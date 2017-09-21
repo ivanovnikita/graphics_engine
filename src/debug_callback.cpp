@@ -20,23 +20,23 @@ namespace ge::impl
         }
 
         std::string type("[ ");
-        if (flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eDebug))
+        if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eDebug)) != 0u)
         {
             type.append("DEBUG ");
         }
-        else if (flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eError))
+        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eError)) != 0u)
         {
             type.append("ERROR ");
         }
-        else if (flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eInformation))
+        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eInformation)) != 0u)
         {
             type.append("INFO ");
         }
-        else if (flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::ePerformanceWarning))
+        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::ePerformanceWarning)) != 0u)
         {
             type.append("PERFOMANCE ");
         }
-        else if (flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eWarning))
+        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eWarning)) != 0u)
         {
             type.append("WARNING ");
         }

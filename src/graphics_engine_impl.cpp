@@ -3,6 +3,8 @@
 
 #include <vulkan_ext.h>
 
+#include <unordered_set>
+
 namespace ge::impl
 {
 
@@ -14,41 +16,92 @@ namespace ge::impl
     {
     }
 
-    vk::UniqueInstance GraphicsEngineImpl::create_instance() const
+    namespace
     {
-        auto extension_properties = vk::enumerateInstanceExtensionProperties();
 
-        vk::ApplicationInfo application_info;
-        application_info.pApplicationName = "ge";
-        application_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        application_info.pEngineName = "no engine";
-        application_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        application_info.apiVersion = VK_API_VERSION_1_0;
-
-        vk::InstanceCreateInfo create_info;
-        create_info.pApplicationInfo = &application_info;
-
-        std::vector<const char*> required_extensions;
-        required_extensions.reserve(extension_properties.size());
-        for (const auto& extension : extension_properties)
+        std::unordered_set<std::string> get_instance_extensions()
         {
-            required_extensions.emplace_back(extension.extensionName);
+            const auto extension_properties = vk::enumerateInstanceExtensionProperties();
+
+            std::unordered_set<std::string> result;
+            for (const auto& extension : extension_properties)
+            {
+                result.emplace(extension.extensionName);
+            }
+
+            return result;
         }
 
-        create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
-        create_info.ppEnabledExtensionNames = required_extensions.data();
+        std::vector<const char*> get_required_instance_extensions()
+        {
+            const std::vector<const char*> required_extesions{VK_KHR_SURFACE_EXTENSION_NAME,
+                                                              VK_KHR_XCB_SURFACE_EXTENSION_NAME,
+                                                              VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
+            const auto available_extensions = get_instance_extensions();
 
-        std::vector<const char*> required_layers{"VK_LAYER_LUNARG_standard_validation"};
+            std::vector<const char*> result;
+            std::copy_if(required_extesions.begin(), required_extesions.end(), std::back_inserter(result),
+                         [&available_extensions] (const char* extension)
+                         {
+                            return available_extensions.count(extension) > 0;
+                         });
 
-    //    auto layer_properties = vk::enumerateInstanceLayerProperties();
-    //    required_layers.reserve(layer_properties.size());
-    //    for (const auto& layer : layer_properties)
-    //    {
-    //        required_layers.emplace_back(layer.layerName);
-    //    }
+            return result;
+        }
 
-        create_info.enabledLayerCount = static_cast<uint32_t>(required_layers.size());
-        create_info.ppEnabledLayerNames = required_layers.data();
+        std::unordered_set<std::string> get_instance_layers()
+        {
+            const auto layer_properties = vk::enumerateInstanceLayerProperties();
+
+            std::unordered_set<std::string> result;
+            for (const auto& layer : layer_properties)
+            {
+                result.emplace(layer.layerName);
+            }
+
+            return result;
+        }
+
+        std::vector<const char*> get_required_instance_layers()
+        {
+            const std::vector<const char*> required_layers{"VK_LAYER_LUNARG_standard_validation"};
+            const auto available_layers = get_instance_layers();
+
+            std::vector<const char*> result;
+            std::copy_if(required_layers.begin(), required_layers.end(), std::back_inserter(result),
+                         [&available_layers] (const char* layer)
+                         {
+                            return available_layers.count(layer) > 0;
+                         });
+
+            return result;
+        }
+
+    } // unnamed namespace
+
+    vk::UniqueInstance GraphicsEngineImpl::create_instance() const
+    {
+        const vk::ApplicationInfo application_info
+        {
+            "graphics engine",
+            VK_MAKE_VERSION(1, 0, 0),
+            "no engine",
+            VK_MAKE_VERSION(1, 0, 0),
+            VK_MAKE_VERSION(1, 0, 0)
+        };
+
+        const std::vector<const char*> required_layers = get_required_instance_layers();
+        const std::vector<const char*> required_extensions = get_required_instance_extensions();
+
+        const vk::InstanceCreateInfo create_info
+        {
+            vk::InstanceCreateFlags(),
+            &application_info,
+            static_cast<uint32_t>(required_layers.size()),
+            required_layers.data(),
+            static_cast<uint32_t>(required_extensions.size()),
+            required_extensions.data()
+        };
 
         auto instance = vk::createInstanceUnique(create_info);
         vkExtInitInstance(static_cast<VkInstance>(*instance));

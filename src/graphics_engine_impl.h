@@ -20,4 +20,5 @@ namespace ge::impl
         std::unique_ptr<Window> window_;
         vk::UniqueSurfaceKHR surface_;
     };
+
 } // namespace ge::impl
