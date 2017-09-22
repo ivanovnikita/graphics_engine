@@ -35,9 +35,12 @@ namespace ge::impl
 
         std::vector<const char*> get_required_instance_extensions()
         {
-            const std::vector<const char*> required_extesions{VK_KHR_SURFACE_EXTENSION_NAME,
-                                                              VK_KHR_XCB_SURFACE_EXTENSION_NAME,
-                                                              VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
+            const std::vector<const char*> required_extesions
+            {
+                  VK_KHR_SURFACE_EXTENSION_NAME
+                , VK_KHR_XCB_SURFACE_EXTENSION_NAME
+                , VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+            };
             const auto available_extensions = get_instance_extensions();
 
             if (std::all_of(required_extesions.begin(), required_extesions.end(),
