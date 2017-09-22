@@ -1,5 +1,6 @@
 #include "graphics_engine_impl.h"
 #include "debug_callback.h"
+#include "exception.h"
 
 #include <vulkan_ext.h>
 
@@ -39,14 +40,18 @@ namespace ge::impl
                                                               VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
             const auto available_extensions = get_instance_extensions();
 
-            std::vector<const char*> result;
-            std::copy_if(required_extesions.begin(), required_extesions.end(), std::back_inserter(result),
-                         [&available_extensions] (const char* extension)
-                         {
-                            return available_extensions.count(extension) > 0;
-                         });
-
-            return result;
+            if (std::all_of(required_extesions.begin(), required_extesions.end(),
+                            [&available_extensions] (const char* extension)
+                            {
+                                return available_extensions.count(extension) > 0;
+                            }))
+            {
+                return required_extesions;
+            }
+            else
+            {
+                GE_THROW(device_capabilities_error, "Some required extensions are not available!");
+            }
         }
 
         std::unordered_set<std::string> get_instance_layers()
@@ -67,14 +72,18 @@ namespace ge::impl
             const std::vector<const char*> required_layers{"VK_LAYER_LUNARG_standard_validation"};
             const auto available_layers = get_instance_layers();
 
-            std::vector<const char*> result;
-            std::copy_if(required_layers.begin(), required_layers.end(), std::back_inserter(result),
-                         [&available_layers] (const char* layer)
-                         {
-                            return available_layers.count(layer) > 0;
-                         });
-
-            return result;
+            if (std::all_of(required_layers.begin(), required_layers.end(),
+                            [&available_layers] (const char* layer)
+                            {
+                                return available_layers.count(layer) > 0;
+                            }))
+            {
+                return required_layers;
+            }
+            else
+            {
+                GE_THROW(device_capabilities_error, "Some required layers are not available!");
+            }
         }
 
     } // unnamed namespace
@@ -83,11 +92,11 @@ namespace ge::impl
     {
         const vk::ApplicationInfo application_info
         {
-            "graphics engine",
-            VK_MAKE_VERSION(1, 0, 0),
-            "no engine",
-            VK_MAKE_VERSION(1, 0, 0),
-            VK_MAKE_VERSION(1, 0, 0)
+              "graphics engine"
+            , VK_MAKE_VERSION(1, 0, 0)
+            , "no engine"
+            , VK_MAKE_VERSION(1, 0, 0)
+            , VK_MAKE_VERSION(1, 0, 0)
         };
 
         const std::vector<const char*> required_layers = get_required_instance_layers();
@@ -95,12 +104,12 @@ namespace ge::impl
 
         const vk::InstanceCreateInfo create_info
         {
-            vk::InstanceCreateFlags(),
-            &application_info,
-            static_cast<uint32_t>(required_layers.size()),
-            required_layers.data(),
-            static_cast<uint32_t>(required_extensions.size()),
-            required_extensions.data()
+              vk::InstanceCreateFlags()
+            , &application_info
+            , static_cast<uint32_t>(required_layers.size())
+            , required_layers.data()
+            , static_cast<uint32_t>(required_extensions.size())
+            , required_extensions.data()
         };
 
         auto instance = vk::createInstanceUnique(create_info);
@@ -111,10 +120,13 @@ namespace ge::impl
 
     vk::UniqueDebugReportCallbackEXT GraphicsEngineImpl::create_debug_callback() const
     {
-        vk::DebugReportCallbackCreateInfoEXT create_info(vk::DebugReportFlagBitsEXT::eError |
-                                                         vk::DebugReportFlagBitsEXT::ePerformanceWarning |
-                                                         vk::DebugReportFlagBitsEXT::eWarning,
-                                                         debug_callback);
+        const vk::DebugReportCallbackCreateInfoEXT create_info
+        (
+              vk::DebugReportFlagBitsEXT::eError
+            | vk::DebugReportFlagBitsEXT::ePerformanceWarning
+            | vk::DebugReportFlagBitsEXT::eWarning
+            , debug_callback
+        );
 
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
