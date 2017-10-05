@@ -2,7 +2,7 @@
 #include "debug_callback.h"
 #include "exception.h"
 
-#include <unordered_set>
+#include <functional>
 
 namespace ge::impl
 {
@@ -18,22 +18,45 @@ namespace ge::impl
     namespace
     {
 
-        std::unordered_set<std::string> get_instance_extensions()
+        template<typename T, typename U, typename Comparator>
+        bool all_contained_in(const T& what, const U& where, Comparator compare)
         {
-            const auto extension_properties = vk::enumerateInstanceExtensionProperties();
+            using T_DATA = std::remove_pointer_t<decltype(std::data(what))>;
+            using U_DATA = std::remove_pointer_t<decltype(std::data(where))>;
 
-            std::unordered_set<std::string> result;
+            return std::all_of(std::begin(what), std::end(what),
+                               [&where, &compare] (const T_DATA& required)
+                               {
+                                   return std::any_of(std::begin(where), std::end(where),
+                                                      [&required, &compare](const U_DATA& available)
+                                                      {
+                                                           return compare(required, available);
+                                                      });
+                               });
+        }
+
+        bool compare(const char* lhs, const std::string& rhs)
+        {
+            return strcmp(lhs, rhs.c_str()) == 0;
+        }
+
+        std::vector<std::string> get_instance_extensions()
+        {
+            auto extension_properties = vk::enumerateInstanceExtensionProperties();
+
+            std::vector<std::string> result;
+            result.reserve(extension_properties.size());
             for (const auto& extension : extension_properties)
             {
-                result.emplace(extension.extensionName);
+                result.emplace_back(std::move(extension.extensionName));
             }
 
             return result;
         }
 
-        std::vector<const char*> get_required_instance_extensions()
+        const auto& get_required_instance_extensions()
         {
-            const std::vector<const char*> required_extesions
+            static constexpr const char* required_extensions[] =
             {
                   VK_KHR_SURFACE_EXTENSION_NAME
                 , VK_KHR_XCB_SURFACE_EXTENSION_NAME
@@ -41,40 +64,33 @@ namespace ge::impl
             };
             const auto available_extensions = get_instance_extensions();
 
-            if (std::all_of(required_extesions.begin(), required_extesions.end(),
-                            [&available_extensions] (const char* extension)
-                            {
-                                return available_extensions.count(extension) > 0;
-                            }))
+            if (all_contained_in(required_extensions, available_extensions, compare))
             {
-                return required_extesions;
+                return required_extensions;
             }
             GE_THROW(device_capabilities_error, "Some required extensions are not available!");
         }
 
-        std::unordered_set<std::string> get_instance_layers()
+        std::vector<std::string> get_instance_layers()
         {
-            const auto layer_properties = vk::enumerateInstanceLayerProperties();
+            auto layer_properties = vk::enumerateInstanceLayerProperties();
 
-            std::unordered_set<std::string> result;
+            std::vector<std::string> result;
+            result.reserve(layer_properties.size());
             for (const auto& layer : layer_properties)
             {
-                result.emplace(layer.layerName);
+                result.emplace_back(std::move(layer.layerName));
             }
 
             return result;
         }
 
-        std::vector<const char*> get_required_instance_layers()
+        const auto& get_required_instance_layers()
         {
-            const std::vector<const char*> required_layers{"VK_LAYER_LUNARG_standard_validation"};
+            static constexpr const char* required_layers[] = {"VK_LAYER_LUNARG_standard_validation"};
             const auto available_layers = get_instance_layers();
 
-            if (std::all_of(required_layers.begin(), required_layers.end(),
-                            [&available_layers] (const char* layer)
-                            {
-                                return available_layers.count(layer) > 0;
-                            }))
+            if (all_contained_in(required_layers, available_layers, compare))
             {
                 return required_layers;
             }
@@ -94,17 +110,17 @@ namespace ge::impl
             , VK_MAKE_VERSION(1, 0, 0)
         };
 
-        const std::vector<const char*> required_layers = get_required_instance_layers();
-        const std::vector<const char*> required_extensions = get_required_instance_extensions();
+        const auto& required_layers = get_required_instance_layers();
+        const auto& required_extensions = get_required_instance_extensions();
 
         const vk::InstanceCreateInfo create_info
         {
               vk::InstanceCreateFlags()
             , &application_info
-            , static_cast<uint32_t>(required_layers.size())
-            , required_layers.data()
-            , static_cast<uint32_t>(required_extensions.size())
-            , required_extensions.data()
+            , static_cast<uint32_t>(std::size(required_layers))
+            , required_layers
+            , static_cast<uint32_t>(std::size(required_extensions))
+            , required_extensions
         };
 
         return vk::createInstanceUnique(create_info);
