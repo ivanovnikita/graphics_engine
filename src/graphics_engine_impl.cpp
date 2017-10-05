@@ -2,8 +2,6 @@
 #include "debug_callback.h"
 #include "exception.h"
 
-#include <vulkan_ext.h>
-
 #include <unordered_set>
 
 namespace ge::impl
@@ -51,10 +49,7 @@ namespace ge::impl
             {
                 return required_extesions;
             }
-            else
-            {
-                GE_THROW(device_capabilities_error, "Some required extensions are not available!");
-            }
+            GE_THROW(device_capabilities_error, "Some required extensions are not available!");
         }
 
         std::unordered_set<std::string> get_instance_layers()
@@ -83,10 +78,7 @@ namespace ge::impl
             {
                 return required_layers;
             }
-            else
-            {
-                GE_THROW(device_capabilities_error, "Some required layers are not available!");
-            }
+            GE_THROW(device_capabilities_error, "Some required layers are not available!");
         }
 
     } // unnamed namespace
@@ -115,10 +107,7 @@ namespace ge::impl
             , required_extensions.data()
         };
 
-        auto instance = vk::createInstanceUnique(create_info);
-        vkExtInitInstance(static_cast<VkInstance>(*instance));
-
-        return instance;
+        return vk::createInstanceUnique(create_info);
     }
 
     vk::UniqueDebugReportCallbackEXT GraphicsEngineImpl::create_debug_callback() const

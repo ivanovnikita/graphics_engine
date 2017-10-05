@@ -19,28 +19,25 @@ namespace ge::impl
             return VK_FALSE;
         }
 
-        std::string type("[ ");
-        if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eDebug)) != 0u)
+        std::string type;
+        switch (static_cast<vk::DebugReportFlagBitsEXT>(flags))
         {
-            type.append("DEBUG ");
+        case vk::DebugReportFlagBitsEXT::eDebug:
+            type = "DEBUG";
+            break;
+        case vk::DebugReportFlagBitsEXT::eError:
+            type = "ERROR";
+            break;
+        case vk::DebugReportFlagBitsEXT::eInformation:
+            type = "INFO";
+            break;
+        case vk::DebugReportFlagBitsEXT::ePerformanceWarning:
+            type = "PERFOMANCE";
+            break;
+        case vk::DebugReportFlagBitsEXT::eWarning:
+            type = "WARNING";
+            break;
         }
-        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eError)) != 0u)
-        {
-            type.append("ERROR ");
-        }
-        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eInformation)) != 0u)
-        {
-            type.append("INFO ");
-        }
-        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::ePerformanceWarning)) != 0u)
-        {
-            type.append("PERFOMANCE ");
-        }
-        else if ((flags & static_cast<VkDebugReportFlagBitsEXT>(vk::DebugReportFlagBitsEXT::eWarning)) != 0u)
-        {
-            type.append("WARNING ");
-        }
-        type.append("]");
 
         std::cerr << "Type: " << type << "\n"
                   << "Layer: " << layer_prefix << "\n"
@@ -50,3 +47,33 @@ namespace ge::impl
     }
 
 } // namespace ge::impl
+
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugReportCallbackEXT
+(
+    VkInstance                                  instance
+    , const VkDebugReportCallbackCreateInfoEXT*   pCreateInfo
+    , const VkAllocationCallbacks*                pAllocator
+    , VkDebugReportCallbackEXT*                   pCallback
+)
+{
+    static const auto func = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>
+    (
+        vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT")
+    );
+    return func(instance, pCreateInfo, pAllocator, pCallback);
+
+}
+
+VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT
+(
+    VkInstance                                  instance
+    , VkDebugReportCallbackEXT                    callback
+    , const VkAllocationCallbacks*                pAllocator
+)
+{
+    static const auto func = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>
+    (
+        vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")
+    );
+    return func(instance, callback, pAllocator);
+}

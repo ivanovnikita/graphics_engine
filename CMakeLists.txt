@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9)
 
 project("graphics_engine")
 
@@ -18,13 +18,7 @@ else()
     set(WINDOW_SYSTEM XCB::XCB)
 endif()
 
-set(VULKAN_LOADER_DIR "${CMAKE_CURRENT_BINARY_DIR}/extern/vulkan")
-file(MAKE_DIRECTORY ${VULKAN_LOADER_DIR})
-file(COPY "extern/Vulkan-Docs/src/ext_loader/" DESTINATION ${VULKAN_LOADER_DIR})
-file(GLOB VULKAN_LODAER_SRC "${VULKAN_LOADER_DIR}/*")
-
-add_executable(${PROJECT_NAME} ${SRC_C} ${VULKAN_LODAER_SRC})
-targeT_compile_definitions(${PROJECT_NAME} PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
-target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan -ldl ${WINDOW_SYSTEM})
+add_executable(${PROJECT_NAME} ${SRC_C})
+target_compile_definitions(${PROJECT_NAME} PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM})
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "src/window")
-target_include_directories(${PROJECT_NAME} PRIVATE ${VULKAN_LOADER_DIR})

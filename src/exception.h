@@ -22,8 +22,10 @@ namespace ge
     public:
         explicit vulkan_error(const std::string& what)
             : ge::exception      ()
-            , std::runtime_error (what)
-        {}
+            , std::runtime_error (what) {}
+        explicit vulkan_error(const char* what)
+            : ge::exception      ()
+            , std::runtime_error (what) {}
 
         virtual ~vulkan_error() = default;
 
@@ -37,6 +39,8 @@ namespace ge
     {
     public:
         explicit device_capabilities_error(const std::string& what)
+            : vulkan_error (what) {}
+        explicit device_capabilities_error(const char* what)
             : vulkan_error (what) {}
     };
 
