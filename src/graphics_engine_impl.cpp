@@ -21,18 +21,23 @@ namespace ge::impl
         template<typename T, typename U, typename Comparator>
         bool all_contained_in(const T& what, const U& where, Comparator compare)
         {
-            using T_DATA = std::remove_pointer_t<decltype(std::data(what))>;
-            using U_DATA = std::remove_pointer_t<decltype(std::data(where))>;
-
-            return std::all_of(std::begin(what), std::end(what),
-                               [&where, &compare] (const T_DATA& required)
-                               {
-                                   return std::any_of(std::begin(where), std::end(where),
-                                                      [&required, &compare](const U_DATA& available)
-                                                      {
-                                                           return compare(required, available);
-                                                      });
-                               });
+            return std::all_of
+            (
+                  std::begin(what)
+                , std::end(what)
+                , [&where, &compare] (const auto& required)
+                {
+                    return std::any_of
+                    (
+                          std::begin(where)
+                        , std::end(where)
+                        , [&required, &compare](const auto& available)
+                        {
+                            return compare(required, available);
+                        }
+                    );
+                }
+            );
         }
 
         bool compare(const char* lhs, const std::string& rhs)
@@ -42,7 +47,7 @@ namespace ge::impl
 
         std::vector<std::string> get_instance_extensions()
         {
-            auto extension_properties = vk::enumerateInstanceExtensionProperties();
+            const auto extension_properties = vk::enumerateInstanceExtensionProperties();
 
             std::vector<std::string> result;
             result.reserve(extension_properties.size());
@@ -73,7 +78,7 @@ namespace ge::impl
 
         std::vector<std::string> get_instance_layers()
         {
-            auto layer_properties = vk::enumerateInstanceLayerProperties();
+            const auto layer_properties = vk::enumerateInstanceLayerProperties();
 
             std::vector<std::string> result;
             result.reserve(layer_properties.size());
