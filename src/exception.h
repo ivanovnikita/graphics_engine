@@ -14,34 +14,25 @@ namespace ge
     class exception
     {
     public:
-        virtual ~exception() = default;
+        virtual ~exception();
     };
 
     class vulkan_error : public ge::exception, public std::runtime_error
     {
     public:
-        explicit vulkan_error(const std::string& what)
-            : ge::exception      ()
-            , std::runtime_error (what) {}
-        explicit vulkan_error(const char* what)
-            : ge::exception      ()
-            , std::runtime_error (what) {}
+        explicit vulkan_error(const std::string& what);
+        explicit vulkan_error(const char* what);
 
-        virtual ~vulkan_error() = default;
+        virtual ~vulkan_error();
 
-        virtual const char* what() const noexcept
-        {
-            return std::runtime_error::what();
-        }
+        virtual const char* what() const noexcept;
     };
 
     class device_capabilities_error : public vulkan_error
     {
     public:
-        explicit device_capabilities_error(const std::string& what)
-            : vulkan_error (what) {}
-        explicit device_capabilities_error(const char* what)
-            : vulkan_error (what) {}
+        explicit device_capabilities_error(const std::string& what);
+        explicit device_capabilities_error(const char* what);
     };
 
 } // namespace ge
