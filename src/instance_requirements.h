@@ -5,7 +5,7 @@
 namespace ge::impl
 {
 
-    inline const auto& get_instance_required_extensions()
+    inline const auto& get_required_instance_extensions()
     {
         static constexpr const char* required_extensions[] =
         {
@@ -17,7 +17,7 @@ namespace ge::impl
         return required_extensions;
     }
 
-    inline const auto& get_instance_required_layers()
+    inline const auto& get_required_instance_layers()
     {
         static constexpr const char* required_layers[] =
         {

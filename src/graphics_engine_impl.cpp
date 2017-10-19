@@ -1,6 +1,7 @@
 #include "graphics_engine_impl.h"
 #include "instance_factory.hpp"
 #include "instance_requirements.h"
+#include "physical_device_factory.h"
 #include "debug_callback.h"
 #include "exception.h"
 
@@ -12,12 +13,13 @@ namespace ge::impl
     GraphicsEngineImpl::GraphicsEngineImpl()
         : instance_         (instance_factory::create
                             (
-                                get_instance_required_extensions()
-                              , get_instance_required_layers()
+                                get_required_instance_extensions()
+                              , get_required_instance_layers()
                             ))
         , debug_callback_   (create_debug_callback())
         , window_           (Window::create())
         , surface_          (create_surface())
+        , device_           (physical_device_factory::create(instance_.get(), surface_.get()))
     {
     }
 

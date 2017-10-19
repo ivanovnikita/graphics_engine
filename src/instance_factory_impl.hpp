@@ -1,77 +1,15 @@
 #pragma once
 
 #include "instance_factory.hpp"
+#include "factory_tools.hpp"
 
-namespace ge::impl::instance_factory
+namespace ge::impl::factory::instance
 {
 
     namespace impl
     {
-
-        bool compare(const char* lhs, const std::string& rhs);
         std::vector<std::string> get_available_instance_extensions();
         std::vector<std::string> get_available_instance_layers();
-
-        template<typename ContainerT, typename ContainerU, typename Comparator>
-        auto not_contained_in
-        (
-            const ContainerT& what
-          , const ContainerU& where
-          , Comparator compare
-        )
-        {
-            using T = std::remove_const_t<std::remove_pointer_t<decltype(std::data(what))>>;
-
-            std::vector<T> absent;
-            std::for_each
-            (
-                std::begin(what)
-              , std::end(what)
-              , [&where, &compare, &absent] (const auto& required)
-              {
-                  if (std::none_of
-                  (
-                      std::begin(where)
-                    , std::end(where)
-                    , [&required, &compare](const auto& available)
-                    {
-                        return compare(required, available);
-                    }
-                  ))
-                  {
-                      absent.emplace_back(required);
-                  }
-              }
-            );
-            return absent;
-        }
-
-        template<typename Container>
-        void all_required_are_available
-        (
-            const Container& required
-          , const std::vector<std::string>& available
-        )
-        {
-            const auto absent = not_contained_in
-            (
-                required
-              , available
-              , compare
-            );
-
-            if (!absent.empty())
-            {
-                std::string message("These features are not available: \n");
-                for (const auto& name : absent)
-                {
-                    message.append(name);
-                    message.append("\n");
-                }
-                GE_THROW(device_capabilities_error, message);
-            }
-        }
-
     } // namespace impl
 
 
@@ -82,6 +20,7 @@ namespace ge::impl::instance_factory
       , const Layers& required_layers
     )
     {
+        using namespace ge::impl::factory::impl;
         using ExtensionsType = std::remove_pointer_t<decltype(std::data(required_extensions))>;
         using LayersType = std::remove_pointer_t<decltype(std::data(required_layers))>;
 
@@ -99,8 +38,8 @@ namespace ge::impl::instance_factory
             , VK_MAKE_VERSION(1, 0, 0)
         };
 
-        impl::all_required_are_available(required_extensions, impl::get_available_instance_extensions());
-        impl::all_required_are_available(required_layers, impl::get_available_instance_layers());
+        all_required_are_available(required_extensions, impl::get_available_instance_extensions());
+        all_required_are_available(required_layers, impl::get_available_instance_layers());
 
         const vk::InstanceCreateInfo create_info
         {
@@ -115,4 +54,4 @@ namespace ge::impl::instance_factory
         return vk::createInstanceUnique(create_info);
     }
 
-} // namespace ge::impl::instance_factory
+} // namespace ge::impl::factory::instance
