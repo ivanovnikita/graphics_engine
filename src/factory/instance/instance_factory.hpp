@@ -1,7 +1,5 @@
 #pragma once
 
-#include "exception.h"
-
 #include <vulkan/vulkan.hpp>
 
 namespace ge::impl::factory::instance

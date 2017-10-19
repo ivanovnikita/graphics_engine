@@ -18,7 +18,8 @@ namespace ge::impl
         vk::UniqueDebugReportCallbackEXT debug_callback_;
         std::unique_ptr<Window> window_;
         vk::UniqueSurfaceKHR surface_;
-        vk::PhysicalDevice device_;
+        vk::PhysicalDevice physical_device_;
+        vk::UniqueDevice logical_device_;
     };
 
 } // namespace ge::impl

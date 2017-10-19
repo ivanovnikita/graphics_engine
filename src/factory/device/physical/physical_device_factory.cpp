@@ -1,14 +1,13 @@
 #include "physical_device_factory.h"
-#include "physical_device_requirements.h"
+#include "device_requirements.h"
 #include "factory_tools.hpp"
+#include "device_tools.h"
 #include "exception.h"
-
-#include <optional>
 
 namespace ge::impl::factory::device::physical
 {
 
-    namespace impl
+    namespace
     {
         std::vector<std::string> get_available_instance_extensions(const vk::PhysicalDevice& device)
         {
@@ -17,24 +16,9 @@ namespace ge::impl::factory::device::physical
 
         bool has_presentation_support(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
         {
-            const auto queue_family_properties = device.getQueueFamilyProperties();
-            const auto required_queue_family_flags = get_required_queue_family_flags();
-
-            for (uint32_t i = 0; i < queue_family_properties.size(); ++i)
-            {
-                if
-                (
-                    queue_family_properties[i].queueCount > 0
-                 && queue_family_properties[i].queueFlags & required_queue_family_flags
-                 && device.getSurfaceSupportKHR(i, surface)
-                )
-                {
-                    return true;
-                }
-            }
-            return false;
+            return get_suitable_queue_family_index(device, surface) >= 0;
         }
-    } // namespace impl
+    } // unnamed namespace
 
     bool is_suitable(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
@@ -42,11 +26,11 @@ namespace ge::impl::factory::device::physical
 
         all_required_are_available
         (
-            get_required_physical_device_extensions()
-          , impl::get_available_instance_extensions(device)
+            get_required_device_extensions()
+          , get_available_instance_extensions(device)
         );
 
-        return impl::has_presentation_support(device, surface);
+        return has_presentation_support(device, surface);
     }
 
     vk::PhysicalDevice create(const vk::Instance& instance, const vk::SurfaceKHR& surface)

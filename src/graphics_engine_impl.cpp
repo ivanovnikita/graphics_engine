@@ -2,10 +2,9 @@
 #include "instance_factory.hpp"
 #include "instance_requirements.h"
 #include "physical_device_factory.h"
+#include "logical_device_factory.hpp"
 #include "debug_callback.h"
 #include "exception.h"
-
-#include <functional>
 
 namespace ge::impl
 {
@@ -19,7 +18,13 @@ namespace ge::impl
         , debug_callback_   (create_debug_callback())
         , window_           (Window::create())
         , surface_          (create_surface())
-        , device_           (factory::device::physical::create(instance_.get(), surface_.get()))
+        , physical_device_  (factory::device::physical::create(*instance_, *surface_))
+        , logical_device_   (factory::device::logical::create
+                            (
+                                physical_device_
+                              , get_required_instance_layers()
+                              , *surface_
+                            ))
     {
     }
 

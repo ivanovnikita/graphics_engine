@@ -5,12 +5,14 @@ project("graphics_engine")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE SRC "src/*")
+file(GLOB_RECURSE SRC "src/*.cpp" "src/*.h*")
 set(INCLUDE_DIRS
     "src"
     "src/window"
     "src/factory"
     "src/factory/instance"
+    "src/factory/device"
+    "src/factory/device/logical"
     "src/factory/device/physical")
 
 find_package(ECM REQUIRED NO_MODULE)

@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::impl
+namespace ge::impl::factory::device
 {
 
     inline vk::QueueFlagBits get_required_queue_family_flags()
@@ -10,7 +10,7 @@ namespace ge::impl
         return vk::QueueFlagBits::eGraphics;
     }
 
-    inline const auto& get_required_physical_device_extensions()
+    inline const auto& get_required_device_extensions()
     {
         static constexpr const char* required_extensions[] =
         {
@@ -20,5 +20,5 @@ namespace ge::impl
         return required_extensions;
     }
 
-} // namespace ge::impl
+} // namespace ge::impl::factory::device
 
