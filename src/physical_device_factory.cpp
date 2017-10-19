@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace ge::impl::factory::physical_device
+namespace ge::impl::factory::device::physical
 {
 
     namespace impl
@@ -73,4 +73,4 @@ namespace ge::impl::factory::physical_device
         GE_THROW(device_capabilities_error, "There is no available physical devices");
     }
 
-} // namespace ge::impl::factory::physical_device
+} // namespace ge::impl::factory::device::physical

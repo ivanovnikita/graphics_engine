@@ -10,11 +10,11 @@ file(GLOB_RECURSE SRC_C "src/*")
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
 
-find_package(Vulkan)
+find_package(Vulkan REQUIRED)
 
 if (WIN32)
 else()
-    find_package(XCB)
+    find_package(XCB REQUIRED)
     set(WINDOW_SYSTEM XCB::XCB)
 endif()
 

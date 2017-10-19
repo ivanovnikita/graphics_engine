@@ -2,9 +2,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::impl::physical_device_factory
+namespace ge::impl::factory::device::physical
 {
 
-    vk::PhysicalDevice create(const vk::Instance&, const vk::SurfaceKHR& surface);
+    vk::PhysicalDevice create(const vk::Instance&, const vk::SurfaceKHR&);
 
-} // namespace ge::impl::physical_device_factory
+} // namespace ge::impl::factory::device::physical

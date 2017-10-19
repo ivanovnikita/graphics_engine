@@ -11,7 +11,7 @@ namespace ge::impl
 {
 
     GraphicsEngineImpl::GraphicsEngineImpl()
-        : instance_         (instance_factory::create
+        : instance_         (factory::instance::create
                             (
                                 get_required_instance_extensions()
                               , get_required_instance_layers()
@@ -19,7 +19,7 @@ namespace ge::impl
         , debug_callback_   (create_debug_callback())
         , window_           (Window::create())
         , surface_          (create_surface())
-        , device_           (physical_device_factory::create(instance_.get(), surface_.get()))
+        , device_           (factory::device::physical::create(instance_.get(), surface_.get()))
     {
     }
 

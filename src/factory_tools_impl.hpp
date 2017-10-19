@@ -11,7 +11,10 @@
 namespace ge::impl::factory::impl
 {
 
-    bool compare(const char* lhs, const std::string& rhs);
+    inline bool compare(const char* lhs, const std::string& rhs)
+    {
+        return strcmp(lhs, rhs.c_str()) == 0;
+    }
 
     template<typename ContainerT, typename ContainerU, typename Comparator>
     auto not_contained_in

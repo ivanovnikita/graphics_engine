@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::impl::instance_factory
+namespace ge::impl::factory::instance
 {
 
     template<typename Extensions, typename Layers>
@@ -14,6 +14,6 @@ namespace ge::impl::instance_factory
       , const Layers& required_layers
     );
 
-} // namespace ge::impl::instance_factory
+} // namespace ge::impl::factory::instance
 
 #include "instance_factory_impl.hpp"
