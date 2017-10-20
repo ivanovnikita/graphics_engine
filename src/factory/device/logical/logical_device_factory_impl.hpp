@@ -2,7 +2,7 @@
 
 #include "logical_device_factory.hpp"
 #include "factory_tools.hpp"
-#include "device_tools.h"
+#include "device_requirements.h"
 
 namespace ge::impl::factory::device::logical
 {
@@ -17,7 +17,7 @@ namespace ge::impl::factory::device::logical
     (
         const vk::PhysicalDevice& physical_device
       , const Layers& required_layers
-      , const vk::SurfaceKHR& surface
+      , uint32_t queue_family_index
     )
     {
         using namespace ge::impl::factory::impl;
@@ -32,7 +32,7 @@ namespace ge::impl::factory::device::logical
         const vk::DeviceQueueCreateInfo queue_create_info
         (
             {}
-          , static_cast<uint32_t>(get_suitable_queue_family_index(physical_device, surface))
+          , queue_family_index
           , 1
           , &queue_priority
         );

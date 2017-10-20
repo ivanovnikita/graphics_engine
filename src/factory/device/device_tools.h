@@ -1,6 +1,12 @@
 #pragma once
 
-#include "device_requirements.h"
+#include <cstdint>
+
+namespace vk
+{
+    class PhysicalDevice;
+    class SurfaceKHR;
+}
 
 namespace ge::impl::factory::device
 {

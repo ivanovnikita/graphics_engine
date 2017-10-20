@@ -19,7 +19,9 @@ namespace ge::impl
         std::unique_ptr<Window> window_;
         vk::UniqueSurfaceKHR surface_;
         vk::PhysicalDevice physical_device_;
+        uint32_t queue_family_index_;
         vk::UniqueDevice logical_device_;
+        vk::Queue queue_;
     };
 
 } // namespace ge::impl

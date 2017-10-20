@@ -10,7 +10,7 @@ namespace ge::impl::factory::device::logical
     (
         const vk::PhysicalDevice& physical_device
       , const Layers& required_layers
-      , const vk::SurfaceKHR& surface
+      , uint32_t queue_family_index
     );
 
 } // namespace ge::impl::factory::device::logical

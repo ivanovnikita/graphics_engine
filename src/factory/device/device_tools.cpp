@@ -1,4 +1,7 @@
 #include "device_tools.h"
+#include "device_requirements.h"
+
+#include <vulkan/vulkan.hpp>
 
 namespace ge::impl::factory::device
 {

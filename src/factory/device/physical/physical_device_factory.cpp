@@ -18,20 +18,21 @@ namespace ge::impl::factory::device::physical
         {
             return get_suitable_queue_family_index(device, surface) >= 0;
         }
+
+        bool is_suitable(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
+        {
+            using namespace ge::impl::factory::impl;
+
+            all_required_are_available
+            (
+                get_required_device_extensions()
+              , get_available_instance_extensions(device)
+            );
+
+            return has_presentation_support(device, surface);
+        }
+
     } // unnamed namespace
-
-    bool is_suitable(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
-    {
-        using namespace ge::impl::factory::impl;
-
-        all_required_are_available
-        (
-            get_required_device_extensions()
-          , get_available_instance_extensions(device)
-        );
-
-        return has_presentation_support(device, surface);
-    }
 
     vk::PhysicalDevice create(const vk::Instance& instance, const vk::SurfaceKHR& surface)
     {
