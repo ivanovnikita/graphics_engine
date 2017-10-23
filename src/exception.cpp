@@ -5,14 +5,12 @@ namespace ge
     exception::~exception() = default;
 
     vulkan_error::vulkan_error(const std::string& what)
-        : ge::exception      ()
-        , std::runtime_error (what)
+        : std::runtime_error (what)
     {
     }
 
     vulkan_error::vulkan_error(const char* what)
-        : ge::exception      ()
-        , std::runtime_error (what)
+        : std::runtime_error (what)
     {
     }
 

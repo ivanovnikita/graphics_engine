@@ -15,6 +15,7 @@ namespace ge
     {
     public:
         virtual ~exception();
+        virtual const char* what() const noexcept = 0;
     };
 
     class vulkan_error : public ge::exception, public std::runtime_error

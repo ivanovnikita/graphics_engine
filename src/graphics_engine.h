@@ -5,10 +5,10 @@
 namespace ge
 {
 
-namespace impl
-{
-    class GraphicsEngineImpl;
-} // namespace impl
+    namespace impl
+    {
+        class GraphicsEngineImpl;
+    } // namespace impl
 
     class GraphicsEngine final
     {

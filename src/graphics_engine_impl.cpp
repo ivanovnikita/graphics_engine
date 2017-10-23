@@ -1,8 +1,7 @@
 #include "graphics_engine_impl.h"
-#include "instance_factory.hpp"
-#include "instance_requirements.h"
+#include "instance_factory.h"
 #include "physical_device_factory.h"
-#include "logical_device_factory.hpp"
+#include "logical_device_factory.h"
 #include "device_tools.h"
 #include "debug_callback.h"
 #include "exception.h"
@@ -11,11 +10,7 @@ namespace ge::impl
 {
 
     GraphicsEngineImpl::GraphicsEngineImpl()
-        : instance_             (factory::instance::create
-                                (
-                                    get_required_instance_extensions()
-                                  , get_required_instance_layers()
-                                ))
+        : instance_             (factory::instance::create())
         , debug_callback_       (create_debug_callback())
         , window_               (Window::create())
         , surface_              (create_surface())
@@ -28,7 +23,6 @@ namespace ge::impl
         , logical_device_       (factory::device::logical::create
                                 (
                                     physical_device_
-                                  , get_required_instance_layers()
                                   , queue_family_index_
                                 ))
         , queue_                (logical_device_->getQueue(queue_family_index_, 0))
@@ -39,10 +33,10 @@ namespace ge::impl
     {
         const vk::DebugReportCallbackCreateInfoEXT create_info
         (
-              vk::DebugReportFlagBitsEXT::eError
-            | vk::DebugReportFlagBitsEXT::ePerformanceWarning
-            | vk::DebugReportFlagBitsEXT::eWarning
-            , debug_callback
+            vk::DebugReportFlagBitsEXT::eError
+          | vk::DebugReportFlagBitsEXT::ePerformanceWarning
+          | vk::DebugReportFlagBitsEXT::eWarning
+          , debug_callback
         );
 
         return instance_->createDebugReportCallbackEXTUnique(create_info);

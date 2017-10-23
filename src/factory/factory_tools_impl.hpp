@@ -11,17 +11,16 @@
 namespace ge::impl::factory::impl
 {
 
-    inline bool compare(const char* lhs, const std::string& rhs)
+    inline bool operator==(const char* lhs, const std::string& rhs)
     {
         return strcmp(lhs, rhs.c_str()) == 0;
     }
 
-    template<typename ContainerT, typename ContainerU, typename Comparator>
+    template<typename ContainerT, typename ContainerU>
     auto not_contained_in
     (
         const ContainerT& what
       , const ContainerU& where
-      , Comparator compare
     )
     {
         using T = std::remove_const_t<std::remove_pointer_t<decltype(std::data(what))>>;
@@ -31,15 +30,15 @@ namespace ge::impl::factory::impl
         (
             std::begin(what)
           , std::end(what)
-          , [&where, &compare, &absent] (const auto& required)
+          , [&where, &absent] (const auto& required)
           {
               if (std::none_of
               (
                   std::begin(where)
                 , std::end(where)
-                , [&required, &compare](const auto& available)
+                , [&required](const auto& available)
                 {
-                    return compare(required, available);
+                    return required == available;
                 }
               ))
               {
@@ -50,18 +49,17 @@ namespace ge::impl::factory::impl
         return absent;
     }
 
-    template<typename Container>
+    template<typename ContainerT, typename ContainerU>
     void all_required_are_available
     (
-        const Container& required
-      , const std::vector<std::string>& available
+        const ContainerT& required
+      , const ContainerU& available
     )
     {
         const auto absent = not_contained_in
         (
             required
           , available
-          , compare
         );
 
         if (!absent.empty())

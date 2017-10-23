@@ -5,11 +5,6 @@
 namespace ge::impl::factory::device
 {
 
-    inline vk::QueueFlagBits get_required_queue_family_flags()
-    {
-        return vk::QueueFlagBits::eGraphics;
-    }
-
     inline const auto& get_required_device_extensions()
     {
         static constexpr const char* required_extensions[] =
