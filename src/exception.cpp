@@ -30,4 +30,21 @@ namespace ge
         : vulkan_error (what)
     {
     }
+
+    window_error::window_error(const std::string& what)
+        : std::runtime_error (what)
+    {
+    }
+
+    window_error::window_error(const char* what)
+        : std::runtime_error (what)
+    {
+    }
+
+    window_error::~window_error() = default;
+
+    const char* window_error::what() const noexcept
+    {
+        return std::runtime_error::what();
+    }
 }

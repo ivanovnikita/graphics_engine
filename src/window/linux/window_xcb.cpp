@@ -1,4 +1,5 @@
 #include "window_xcb.h"
+#include "exception.h"
 
 namespace ge::impl
 {
@@ -11,7 +12,7 @@ namespace ge::impl
 
         if (connection_ == nullptr)
         {
-            throw std::runtime_error("Connection to xcb failed");
+            GE_THROW(window_error, "Connection to xcb failed");
         }
 
         const xcb_setup_t* setup = xcb_get_setup(connection_);
@@ -30,33 +31,37 @@ namespace ge::impl
             XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         };
 
-        xcb_create_window(
-                    connection_,
-                    XCB_COPY_FROM_PARENT,
-                    handle_,
-                    screen->root,
-                    20,
-                    20,
-                    500,
-                    500,
-                    0,
-                    XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                    screen->root_visual,
-                    XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
-                    value_list);
+        xcb_create_window
+        (
+            connection_
+          , XCB_COPY_FROM_PARENT
+          , handle_
+          , screen->root
+          , 20
+          , 20
+          , 500
+          , 500
+          , 0
+          , XCB_WINDOW_CLASS_INPUT_OUTPUT
+          , screen->root_visual
+          , XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+          , value_list
+        );
 
         xcb_flush(connection_);
 
         std::string title("window");
-        xcb_change_property(
-                    connection_,
-                    XCB_PROP_MODE_REPLACE,
-                    handle_,
-                    XCB_ATOM_WM_NAME,
-                    XCB_ATOM_STRING,
-                    8,
-                    static_cast<uint32_t>(title.size()),
-                    title.c_str());
+        xcb_change_property
+        (
+            connection_
+          , XCB_PROP_MODE_REPLACE
+          , handle_
+          , XCB_ATOM_WM_NAME
+          , XCB_ATOM_STRING
+          , 8
+          , static_cast<uint32_t>(title.size())
+          , title.c_str()
+        );
     }
 
     WindowXCB::~WindowXCB()

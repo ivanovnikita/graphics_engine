@@ -23,9 +23,7 @@ namespace ge
     public:
         explicit vulkan_error(const std::string& what);
         explicit vulkan_error(const char* what);
-
         virtual ~vulkan_error();
-
         virtual const char* what() const noexcept;
     };
 
@@ -34,6 +32,15 @@ namespace ge
     public:
         explicit device_capabilities_error(const std::string& what);
         explicit device_capabilities_error(const char* what);
+    };
+
+    class window_error : public ge::exception, public std::runtime_error
+    {
+    public:
+        explicit window_error(const std::string& what);
+        explicit window_error(const char* what);
+        virtual ~window_error();
+        virtual const char* what() const noexcept;
     };
 
 } // namespace ge
