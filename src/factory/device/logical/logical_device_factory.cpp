@@ -2,21 +2,23 @@
 #include "device_requirements.h"
 #include "factory_tools.hpp"
 
+#include <set>
+
 namespace ge::impl::factory::device::logical
 {
 
-    namespace impl
+    namespace
     {
         std::vector<std::string> get_available_device_layers(const vk::PhysicalDevice& device)
         {
             return ge::impl::factory::impl::layers_names(device.enumerateDeviceLayerProperties());
         }
-    } // namespace impl
+    } // unnamed namespace
 
     vk::UniqueDevice create
     (
         const vk::PhysicalDevice& physical_device
-      , uint32_t queue_family_index
+      , QueueFamilyIndices queue_family_indeces
     )
     {
         using namespace ge::impl::factory::impl;
@@ -25,16 +27,24 @@ namespace ge::impl::factory::device::logical
         {
             "VK_LAYER_LUNARG_standard_validation"
         };
-        all_required_are_available(required_layers, impl::get_available_device_layers(physical_device));
+        all_required_are_available(required_layers, get_available_device_layers(physical_device));
 
-        const auto queue_priority = 1.0f;
-        const vk::DeviceQueueCreateInfo queue_create_info
-        (
-            {}
-          , queue_family_index
-          , 1
-          , &queue_priority
-        );
+        std::set<uint32_t> unique_queue_family_indices
+        {
+            queue_family_indeces.graphics
+          , queue_family_indeces.present
+          , queue_family_indeces.compute
+          , queue_family_indeces.transfer
+        };
+
+        const auto queue_priority = 0.0f;
+        const auto queue_count = 1;
+        std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
+        queue_create_infos.reserve(unique_queue_family_indices.size());
+        for (const auto& queue_family_index : unique_queue_family_indices)
+        {
+            queue_create_infos.emplace_back(vk::DeviceQueueCreateFlags(), queue_family_index, queue_count, &queue_priority);
+        }
 
         vk::PhysicalDeviceFeatures device_features;
         device_features.setSamplerAnisotropy(VK_TRUE);
@@ -44,8 +54,8 @@ namespace ge::impl::factory::device::logical
         vk::DeviceCreateInfo device_create_info
         (
             {}
-          , 1
-          , &queue_create_info
+          , static_cast<uint32_t>(std::size(queue_create_infos))
+          , std::data(queue_create_infos)
           , static_cast<uint32_t>(std::size(required_layers))
           , std::data(required_layers)
           , static_cast<uint32_t>(std::size(required_extensions))
