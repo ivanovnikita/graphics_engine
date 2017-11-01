@@ -19,7 +19,7 @@ arch:
     - vulkan-hpp
     - vulkan-intel
   script:
-    - sudo sh ./ci/travis-build.sh
+    - sudo sh ./ci/travis_build.sh
 
 script:
   - bash ci/arch-travis/arch-travis.sh
