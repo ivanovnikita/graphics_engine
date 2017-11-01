@@ -1,0 +1,3 @@
+[submodule "ci/arch-travis"]
+	path = ci/arch-travis
+	url = https://github.com/mikkeloscar/arch-travis

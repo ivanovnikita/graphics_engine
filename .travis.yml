@@ -1,0 +1,19 @@
+sudo: required
+
+language: cpp
+notifications:
+  email: false
+
+compiler:
+  - gcc
+
+arch:
+  packages:
+    - gcc
+    - cmake
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - make
+script:
+  - bash ci/arch-travis/arch-travis.sh
