@@ -15,8 +15,7 @@ arch:
     - gcc
     - cmake
   script:
-    - mkdir build && cd build
-    - cmake ..
-    - make
+    - sudo sh ./ci/travis-build.sh
+
 script:
   - bash ci/arch-travis/arch-travis.sh
