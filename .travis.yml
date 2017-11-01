@@ -1,5 +1,9 @@
 sudo: required
 
+env:
+  - ARCH_TRAVIS_CLEAN_CHROOT=1
+  - ARCH_TRAVIS_CONFIRM_YES=1
+
 language: cpp
 notifications:
   email: false
@@ -12,8 +16,11 @@ arch:
     - gcc
     - cmake
   script:
-    - mkdir build && cd build
-    - cmake ..
-    - make
+    - g++ -v
+    - cmake --version
+    - ls -l
+    #- mkdir build && cd build
+    #- cmake ..
+    #- make
 script:
   - bash ci/arch-travis/arch-travis.sh
