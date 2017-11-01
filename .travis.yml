@@ -18,6 +18,7 @@ arch:
     - vulkan-headers
     - vulkan-hpp
     - vulkan-intel
+    - wget
   script:
     - sudo sh ./ci/install_vulkan_sdk.sh
     - sudo sh ./ci/travis_build.sh
