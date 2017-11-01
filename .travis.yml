@@ -1,7 +1,7 @@
 sudo: required
 
 env:
-  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1
+  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1 VULKAN_SDK=
 
 language: cpp
 notifications:
@@ -20,7 +20,6 @@ arch:
     - vulkan-intel
     - wget
   script:
-    - sudo sh ./ci/install_vulkan_sdk.sh
     - sudo sh ./ci/travis_build.sh
 
 script:
