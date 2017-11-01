@@ -17,8 +17,8 @@ arch:
     - extra-cmake-modules
     - vulkan-headers
     - vulkan-hpp
+    - vulkan-intel
   script:
-    - cat /proc/cpuinfo
     - sudo sh ./ci/travis-build.sh
 
 script:
