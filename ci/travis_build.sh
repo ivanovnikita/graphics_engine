@@ -9,7 +9,10 @@ wget -nv "https://vulkan.lunarg.com/sdk/download/$VULKAN_VERSION/linux/vulkansdk
 chmod ugo+x vulkansdk-linux-x86_64-$VULKAN_VERSION.run
 ./vulkansdk-linux-x86_64-$VULKAN_VERSION.run
 cd "VulkanSDK/$VULKAN_VERSION"
-source setup-env.sh
+export VULKAN_SDK=$PWD/x86_64
+export PATH=$VULKAN_SDK/bin:$PATH
+export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
+export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
 cd ../../..
 mkdir build && cd build
