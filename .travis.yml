@@ -1,0 +1,26 @@
+sudo: required
+
+env:
+  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1 VULKAN_SDK=
+
+language: cpp
+notifications:
+  email: false
+
+compiler:
+  - gcc
+
+arch:
+  packages:
+    - gcc
+    - cmake
+    - extra-cmake-modules
+    - vulkan-headers
+    - vulkan-hpp
+    - vulkan-intel
+    - wget
+  script:
+    - sudo sh ./ci/travis_build.sh
+
+script:
+  - bash ci/arch-travis/arch-travis.sh
