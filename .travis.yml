@@ -18,6 +18,7 @@ arch:
     - vulkan-headers
     - vulkan-hpp
   script:
+    - cat /proc/cpuinfo
     - sudo sh ./ci/travis-build.sh
 
 script:
