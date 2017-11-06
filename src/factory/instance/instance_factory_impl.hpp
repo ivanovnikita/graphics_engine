@@ -41,7 +41,7 @@ namespace ge::impl::factory::instance
         {
             constexpr size_t size = get_required_extensions_count<debug_callback_enabled, window_options>();
 
-            std::array<const char*, size> extensions;
+            std::array<const char*, size> extensions{};
 
             size_t i = 0;
             if (debug_callback_enabled)
@@ -92,7 +92,7 @@ namespace ge::impl::factory::instance
         {
             constexpr size_t size = get_required_layers_count<validation_layers_enabled>();
 
-            std::array<const char*, size> layers;
+            std::array<const char*, size> layers{};
 
             size_t i = 0;
             if (validation_layers_enabled)
