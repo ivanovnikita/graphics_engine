@@ -21,6 +21,9 @@ namespace ge::impl
         QueueFamilyIndices                  queue_family_indeces_;
         vk::UniqueDevice                    logical_device_;
         Queues                              queues_;
+        vk::UniqueSwapchainKHR              swapchain_;
+        std::vector<vk::Image>              images_;
+        std::vector<vk::UniqueImageView>    image_views_;
     };
 
 } // namespace ge::impl

@@ -12,9 +12,10 @@ namespace ge::impl
     public:
         virtual ~Window();
 
-        static std::unique_ptr<Window> create();
+        static std::unique_ptr<Window> create(uint16_t width, uint16_t height);
 
         virtual std::unique_ptr<vk::UniqueSurfaceKHR> create_surface(const vk::UniqueInstance& instance) = 0;
+        virtual std::pair<uint16_t, uint16_t> extent() const = 0;
 
     protected:
         Window();

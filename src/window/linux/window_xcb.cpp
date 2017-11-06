@@ -4,7 +4,9 @@
 namespace ge::impl
 {
 
-    WindowXCB::WindowXCB()
+    WindowXCB::WindowXCB(uint16_t width, uint16_t height)
+        : width_ (width)
+        , height_ (height)
     {
         int screen_index = 0;
         connection_ = xcb_connect(nullptr, &screen_index);
@@ -39,8 +41,8 @@ namespace ge::impl
           , screen->root
           , 20
           , 20
-          , 500
-          , 500
+          , width_
+          , height_
           , 0
           , XCB_WINDOW_CLASS_INPUT_OUTPUT
           , screen->root_visual
@@ -75,6 +77,11 @@ namespace ge::impl
         vk::XcbSurfaceCreateInfoKHR create_info(vk::XcbSurfaceCreateFlagsKHR(), connection_, handle_);
 
         return std::make_unique<vk::UniqueSurfaceKHR>(instance->createXcbSurfaceKHRUnique(create_info));
+    }
+
+    std::pair<uint16_t, uint16_t> WindowXCB::extent() const
+    {
+        return {width_, height_};
     }
 
 } // namespace ge::impl

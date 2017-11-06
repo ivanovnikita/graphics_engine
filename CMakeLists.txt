@@ -15,7 +15,9 @@ set(INCLUDE_DIRS
     "src/factory/instance"
     "src/factory/device"
     "src/factory/device/logical"
-    "src/factory/device/physical")
+    "src/factory/device/physical"
+    "src/factory/swapchain"
+    "src/factory/image_view")
 
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
