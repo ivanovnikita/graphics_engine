@@ -21,48 +21,56 @@ namespace ge::impl::factory::instance
             return ge::impl::factory::impl::layers_names(vk::enumerateInstanceLayerProperties());
         }
 
-        template<bool debug_callback_enabled, WindowOptions window_options>
+        template
+        <
+            typename OPTION_DEBUG_CALLBACK
+          , typename OPTION_WINDOW
+        >
         constexpr size_t get_required_extensions_count()
         {
             size_t count = 0;
-            if constexpr (debug_callback_enabled)
+            if (typename OPTION_DEBUG_CALLBACK::enabled())
             {
                 ++count;
             }
-            if constexpr (window_options != WindowOptions::NONE)
+            if (typename OPTION_WINDOW::enabled())
             {
                 count += 2u;
             }
             return count;
         }
 
-        template<bool debug_callback_enabled, WindowOptions window_options>
+        template
+        <
+            typename OPTION_DEBUG_CALLBACK
+          , typename OPTION_WINDOW
+        >
         constexpr auto get_required_extensions()
         {
-            constexpr size_t size = get_required_extensions_count<debug_callback_enabled, window_options>();
+            constexpr size_t size = get_required_extensions_count<OPTION_DEBUG_CALLBACK, OPTION_WINDOW>();
 
             std::array<const char*, size> extensions{};
 
             size_t i = 0;
-            if (debug_callback_enabled)
+            if (typename OPTION_DEBUG_CALLBACK::enabled())
             {
                 extensions[i] = VK_EXT_DEBUG_REPORT_EXTENSION_NAME;
                 ++i;
             }
 
-            if (window_options != WindowOptions::NONE)
+            if (typename OPTION_WINDOW::enabled())
             {
                 extensions[i] = VK_KHR_SURFACE_EXTENSION_NAME;
                 ++i;
 
-                switch (window_options)
+                switch (OPTION_WINDOW::type)
                 {
-                case WindowOptions::XCB:
+                case WindowType::XCB:
                 {
                     extensions[i] = VK_KHR_XCB_SURFACE_EXTENSION_NAME;
                     ++i;
                 } break;
-                case WindowOptions::WIN32:
+                case WindowType::WIN32:
                 {
 #if defined(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
                     extensions[i] = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
@@ -76,26 +84,26 @@ namespace ge::impl::factory::instance
             return extensions;
         }
 
-        template<bool validation_layers_enabled>
+        template<typename OPTION_VALIDATION_LAYERS>
         constexpr size_t get_required_layers_count()
         {
             size_t count = 0;
-            if constexpr (validation_layers_enabled)
+            if (typename OPTION_VALIDATION_LAYERS::enabled())
             {
                 ++count;
             }
             return count;
         }
 
-        template<bool validation_layers_enabled>
+        template<typename OPTION_VALIDATION_LAYERS>
         constexpr auto get_required_layers()
         {
-            constexpr size_t size = get_required_layers_count<validation_layers_enabled>();
+            constexpr size_t size = get_required_layers_count<OPTION_VALIDATION_LAYERS>();
 
             std::array<const char*, size> layers{};
 
             size_t i = 0;
-            if (validation_layers_enabled)
+            if (typename OPTION_VALIDATION_LAYERS::enabled())
             {
                 layers[i] = "VK_LAYER_LUNARG_standard_validation";
                 ++i;
@@ -105,12 +113,7 @@ namespace ge::impl::factory::instance
 
     } // namespace impl
 
-    template
-    <
-        bool debug_callback_enabled
-      , bool validation_layers_enabled
-      , WindowOptions window_options
-    >
+    template<typename OPTIONS>
     vk::UniqueInstance create()
     {
         using namespace ge::impl::factory::impl;
@@ -125,8 +128,12 @@ namespace ge::impl::factory::instance
           , VK_MAKE_VERSION(1, 0, 0)
         };
 
-        const auto required_extensions = get_required_extensions<debug_callback_enabled, window_options>();
-        const auto required_layers = get_required_layers<validation_layers_enabled>();
+        const auto required_extensions = get_required_extensions
+        <
+            typename OPTIONS::debug::debug_callback
+          , typename OPTIONS::window
+        >();
+        const auto required_layers = get_required_layers<typename OPTIONS::debug::validation_layers>();
 
         all_required_are_available(required_extensions, impl::get_available_instance_extensions());
         all_required_are_available(required_layers, impl::get_available_instance_layers());

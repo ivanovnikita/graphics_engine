@@ -13,14 +13,18 @@ namespace ge::impl
     GraphicsEngineImpl::GraphicsEngineImpl()
     {
         {
-            const bool debug_callback_enabled = true;
-            const bool validation_layers_enabled = true;
-            const auto window_options = factory::instance::WindowOptions::XCB;
+            using namespace factory::instance;
             instance_ = factory::instance::create
             <
-                debug_callback_enabled
-              , validation_layers_enabled
-              , window_options
+                OptionsInstance
+                <
+                    OptionsDebug
+                    <
+                        OptionDebugCallback<ENABLED, REQUIRED>
+                      , OptionValidationLayers<ENABLED, REQUIRED>
+                    >
+                  , OptionWindow<WindowType::XCB, ENABLED, REQUIRED>
+                >
             >();
         }
 
