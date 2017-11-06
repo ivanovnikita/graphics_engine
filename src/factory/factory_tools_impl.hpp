@@ -56,6 +56,11 @@ namespace ge::impl::factory::impl
       , const ContainerU& available
     )
     {
+        if (std::empty(required))
+        {
+            return;
+        }
+
         const auto absent = not_contained_in
         (
             required

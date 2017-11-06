@@ -1,5 +1,5 @@
 #include "graphics_engine_impl.h"
-#include "instance_factory.h"
+#include "instance_factory.hpp"
 #include "physical_device_factory.h"
 #include "logical_device_factory.h"
 #include "swapchain_factory.h"
@@ -11,11 +11,23 @@ namespace ge::impl
 {
 
     GraphicsEngineImpl::GraphicsEngineImpl()
-        : instance_             (factory::instance::create())
-        , debug_callback_       (create_debug_callback())
-        , window_               (Window::create(500, 500))
-        , surface_              (create_surface())
     {
+        {
+            const bool debug_callback_enabled = true;
+            const bool validation_layers_enabled = true;
+            const auto window_options = factory::instance::WindowOptions::XCB;
+            instance_ = factory::instance::create
+            <
+                debug_callback_enabled
+              , validation_layers_enabled
+              , window_options
+            >();
+        }
+
+        debug_callback_ = create_debug_callback();
+        window_ = Window::create(500, 500);
+        surface_ = create_surface();
+
         {
             const auto[physical_device, queue_family_indeces] = factory::device::physical::create(*instance_, *surface_);
             physical_device_ = physical_device;
