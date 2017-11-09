@@ -1,5 +1,5 @@
 #include "graphics_engine_impl.h"
-#include "instance_factory.hpp"
+#include "instance_factory.h"
 #include "physical_device_factory.h"
 #include "logical_device_factory.h"
 #include "swapchain_factory.h"
@@ -14,18 +14,19 @@ namespace ge::impl
     {
         {
             using namespace factory::instance;
+            const bool enabled = true;
             instance_ = factory::instance::create
-            <
+            (
                 OptionsInstance
-                <
+                {
                     OptionsDebug
-                    <
-                        OptionDebugCallback<ENABLED, REQUIRED>
-                      , OptionValidationLayers<ENABLED, REQUIRED>
-                    >
-                  , OptionWindow<WindowType::XCB, ENABLED, REQUIRED>
-                >
-            >();
+                    {
+                        OptionDebugCallback{enabled}
+                      , OptionValidationLayers{enabled}
+                    }
+                  , OptionWindow{enabled, WindowType::XCB}
+                }
+            );
         }
 
         debug_callback_ = create_debug_callback();
