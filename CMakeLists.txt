@@ -5,8 +5,6 @@ project("graphics_engine")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
-
 file(GLOB_RECURSE SRC "src/*.cpp" "src/*.h*")
 set(INCLUDE_DIRS
     "src"
@@ -30,7 +28,14 @@ else()
     set(WINDOW_SYSTEM XCB::XCB)
 endif()
 
+set(SHADERC_THIRD_PARTY_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party" CACHE STRING "Third party path." FORCE)
+set(SPIRV-Headers_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/spirv-headers" CACHE STRING "SPIRV-Headers path")
+set(SHADERC_SKIP_TESTS ON)
+set(SPIRV_SKIP_EXECUTABLES ON)
+add_subdirectory(third_party/shaderc)
+
 add_executable(${PROJECT_NAME} ${SRC})
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
