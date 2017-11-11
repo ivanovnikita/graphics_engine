@@ -26,6 +26,7 @@ arch:
     - vulkan-hpp
     - vulkan-intel
     - wget
+    - python
   script:
     - sudo sh ./ci/travis_build.sh
 
