@@ -35,12 +35,14 @@ namespace ge::impl
         window_ = Window::create(500, 500);
         surface_ = create_surface();
 
+        const factory::OptionGraphics option_graphics{enabled};
+
         {
             using namespace factory;
 
             const OptionsDevice options_device
             {
-                OptionGraphics{enabled}
+                option_graphics
               , OptionCompute{disabled}
               , OptionTransfer{disabled}
             };
@@ -76,6 +78,7 @@ namespace ge::impl
             }
         }
 
+        if (option_graphics.enabled)
         {
             auto[swapchain, format] = factory::swapchain::create
             (
