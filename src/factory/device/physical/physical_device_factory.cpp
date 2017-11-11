@@ -118,7 +118,12 @@ namespace ge::impl::factory::device::physical
 
     } // unnamed namespace
 
-    std::pair<vk::PhysicalDevice, QueueFamilyIndices> create(const vk::Instance& instance, const vk::SurfaceKHR& surface)
+    std::pair<vk::PhysicalDevice, QueueFamilyIndices> create
+    (
+        const OptionsPhysicalDevice& options
+      , const vk::Instance& instance
+      , const vk::SurfaceKHR& surface
+    )
     {
         using namespace ge::impl::factory::impl;
 
@@ -130,13 +135,23 @@ namespace ge::impl::factory::device::physical
         {
             try
             {
-                QueueFamilyIndices indices
+                QueueFamilyIndices indices;
+
+                if (options.graphics.enabled)
                 {
-                    get_queue_family_index(device, vk::QueueFlagBits::eGraphics)
-                  , get_presentation_queue_family_index(device, surface)
-                  , get_queue_family_index(device, vk::QueueFlagBits::eCompute)
-                  , get_queue_family_index(device, vk::QueueFlagBits::eTransfer)
-                };
+                    indices.graphics = get_queue_family_index(device, vk::QueueFlagBits::eGraphics);
+                    indices.present = get_presentation_queue_family_index(device, surface);
+                }
+
+                if (options.compute.enabled)
+                {
+                    indices.compute = get_queue_family_index(device, vk::QueueFlagBits::eCompute);
+                }
+
+                if (options.transfer.enabled)
+                {
+                    indices.transfer = get_queue_family_index(device, vk::QueueFlagBits::eTransfer);
+                }
 
                 return {device, indices};
             }

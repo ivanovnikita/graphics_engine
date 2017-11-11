@@ -11,10 +11,12 @@ namespace ge::impl
 {
 
     GraphicsEngineImpl::GraphicsEngineImpl()
-    {
+    {        
+        const bool enabled = true;
+        const bool disabled = false;
         {
+            using namespace factory;
             using namespace factory::instance;
-            const bool enabled = true;
             instance_ = factory::instance::create
             (
                 OptionsInstance
@@ -34,7 +36,18 @@ namespace ge::impl
         surface_ = create_surface();
 
         {
-            const auto[physical_device, queue_family_indeces] = factory::device::physical::create(*instance_, *surface_);
+            using namespace factory::device::physical;
+            const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+            (
+                OptionsPhysicalDevice
+                {
+                    OptionGraphics{enabled}
+                  , OptionCompute{enabled}
+                  , OptionTransfer{enabled}
+                }
+              , *instance_
+              , *surface_
+            );
             physical_device_ = physical_device;
             queue_family_indeces_ = queue_family_indeces;
         }
