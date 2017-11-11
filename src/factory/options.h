@@ -31,4 +31,32 @@ namespace ge::impl::factory
         WindowType type = WindowType::XCB;
     };
 
+    struct OptionGraphics
+    {
+        bool enabled = false;
+    };
+
+    struct OptionCompute
+    {
+        bool enabled = false;
+    };
+
+    struct OptionTransfer
+    {
+        bool enabled = false;
+    };
+
+    struct OptionsInstance final
+    {
+        OptionsDebug debug;
+        OptionWindow window;
+    };
+
+    struct OptionsDevice
+    {
+        OptionGraphics graphics;
+        OptionCompute compute;
+        OptionTransfer transfer;
+    };
+
 } // ge::impl::factory

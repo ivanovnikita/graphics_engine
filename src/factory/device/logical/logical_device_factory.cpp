@@ -17,7 +17,8 @@ namespace ge::impl::factory::device::logical
 
     vk::UniqueDevice create
     (
-        const vk::PhysicalDevice& physical_device
+        const OptionsDevice& options
+      , const vk::PhysicalDevice& physical_device
       , QueueFamilyIndices queue_family_indeces
     )
     {
@@ -29,13 +30,22 @@ namespace ge::impl::factory::device::logical
         };
         all_required_are_available(required_layers, get_available_device_layers(physical_device));
 
-        std::set<uint32_t> unique_queue_family_indices
+        std::set<uint32_t> unique_queue_family_indices;
+        if (options.graphics.enabled)
         {
-            queue_family_indeces.graphics
-          , queue_family_indeces.present
-          , queue_family_indeces.compute
-          , queue_family_indeces.transfer
-        };
+            unique_queue_family_indices.emplace(queue_family_indeces.graphics);
+            unique_queue_family_indices.emplace(queue_family_indeces.present);
+        }
+
+        if (options.compute.enabled)
+        {
+            unique_queue_family_indices.emplace(queue_family_indeces.compute);
+        }
+
+        if (options.transfer.enabled)
+        {
+            unique_queue_family_indices.emplace(queue_family_indeces.transfer);
+        }
 
         const auto queue_priority = 0.0f;
         const auto queue_count = 1;

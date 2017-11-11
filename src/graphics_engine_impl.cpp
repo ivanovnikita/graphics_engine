@@ -36,28 +36,45 @@ namespace ge::impl
         surface_ = create_surface();
 
         {
-            using namespace factory::device::physical;
-            const auto[physical_device, queue_family_indeces] = factory::device::physical::create
-            (
-                OptionsPhysicalDevice
-                {
-                    OptionGraphics{enabled}
-                  , OptionCompute{enabled}
-                  , OptionTransfer{enabled}
-                }
-              , *instance_
-              , *surface_
-            );
-            physical_device_ = physical_device;
-            queue_family_indeces_ = queue_family_indeces;
+            using namespace factory;
+
+            const OptionsDevice options_device
+            {
+                OptionGraphics{enabled}
+              , OptionCompute{disabled}
+              , OptionTransfer{disabled}
+            };
+
+            {
+                using namespace factory::device::physical;
+                const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+                (
+                    options_device
+                  , *instance_
+                  , *surface_
+                );
+                physical_device_ = physical_device;
+                queue_family_indeces_ = queue_family_indeces;
+            }
+
+            logical_device_ = factory::device::logical::create(options_device, physical_device_, queue_family_indeces_);
+
+            if (options_device.graphics.enabled)
+            {
+                queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics, 0);
+                queues_.present = logical_device_->getQueue(queue_family_indeces_.present, 0);
+            }
+
+            if (options_device.compute.enabled)
+            {
+                queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute, 0);
+            }
+
+            if (options_device.transfer.enabled)
+            {
+                queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer, 0);
+            }
         }
-
-        logical_device_ = factory::device::logical::create(physical_device_, queue_family_indeces_);
-
-        queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics, 0);
-        queues_.present = logical_device_->getQueue(queue_family_indeces_.present, 0);
-        queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute, 0);
-        queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer, 0);
 
         {
             auto[swapchain, format] = factory::swapchain::create

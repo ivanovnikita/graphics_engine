@@ -1,37 +1,16 @@
 #pragma once
 
 #include "queue.h"
+#include "options.h"
 
 #include <vulkan/vulkan.hpp>
 
 namespace ge::impl::factory::device::physical
 {
 
-    struct OptionGraphics
-    {
-        bool enabled = false;
-    };
-
-    struct OptionCompute
-    {
-        bool enabled = false;
-    };
-
-    struct OptionTransfer
-    {
-        bool enabled = false;
-    };
-
-    struct OptionsPhysicalDevice
-    {
-        OptionGraphics graphics;
-        OptionCompute compute;
-        OptionTransfer transfer;
-    };
-
     std::pair<vk::PhysicalDevice, QueueFamilyIndices> create
     (
-        const OptionsPhysicalDevice&
+        const OptionsDevice&
       , const vk::Instance&
       , const vk::SurfaceKHR&
     );

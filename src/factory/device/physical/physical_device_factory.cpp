@@ -120,7 +120,7 @@ namespace ge::impl::factory::device::physical
 
     std::pair<vk::PhysicalDevice, QueueFamilyIndices> create
     (
-        const OptionsPhysicalDevice& options
+        const OptionsDevice& options
       , const vk::Instance& instance
       , const vk::SurfaceKHR& surface
     )
