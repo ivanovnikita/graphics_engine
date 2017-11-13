@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 
-find_package(GTest REQUIRED)
-
 file(GLOB_RECURSE TEST_SRC "*.cpp" "*.h*")
 
-set(TEST "${CMAKE_PROJECT_NAME}-test")
-add_executable(${TEST} ${TEST_SRC})
-target_link_libraries(${TEST} ge GTest::GTest GTest::Main)
+set(TEST_COVERAGE "${CMAKE_PROJECT_NAME}-test-coverage")
+add_executable(${TEST_COVERAGE} ${TEST_SRC})
+target_link_libraries(${TEST_COVERAGE} ge gtest_main)
 
-add_test(NAME "Tests" COMMAND ${TEST})
+add_test(NAME "Tests coverage" COMMAND ${TEST_COVERAGE})
