@@ -16,6 +16,6 @@ export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
 cd ../../..
 mkdir build && cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 make test
