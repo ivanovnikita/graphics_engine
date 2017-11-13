@@ -7,3 +7,4 @@ add_executable(${TEST_COVERAGE} ${TEST_SRC})
 target_link_libraries(${TEST_COVERAGE} ge gtest_main)
 
 add_test(NAME "Tests coverage" COMMAND ${TEST_COVERAGE})
+add_test(NAME ${TEST_COVERAGE} COMMAND ${TEST_COVERAGE})
