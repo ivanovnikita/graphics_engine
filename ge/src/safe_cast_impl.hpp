@@ -21,13 +21,13 @@ namespace ge
     }
 
     template<typename To, typename From>
-    To safe_cast(const From& from)
+    constexpr To safe_cast(const From& from)
     {
         static_assert(std::is_integral<From>::value && std::is_integral<To>::value, "Types must be integral");
 
-        static constexpr auto toMin = static_cast<From>(std::numeric_limits<To>::min());
-        static constexpr auto toMax = static_cast<From>(std::numeric_limits<To>::max());
-        static constexpr auto zero = static_cast<From>(0);
+        constexpr auto toMin = static_cast<From>(std::numeric_limits<To>::min());
+        constexpr auto toMax = static_cast<From>(std::numeric_limits<To>::max());
+        constexpr auto zero = static_cast<From>(0);
 
         if constexpr
         (

@@ -4,7 +4,7 @@ namespace ge
 {
 
     template<typename To, typename From>
-    To safe_cast(const From& from);
+    constexpr To safe_cast(const From& from);
 
 }
 
