@@ -47,4 +47,11 @@ namespace ge
     {
         return std::runtime_error::what();
     }
+
+    overflow_error::~overflow_error() = default;
+
+    const char* overflow_error::what() const noexcept
+    {
+        return std::overflow_error::what();
+    }
 }

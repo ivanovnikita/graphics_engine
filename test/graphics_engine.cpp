@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-TEST(GraphicsEngine, create)
+TEST(GraphicsEngine, DISABLED_create)
 {
     ASSERT_NO_THROW
     ({

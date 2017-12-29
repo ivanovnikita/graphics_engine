@@ -43,4 +43,12 @@ namespace ge
         virtual const char* what() const noexcept;
     };
 
+    class overflow_error : public ge::exception, public std::overflow_error
+    {
+    public:
+        using std::overflow_error::overflow_error;
+        virtual ~overflow_error();
+        virtual const char* what() const noexcept;
+    };
+
 } // namespace ge
