@@ -12,7 +12,10 @@ namespace ge::impl::factory::swapchain
 
             if (surface_formats.size() == 1 && surface_formats[0].format == vk::Format::eUndefined)
             {
-                return {vk::Format::eB8G8R8A8Unorm, vk::ColorSpaceKHR::eSrgbNonlinear};
+                vk::SurfaceFormatKHR format;
+                format.format = vk::Format::eB8G8R8A8Unorm;
+                format.colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
+                return format;
             }
 
             for (const auto& format : surface_formats)
