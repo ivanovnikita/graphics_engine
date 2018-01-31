@@ -2,6 +2,8 @@
 
 set -e
 
+conan remote add common https://api.bintray.com/conan/ivanovnikita/common
+
 VULKAN_VERSION="1.0.61.1"
 mkdir vulkan
 cd vulkan

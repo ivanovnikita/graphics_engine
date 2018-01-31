@@ -27,6 +27,7 @@ arch:
     - vulkan-intel
     - wget
     - python
+    - conan
   script:
     - sudo sh ./ci/travis_build.sh
 
