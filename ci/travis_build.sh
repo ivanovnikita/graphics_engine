@@ -20,4 +20,4 @@ cd ../../..
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-./test/graphics_engine-test
+./bin/graphics_engine-test
