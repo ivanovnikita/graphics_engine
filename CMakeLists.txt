@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 
 project(graphics_engine)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+
 include("third_party/cmake-conan/conan.cmake")
 
 conan_cmake_run(CONANFILE conanfile.txt
