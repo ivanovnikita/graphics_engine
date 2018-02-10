@@ -2,7 +2,8 @@
 
 set -e
 
-conan remote add common https://api.bintray.com/conan/ivanovnikita/common
+conan remote add common https://api.bintray.com/conan/ivanovnikita/common --insert
+conan remote add graphics https://api.bintray.com/conan/ivanovnikita/graphics_engine --insert
 
 VULKAN_VERSION="1.0.61.1"
 mkdir vulkan
