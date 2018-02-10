@@ -1,18 +1,6 @@
 [submodule "ci/arch-travis"]
 	path = ci/arch-travis
 	url = https://github.com/mikkeloscar/arch-travis
-[submodule "third_party/shaderc"]
-	path = third_party/shaderc
-	url = git@github.com:google/shaderc.git
-[submodule "third_party/glslang"]
-	path = third_party/glslang
-	url = git@github.com:KhronosGroup/glslang.git
-[submodule "third_party/spirv-headers"]
-	path = third_party/spirv-headers
-	url = git@github.com:KhronosGroup/SPIRV-Headers.git
-[submodule "third_party/spirv-tools"]
-	path = third_party/spirv-tools
-	url = git@github.com:KhronosGroup/SPIRV-Tools.git
 [submodule "third_party/cmake-conan"]
 	path = third_party/cmake-conan
 	url = git@github.com:ivanovnikita/cmake-conan.git
