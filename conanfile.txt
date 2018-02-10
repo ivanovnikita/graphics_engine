@@ -1,5 +1,6 @@
 [requires]
 googletest/1.8@ivanovnikita/stable
+shaderc/c607253@ivanovnikita/stable
 
 [generators]
 cmake  
