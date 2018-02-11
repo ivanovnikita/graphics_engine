@@ -4,11 +4,13 @@ project(graphics_engine)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CONAN_STD_OPTION "CLANG_STD")
 endif()
 
 include("third_party/cmake-conan/conan.cmake")
 
 conan_cmake_run(CONANFILE conanfile.txt
+                ${CONAN_STD_OPTION}
                 BASIC_SETUP
                 BUILD missing)
 
