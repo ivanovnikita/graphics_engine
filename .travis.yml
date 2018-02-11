@@ -22,8 +22,6 @@ arch:
     - gcc
     - cmake
     - extra-cmake-modules
-    - vulkan-headers
-    - vulkan-hpp
     - vulkan-intel
     - wget
     - python
