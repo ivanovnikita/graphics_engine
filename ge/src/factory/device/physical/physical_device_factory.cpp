@@ -101,7 +101,9 @@ namespace ge::impl::factory::device::physical
                 case vk::PhysicalDeviceType::eDiscreteGpu: return 0;
                 case vk::PhysicalDeviceType::eIntegratedGpu: return 1;
                 case vk::PhysicalDeviceType::eCpu: return 2;
-                default: return 3;
+                case vk::PhysicalDeviceType::eVirtualGpu:
+                case vk::PhysicalDeviceType::eOther:
+                    return 3;
                 }
             };
             std::sort

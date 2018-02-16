@@ -12,8 +12,8 @@ namespace ge::impl
 
     GraphicsEngineImpl::GraphicsEngineImpl()
     {        
-        const bool enabled = true;
-        const bool disabled = false;
+        constexpr bool enabled = true;
+        constexpr bool disabled = false;
         {
             using namespace factory;
             using namespace factory::instance;
@@ -35,12 +35,12 @@ namespace ge::impl
         window_ = Window::create(500, 500);
         surface_ = create_surface();
 
-        const factory::OptionGraphics option_graphics{enabled};
+        constexpr factory::OptionGraphics option_graphics{enabled};
 
         {
             using namespace factory;
 
-            const OptionsDevice options_device
+            constexpr OptionsDevice options_device
             {
                 option_graphics
               , OptionCompute{disabled}
@@ -61,24 +61,24 @@ namespace ge::impl
 
             logical_device_ = factory::device::logical::create(options_device, physical_device_, queue_family_indeces_);
 
-            if (options_device.graphics.enabled)
+            if constexpr (options_device.graphics.enabled)
             {
                 queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics, 0);
                 queues_.present = logical_device_->getQueue(queue_family_indeces_.present, 0);
             }
 
-            if (options_device.compute.enabled)
+            if constexpr (options_device.compute.enabled)
             {
                 queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute, 0);
             }
 
-            if (options_device.transfer.enabled)
+            if constexpr (options_device.transfer.enabled)
             {
                 queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer, 0);
             }
         }
 
-        if (option_graphics.enabled)
+        if constexpr (option_graphics.enabled)
         {
             auto[swapchain, format] = factory::swapchain::create
             (

@@ -28,7 +28,39 @@ else()
 endif()
 
 add_library(${PROJECT_NAME} ${SRC})
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(${PROJECT_NAME} PRIVATE
+    -Werror -Wall -Wextra
+    -pedantic -pedantic-errors
+    )
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wstrict-overflow=5
+        -Wfloat-equal
+        -Wshadow
+        -Wpointer-arith
+        -Wcast-qual
+        -Wconversion
+        -Wsign-conversion
+        -Wlogical-op
+        -Wmissing-declarations
+        -Wredundant-decls
+        -Winline
+        -Wno-return-local-addr
+        -Wsuggest-final-types
+        -Wsuggest-final-methods
+        -Wsuggest-override
+        -Wduplicated-branches
+        -Wduplicated-cond
+        )
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Weverything
+        -Wno-c++98-compat
+        -Wno-c++11-compat
+        -Wno-c++14-compat
+        -Wno-unreachable-code
+        )
+endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM})
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})

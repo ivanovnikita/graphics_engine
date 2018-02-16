@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace ge::impl::factory
 {
 
@@ -19,7 +21,7 @@ namespace ge::impl::factory
         OptionValidationLayers validation_layers;
     };
 
-    enum class WindowType
+    enum class WindowType : uint8_t
     {
         XCB
       , WIN32

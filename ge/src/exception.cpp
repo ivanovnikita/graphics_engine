@@ -31,6 +31,8 @@ namespace ge
     {
     }
 
+    device_capabilities_error::~device_capabilities_error() = default;
+
     window_error::window_error(const std::string& what)
         : std::runtime_error (what)
     {

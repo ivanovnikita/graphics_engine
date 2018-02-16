@@ -32,6 +32,7 @@ namespace ge
     public:
         explicit device_capabilities_error(const std::string& what);
         explicit device_capabilities_error(const char* what);
+        ~device_capabilities_error() override;
     };
 
     class window_error : public ge::exception, public std::runtime_error
