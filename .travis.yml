@@ -16,10 +16,12 @@ notifications:
 
 compiler:
   - gcc
+  - clang
 
 arch:
   packages:
     - gcc
+    - clang
     - cmake
     - extra-cmake-modules
     - vulkan-intel
