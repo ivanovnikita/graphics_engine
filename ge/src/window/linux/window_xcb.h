@@ -11,10 +11,10 @@ namespace ge::impl
     {
     public:
         WindowXCB(uint16_t width, uint16_t height);
-        ~WindowXCB();
+        ~WindowXCB() override;
 
-        std::unique_ptr<vk::UniqueSurfaceKHR> create_surface(const vk::UniqueInstance& instance) final;
-        std::pair<uint16_t, uint16_t> extent() const final;
+        std::unique_ptr<vk::UniqueSurfaceKHR> create_surface(const vk::UniqueInstance& instance) override;
+        std::pair<uint16_t, uint16_t> extent() const override;
     private:
         xcb_connection_t* connection_;
         xcb_window_t handle_;

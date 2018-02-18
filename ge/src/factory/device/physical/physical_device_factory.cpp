@@ -105,6 +105,8 @@ namespace ge::impl::factory::device::physical
                 case vk::PhysicalDeviceType::eOther:
                     return 3;
                 }
+
+                GE_THROW(device_capabilities_error, "Unknown physical device type");
             };
             std::sort
             (

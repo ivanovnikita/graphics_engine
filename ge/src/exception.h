@@ -23,8 +23,8 @@ namespace ge
     public:
         explicit vulkan_error(const std::string& what);
         explicit vulkan_error(const char* what);
-        virtual ~vulkan_error();
-        virtual const char* what() const noexcept;
+        virtual ~vulkan_error() override;
+        virtual const char* what() const noexcept override;
     };
 
     class device_capabilities_error : public vulkan_error
@@ -40,16 +40,16 @@ namespace ge
     public:
         explicit window_error(const std::string& what);
         explicit window_error(const char* what);
-        virtual ~window_error();
-        virtual const char* what() const noexcept;
+        virtual ~window_error() override;
+        virtual const char* what() const noexcept override;
     };
 
     class overflow_error : public ge::exception, public std::overflow_error
     {
     public:
         using std::overflow_error::overflow_error;
-        virtual ~overflow_error();
-        virtual const char* what() const noexcept;
+        virtual ~overflow_error() override;
+        virtual const char* what() const noexcept override;
     };
 
 } // namespace ge
