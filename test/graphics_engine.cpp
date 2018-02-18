@@ -6,15 +6,5 @@
 
 TEST(GraphicsEngine, DISABLED_create)
 {
-    ASSERT_NO_THROW
-    ({
-        try
-        {
-            ge::GraphicsEngine ge;
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << std::endl;
-        }
-    });
+    ASSERT_NO_THROW(ge::GraphicsEngine ge;);
 }
