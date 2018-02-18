@@ -14,12 +14,15 @@ language: cpp
 notifications:
   email: false
 
-compiler:
-  - gcc
+matrix:
+  include:
+    - compiler: gcc
+    - compiler: clang
 
 arch:
   packages:
     - gcc
+    - clang
     - cmake
     - extra-cmake-modules
     - vulkan-intel
