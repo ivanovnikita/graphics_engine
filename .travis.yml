@@ -8,16 +8,16 @@ before_install:
     - git submodule update --init --recursive
     
 env:
-  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1 VULKAN_SDK=
+  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1
 
-language: cpp
 notifications:
   email: false
 
-matrix:
-  include:
-    - compiler: gcc
-    - compiler: clang
+language: c
+
+compiler:
+  - gcc
+  - clang
 
 arch:
   packages:
