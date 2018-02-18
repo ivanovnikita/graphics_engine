@@ -2,7 +2,7 @@
 
 #include "ge/graphics_engine.h"
 
-TEST(GraphicsEngine, DISABLED_create)
+TEST(GraphicsEngine, create)
 {
     ASSERT_NO_THROW(ge::GraphicsEngine ge;);
 }

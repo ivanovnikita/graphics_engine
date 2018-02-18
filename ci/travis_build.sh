@@ -6,6 +6,6 @@ conan remote add common https://api.bintray.com/conan/ivanovnikita/common --inse
 conan remote add graphics https://api.bintray.com/conan/ivanovnikita/graphics_engine --insert
 
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCMAKE_BUILD_TYPE=Release -DGE_BUILD_GRAPHICS_TESTS=OFF ..
 make
-./bin/graphics_engine-test
+./bin/graphics_engine-common-test

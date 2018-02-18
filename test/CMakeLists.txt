@@ -1,12 +1,27 @@
 cmake_minimum_required(VERSION 3.9)
 
+include(CMakeDependentOption)
+
 find_package(Threads REQUIRED)
 find_package(GTest REQUIRED)
 
-file(GLOB_RECURSE TEST_SRC "*.cpp" "*.h*")
+file(GLOB_RECURSE COMMON_TEST_SRC "common/*.cpp")
 
-set(TEST "${CMAKE_PROJECT_NAME}-test")
-add_executable(${TEST} ${TEST_SRC})
-target_link_libraries(${TEST} ge GTest::Main Threads::Threads)
+set(COMMON_TEST "${CMAKE_PROJECT_NAME}-common-test")
+add_executable(${COMMON_TEST} ${COMMON_TEST_SRC})
+target_link_libraries(${COMMON_TEST} ge GTest::Main Threads::Threads)
 
-add_test(NAME ${TEST} COMMAND ${TEST})
+add_test(NAME ${COMMON_TEST} COMMAND ${COMMON_TEST})
+
+cmake_dependent_option(GE_BUILD_GRAPHICS_TESTS "Build graphics tests?" ON
+                       "GE_BUILD_TESTS" OFF)
+
+if (${GE_BUILD_GRAPHICS_TESTS})
+    file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp")
+
+    set(GRAPHICS_TEST "${CMAKE_PROJECT_NAME}-graphics-test")
+    add_executable(${GRAPHICS_TEST} ${GRAPHICS_TEST_SRC})
+    target_link_libraries(${GRAPHICS_TEST} ge GTest::Main Threads::Threads)
+
+    add_test(NAME ${GRAPHICS_TEST} COMMAND ${GRAPHICS_TEST})
+endif()
