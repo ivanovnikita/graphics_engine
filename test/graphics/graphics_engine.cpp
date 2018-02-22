@@ -4,5 +4,5 @@
 
 TEST(GraphicsEngine, create)
 {
-    ASSERT_NO_THROW(ge::GraphicsEngine ge;);
+    ge::GraphicsEngine ge;
 }
