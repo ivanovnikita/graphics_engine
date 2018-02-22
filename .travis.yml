@@ -23,6 +23,8 @@ arch:
     - gcc
     - cmake
     - extra-cmake-modules
+    - mesa
+    - libxcb
     - vulkan-icd-loader
     - wget
     - python
