@@ -23,7 +23,7 @@ arch:
     - gcc
     - cmake
     - extra-cmake-modules
-    - vulkan-intel
+    - vulkan-icd-loader
     - wget
     - python
     - conan
