@@ -9,3 +9,4 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ./bin/graphics_engine-common-test
+./bin/graphics_engine-graphics-test
