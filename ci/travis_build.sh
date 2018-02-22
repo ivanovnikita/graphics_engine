@@ -8,5 +8,6 @@ conan remote add graphics https://api.bintray.com/conan/ivanovnikita/graphics_en
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-./bin/graphics_engine-common-test
-./bin/graphics_engine-graphics-test
+cd bin
+./graphics_engine-common-test
+./graphics_engine-graphics-test
