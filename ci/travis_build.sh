@@ -11,3 +11,4 @@ make
 cd bin
 ./graphics_engine-common-test
 ./graphics_engine-graphics-test
+vulkaninfo

@@ -27,6 +27,7 @@ arch:
     - libxcb
     - vulkan-intel
     - vulkan-icd-loader
+    - gpu-viewer
     - wget
     - python
     - conan
