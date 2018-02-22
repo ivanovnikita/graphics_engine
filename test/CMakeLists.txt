@@ -17,6 +17,9 @@ cmake_dependent_option(GE_BUILD_GRAPHICS_TESTS "Build graphics tests?" ON
                        "GE_BUILD_TESTS" OFF)
 
 if (${GE_BUILD_GRAPHICS_TESTS})
+    set(VK_LAYER_PATH "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/etc/vulkan/explicit_layer.d")
+    configure_file("graphics/graphics_config.txt.in" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/graphics_config.txt")
+
     file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp")
 
     set(GRAPHICS_TEST "${CMAKE_PROJECT_NAME}-graphics-test")
