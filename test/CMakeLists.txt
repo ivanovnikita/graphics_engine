@@ -20,6 +20,13 @@ if (${GE_BUILD_GRAPHICS_TESTS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/etc/vulkan/explicit_layer.d")
     configure_file("graphics/graphics_config.txt.in" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/graphics_config.txt")
 
+    find_file(VULKAN_INFO vulkaninfo REQUIRED
+              PATHS "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/bin")
+    execute_process(COMMAND ${VULKAN_INFO}
+                    OUTPUT_VARIABLE output
+                    RESULT_VARIABLE result)
+    message(${output})
+
     file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp")
 
     set(GRAPHICS_TEST "${CMAKE_PROJECT_NAME}-graphics-test")
