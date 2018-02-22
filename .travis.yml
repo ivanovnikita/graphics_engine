@@ -25,6 +25,7 @@ arch:
     - extra-cmake-modules
     - mesa
     - libxcb
+    - vulkan-intel
     - vulkan-icd-loader
     - wget
     - python
