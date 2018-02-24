@@ -25,7 +25,7 @@ if (${GE_BUILD_GRAPHICS_TESTS})
     execute_process(COMMAND ${VULKAN_INFO}
                     OUTPUT_VARIABLE output
                     RESULT_VARIABLE result)
-    message(${output})
+#    message(${output})
 
     file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp")
 

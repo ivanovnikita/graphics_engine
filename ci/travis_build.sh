@@ -9,6 +9,6 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 cd bin
-./graphics_engine-common-test
-./graphics_engine-graphics-test
+#./graphics_engine-common-test
+#./graphics_engine-graphics-test
 vulkaninfo
