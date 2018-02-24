@@ -37,7 +37,6 @@ before_install:
 
 install:
   - sudo pip install conan
-  - sudo sh ./ci/install-linux.sh
 
 script:
   - sudo sh ./ci/travis_build.sh
