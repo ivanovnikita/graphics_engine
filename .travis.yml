@@ -30,6 +30,12 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
+addons:
+  apt:
+    packages:
+      - libvulkan-dev
+      - libxcb1-dev
+
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
