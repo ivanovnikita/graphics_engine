@@ -1,34 +1,42 @@
 sudo: required
 
-git:
-    submodules: false
-
-before_install:
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-    - git submodule update --init --recursive
-    
-env:
-  - ARCH_TRAVIS_CLEAN_CHROOT=1 ARCH_TRAVIS_CONFIRM_YES=1
-
 notifications:
   email: false
 
 language: cpp
 
-compiler:
-    - gcc
+git:
+    submodules: false
 
-arch:
-  packages:
-    - gcc
-    - cmake
-    - libxcb
-    - vulkan-intel
-    - vulkan-icd-loader
-    - python
-    - conan
-  script:
-    - sudo sh ./ci/travis_build.sh
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
+before_install:
+    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+    - git submodule update --init --recursive
+    - eval "${MATRIX_EVAL}"
+
+install:
+    - pip install conan
 
 script:
-  - bash ci/arch-travis/arch-travis.sh
+  - sudo sh ./ci/travis_build.sh
