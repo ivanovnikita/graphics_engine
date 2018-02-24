@@ -6,7 +6,7 @@ notifications:
 language: cpp
 
 git:
-    submodules: false
+  submodules: false
 
 matrix:
   include:
@@ -31,12 +31,13 @@ matrix:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
 before_install:
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-    - git submodule update --init --recursive
-    - eval "${MATRIX_EVAL}"
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+  - eval "${MATRIX_EVAL}"
 
 install:
-    - sudo pip install conan
+  - sudo pip install conan
+  - sudo sh ./ci/install-linux.sh
 
 script:
   - sudo sh ./ci/travis_build.sh
