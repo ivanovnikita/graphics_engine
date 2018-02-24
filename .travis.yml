@@ -36,7 +36,7 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 install:
-    - pip install conan
+    - sudo pip install conan
 
 script:
   - sudo sh ./ci/travis_build.sh
