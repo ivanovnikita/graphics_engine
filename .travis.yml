@@ -13,14 +13,17 @@ env:
 notifications:
   email: false
 
-language: cpp
+language: c
 
 compiler:
     - gcc
+    - clang
 
 arch:
   packages:
     - gcc
+    - clang
+    - clang-tools-extra
     - cmake
     - libxcb
     - vulkan-intel
