@@ -16,8 +16,7 @@ set(INCLUDE_DIRS
 )
 set(API_DIRS "include")
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Vulkan REQUIRED)
 
