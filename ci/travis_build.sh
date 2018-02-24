@@ -1,5 +1,6 @@
 #!/bin/sh
 
+echo $CC
 set -e
 
 conan remote add common https://api.bintray.com/conan/ivanovnikita/common --insert
