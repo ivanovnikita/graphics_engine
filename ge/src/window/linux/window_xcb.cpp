@@ -84,4 +84,4 @@ namespace ge::impl
         return {width_, height_};
     }
 
-} // namespace ge::impl
+}

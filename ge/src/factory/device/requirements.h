@@ -15,5 +15,5 @@ namespace ge::impl::factory::device
         return required_extensions;
     }
 
-} // namespace ge::impl::factory::device
+}
 

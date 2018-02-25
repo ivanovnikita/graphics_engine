@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window.h"
+#include "window/window.h"
 
 #include <xcb/xcb.h>
 
@@ -22,4 +22,4 @@ namespace ge::impl
         uint16_t height_;
     };
 
-} // namespace ge::impl
+}

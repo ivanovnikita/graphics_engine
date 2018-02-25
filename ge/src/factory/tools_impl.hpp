@@ -1,6 +1,6 @@
 #pragma once
 
-#include "factory_tools.hpp"
+#include "factory/tools.hpp"
 #include "exception.h"
 
 #include <vulkan/vulkan.hpp>
@@ -8,7 +8,7 @@
 #include <string>
 #include <algorithm>
 
-namespace ge::impl::factory::impl
+namespace ge::impl::factory::tools
 {
 
     inline bool operator==(const char* lhs, const std::string& rhs)
@@ -113,4 +113,4 @@ namespace ge::impl::factory::impl
         return properties_names(layers, get_layer_name);
     }
 
-} // namespace ge::impl::factory::impl
+}

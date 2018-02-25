@@ -1,4 +1,4 @@
-#include "swapchain_factory.h"
+#include "factory/swapchain.h"
 
 namespace ge::impl::factory::swapchain
 {
@@ -144,4 +144,4 @@ namespace ge::impl::factory::swapchain
         return {logical_device.createSwapchainKHRUnique(create_info), format.format};
     }
 
-} // namespace ge::impl::factory::swapchain
+}

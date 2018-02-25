@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace ge::impl::factory::impl
+namespace ge::impl::factory::tools
 {
 
     template<typename ContainerT, typename ContainerU>
@@ -27,6 +27,6 @@ namespace ge::impl::factory::impl
     template<typename Container>
     std::vector<std::string> layers_names(const Container& layers);
 
-} // namespace ge::impl::factory::impl
+}
 
-#include "factory_tools_impl.hpp"
+#include "factory/tools_impl.hpp"

@@ -61,4 +61,4 @@ namespace ge::impl::factory
         OptionTransfer transfer;
     };
 
-} // ge::impl::factory
+}

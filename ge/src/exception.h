@@ -52,4 +52,4 @@ namespace ge
         virtual const char* what() const noexcept override;
     };
 
-} // namespace ge
+}

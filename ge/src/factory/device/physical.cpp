@@ -1,6 +1,6 @@
-#include "physical_device_factory.h"
-#include "device_requirements.h"
-#include "factory_tools.hpp"
+#include "factory/device/physical.h"
+#include "factory/device/requirements.h"
+#include "factory/tools.hpp"
 #include "exception.h"
 
 namespace ge::impl::factory::device::physical
@@ -10,7 +10,7 @@ namespace ge::impl::factory::device::physical
     {
         std::vector<std::string> get_available_device_extensions(const vk::PhysicalDevice& device)
         {
-            return ge::impl::factory::impl::extensions_names(device.enumerateDeviceExtensionProperties());
+            return tools::extensions_names(device.enumerateDeviceExtensionProperties());
         }
 
         uint32_t get_queue_family_index(const vk::PhysicalDevice& device, vk::QueueFlagBits required_bit)
@@ -67,7 +67,7 @@ namespace ge::impl::factory::device::physical
 
         uint32_t get_presentation_queue_family_index(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
         {
-            using namespace ge::impl::factory::impl;
+            using namespace tools;
 
             all_required_are_available
             (
@@ -129,7 +129,7 @@ namespace ge::impl::factory::device::physical
       , const vk::SurfaceKHR& surface
     )
     {
-        using namespace ge::impl::factory::impl;
+        using namespace tools;
 
         auto devices = instance.enumeratePhysicalDevices();
 
@@ -168,4 +168,4 @@ namespace ge::impl::factory::device::physical
         GE_THROW(device_capabilities_error, "There is no available physical devices");
     }
 
-} // namespace ge::impl::factory::device::physical
+}

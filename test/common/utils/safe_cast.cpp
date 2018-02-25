@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "safe_cast.hpp"
+#include "utils/safe_cast.hpp"
 
 template<typename T, typename U>
 struct CastPair
@@ -89,7 +89,7 @@ TYPED_TEST(safe_castInt, signedToUnsigned)
     const auto fromMaxSigned = std::numeric_limits<FromSigned>::max();
     const auto fromMinSigned = std::numeric_limits<FromSigned>::min();
 
-    if (sizeof(FromSigned) <= sizeof(ToUnsigned) || 2 * sizeof(FromSigned) == sizeof(ToUnsigned))
+    if (sizeof(FromSigned) <= sizeof(ToUnsigned))
     {
         EXPECT_EQ(static_cast<ToUnsigned>(fromMaxSigned), safe_cast<ToUnsigned>(fromMaxSigned));
     }

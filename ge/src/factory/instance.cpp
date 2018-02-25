@@ -1,5 +1,5 @@
-#include "instance_factory.h"
-#include "factory_tools.hpp"
+#include "factory/instance.h"
+#include "factory/tools.hpp"
 
 #include <vector>
 
@@ -11,12 +11,12 @@ namespace ge::impl::factory::instance
 
         std::vector<std::string> get_available_instance_extensions()
         {
-            return ge::impl::factory::impl::extensions_names(vk::enumerateInstanceExtensionProperties());
+            return tools::extensions_names(vk::enumerateInstanceExtensionProperties());
         }
 
         std::vector<std::string> get_available_instance_layers()
         {
-            return ge::impl::factory::impl::layers_names(vk::enumerateInstanceLayerProperties());
+            return tools::layers_names(vk::enumerateInstanceLayerProperties());
         }
 
         std::vector<const char*> get_required_extensions
@@ -71,7 +71,7 @@ namespace ge::impl::factory::instance
 
     vk::UniqueInstance create(const OptionsInstance& options)
     {
-        using namespace ge::impl::factory::impl;
+        using namespace tools;
 
         const vk::ApplicationInfo application_info
         {
@@ -101,4 +101,4 @@ namespace ge::impl::factory::instance
         return vk::createInstanceUnique(create_info);
     }
 
-} // namespace ge::impl::factory::instance
+}

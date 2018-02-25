@@ -1,6 +1,6 @@
-#include "logical_device_factory.h"
-#include "device_requirements.h"
-#include "factory_tools.hpp"
+#include "factory/device/logical.h"
+#include "factory/device/requirements.h"
+#include "factory/tools.hpp"
 
 #include <set>
 
@@ -11,7 +11,7 @@ namespace ge::impl::factory::device::logical
     {
         std::vector<std::string> get_available_device_layers(const vk::PhysicalDevice& device)
         {
-            return ge::impl::factory::impl::layers_names(device.enumerateDeviceLayerProperties());
+            return tools::layers_names(device.enumerateDeviceLayerProperties());
         }
     } // unnamed namespace
 
@@ -22,7 +22,7 @@ namespace ge::impl::factory::device::logical
       , QueueFamilyIndices queue_family_indeces
     )
     {
-        using namespace ge::impl::factory::impl;
+        using namespace tools;
 
         static constexpr const char* required_layers[] =
         {
@@ -76,4 +76,4 @@ namespace ge::impl::factory::device::logical
         return physical_device.createDeviceUnique(device_create_info);
     }
 
-} // namespace ge::impl::factory::device::logical
+}

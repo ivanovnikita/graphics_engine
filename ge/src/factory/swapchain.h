@@ -17,4 +17,4 @@ namespace ge::impl::factory::swapchain
       , const QueueFamilyIndices&
     );
 
-} // namespace ge::impl::factory::swapchain
+}

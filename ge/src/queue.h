@@ -23,4 +23,4 @@ namespace ge::impl
         vk::Queue transfer;
     };
 
-} // namespace ge::impl
+}

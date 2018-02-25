@@ -1,4 +1,4 @@
-#include "image_view_factory.h"
+#include "factory/image_view.h"
 
 namespace ge::impl::factory::image_view
 {
@@ -43,4 +43,4 @@ namespace ge::impl::factory::image_view
         return image_views;
     }
 
-} // namespace ge::impl::factory::image_view
+}

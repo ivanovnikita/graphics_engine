@@ -26,4 +26,4 @@ namespace ge::impl
         std::vector<vk::UniqueImageView>    image_views_;
     };
 
-} // namespace ge::impl
+}

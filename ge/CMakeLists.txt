@@ -3,17 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 project("ge")
 
 file(GLOB_RECURSE SRC "src/*.cpp" "src/*.h*" "include/*.h*")
-set(INCLUDE_DIRS
-    "src"
-    "src/window"
-    "src/factory"
-    "src/factory/instance"
-    "src/factory/device"
-    "src/factory/device/logical"
-    "src/factory/device/physical"
-    "src/factory/swapchain"
-    "src/factory/image_view"
-)
+set(INCLUDE_DIRS "src")
 set(API_DIRS "include")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

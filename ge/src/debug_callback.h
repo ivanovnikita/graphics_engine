@@ -17,4 +17,4 @@ VKAPI_ATTR vk::Bool32 VKAPI_CALL debug_callback
   , void*                       user_data
 );
 
-} // namespace ge::impl
+}

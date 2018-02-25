@@ -1,9 +1,9 @@
 #include "graphics_engine_impl.h"
-#include "instance_factory.h"
-#include "physical_device_factory.h"
-#include "logical_device_factory.h"
-#include "swapchain_factory.h"
-#include "image_view_factory.h"
+#include "factory/instance.h"
+#include "factory/device/physical.h"
+#include "factory/device/logical.h"
+#include "factory/swapchain.h"
+#include "factory/image_view.h"
 #include "debug_callback.h"
 #include "exception.h"
 
@@ -113,4 +113,4 @@ namespace ge::impl
         return vk::UniqueSurfaceKHR(std::move(*(window_->create_surface(instance_).release())));
     }
 
-} // namespace ge::impl
+}

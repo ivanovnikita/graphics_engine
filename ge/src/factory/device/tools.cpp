@@ -1,4 +1,4 @@
-#include "device_tools.h"
+#include "factory/device/tools.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -22,8 +22,8 @@ namespace ge::impl::factory::device
                 return static_cast<int32_t>(i);
             }
         }
-        return -1;
+        return -1; // TODO: optional
     }
 
-} // namespace ge::impl::fatcory::device
+}
 
