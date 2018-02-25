@@ -17,7 +17,7 @@ namespace ge::impl::factory::device::logical
 
     vk::UniqueDevice create
     (
-        const OptionsDevice& options
+        const options::Device& options
       , const vk::PhysicalDevice& physical_device
       , QueueFamilyIndices queue_family_indeces
     )

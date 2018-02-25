@@ -21,8 +21,8 @@ namespace ge::impl::factory::instance
 
         std::vector<const char*> get_required_extensions
         (
-            const OptionDebugCallback& option_debug_callback
-          , const OptionWindow& option_window
+            const options::DebugCallback& option_debug_callback
+          , const options::Window& option_window
         )
         {
             std::vector<const char*> extensions;
@@ -38,11 +38,11 @@ namespace ge::impl::factory::instance
 
                 switch (option_window.type)
                 {
-                case WindowType::XCB:
+                case options::WindowType::XCB:
                 {
                     extensions.emplace_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
                 } break;
-                case WindowType::WIN32:
+                case options::WindowType::WIN32:
                 {
                     // TODO: assert if not defined
 #if defined(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
@@ -55,7 +55,7 @@ namespace ge::impl::factory::instance
             return extensions;
         }
 
-        std::vector<const char*> get_required_layers(const OptionValidationLayers& option_validation_layers)
+        std::vector<const char*> get_required_layers(const options::ValidationLayers& option_validation_layers)
         {
             std::vector<const char*> layers;
 
@@ -69,7 +69,7 @@ namespace ge::impl::factory::instance
 
     } // unnamed namespace
 
-    vk::UniqueInstance create(const OptionsInstance& options)
+    vk::UniqueInstance create(const options::Instance& options)
     {
         using namespace tools;
 

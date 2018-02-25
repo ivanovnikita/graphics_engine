@@ -7,6 +7,6 @@
 namespace ge::impl::factory::instance
 {
 
-    vk::UniqueInstance create(const OptionsInstance&);
+    vk::UniqueInstance create(const options::Instance&);
 
 }

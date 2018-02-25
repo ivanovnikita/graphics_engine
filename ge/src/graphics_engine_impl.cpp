@@ -19,14 +19,14 @@ namespace ge::impl
             using namespace factory::instance;
             instance_ = factory::instance::create
             (
-                OptionsInstance
+                options::Instance
                 {
-                    OptionsDebug
+                    options::Debug
                     {
-                        OptionDebugCallback{enabled}
-                      , OptionValidationLayers{enabled}
+                        options::DebugCallback{enabled}
+                      , options::ValidationLayers{enabled}
                     }
-                  , OptionWindow{enabled, WindowType::XCB}
+                  , options::Window{enabled, options::WindowType::XCB}
                 }
             );
         }
@@ -35,16 +35,16 @@ namespace ge::impl
         window_ = Window::create(500, 500);
         surface_ = create_surface();
 
-        constexpr factory::OptionGraphics option_graphics{enabled};
+        constexpr factory::options::Graphics option_graphics{enabled};
 
         {
             using namespace factory;
 
-            constexpr OptionsDevice options_device
+            constexpr options::Device options_device
             {
                 option_graphics
-              , OptionCompute{disabled}
-              , OptionTransfer{disabled}
+              , options::Compute{disabled}
+              , options::Transfer{disabled}
             };
 
             {

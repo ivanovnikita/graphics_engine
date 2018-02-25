@@ -2,23 +2,25 @@
 
 #include <cstdint>
 
-namespace ge::impl::factory
+namespace ge::impl::factory::options
 {
+    constexpr bool ENABLED = true;
+    constexpr bool DISABLED = false;
 
-    struct OptionDebugCallback final
+    struct DebugCallback final
     {
         bool enabled = false;
     };
 
-    struct OptionValidationLayers final
+    struct ValidationLayers final
     {
         bool enabled = false;
     };
 
-    struct OptionsDebug final
+    struct Debug final
     {
-        OptionDebugCallback debug_callback;
-        OptionValidationLayers validation_layers;
+        DebugCallback debug_callback;
+        ValidationLayers validation_layers;
     };
 
     enum class WindowType : uint8_t
@@ -27,38 +29,38 @@ namespace ge::impl::factory
       , WIN32
     };
 
-    struct OptionWindow final
+    struct Window final
     {
         bool enabled = false;
         WindowType type = WindowType::XCB;
     };
 
-    struct OptionGraphics
+    struct Graphics
     {
         bool enabled = false;
     };
 
-    struct OptionCompute
+    struct Compute
     {
         bool enabled = false;
     };
 
-    struct OptionTransfer
+    struct Transfer
     {
         bool enabled = false;
     };
 
-    struct OptionsInstance final
+    struct Instance final
     {
-        OptionsDebug debug;
-        OptionWindow window;
+        Debug debug;
+        Window window;
     };
 
-    struct OptionsDevice
+    struct Device
     {
-        OptionGraphics graphics;
-        OptionCompute compute;
-        OptionTransfer transfer;
+        Graphics graphics;
+        Compute compute;
+        Transfer transfer;
     };
 
 }
