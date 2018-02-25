@@ -1,5 +1,8 @@
 #!/bin/sh
 
+gpg --recv-keys 11E521D646982372EB577A1F8F0871F202119294
+pacaur -S libc++ --noconfirm --noedit --needed
+
 CC_COMPILER=$1
 
 export CC=$CC_COMPILER
