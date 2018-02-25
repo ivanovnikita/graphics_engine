@@ -1,4 +1,5 @@
 #include "factory/swapchain.h"
+#include "utils/safe_cast.hpp"
 
 namespace ge::impl::factory::swapchain
 {
@@ -64,12 +65,12 @@ namespace ge::impl::factory::swapchain
                     std::max
                     (
                         capabilities.minImageExtent.width
-                      , std::min(capabilities.maxImageExtent.width, static_cast<uint32_t>(width))
+                      , std::min(capabilities.maxImageExtent.width, safe_cast<uint32_t>(width))
                     )
                   , std::max
                     (
                         capabilities.minImageExtent.height
-                      , std::min(capabilities.maxImageExtent.height, static_cast<uint32_t>(height))
+                      , std::min(capabilities.maxImageExtent.height, safe_cast<uint32_t>(height))
                     )
                 };
             }
@@ -133,7 +134,7 @@ namespace ge::impl::factory::swapchain
           , array_layers_count
           , vk::ImageUsageFlagBits::eColorAttachment
           , sharing_mode
-          , static_cast<uint32_t>(std::size(indices))
+          , safe_cast<uint32_t>(std::size(indices))
           , std::data(indices)
           , surface_capabilities.currentTransform
           , vk::CompositeAlphaFlagBitsKHR::eOpaque

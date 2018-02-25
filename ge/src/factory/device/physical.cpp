@@ -1,6 +1,7 @@
 #include "factory/device/physical.h"
 #include "factory/device/requirements.h"
 #include "factory/tools.hpp"
+#include "utils/safe_cast.hpp"
 #include "exception.h"
 
 namespace ge::impl::factory::device::physical
@@ -19,7 +20,7 @@ namespace ge::impl::factory::device::physical
 
             if (required_bit == vk::QueueFlagBits::eCompute)
             {
-                for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i)
+                for (uint32_t i = 0; i < safe_cast<uint32_t>(queue_family_properties.size()); ++i)
                 {
                     if
                     (
@@ -35,7 +36,7 @@ namespace ge::impl::factory::device::physical
 
             if (required_bit == vk::QueueFlagBits::eTransfer)
             {
-                for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i)
+                for (uint32_t i = 0; i < safe_cast<uint32_t>(queue_family_properties.size()); ++i)
                 {
                     if
                     (
@@ -50,7 +51,7 @@ namespace ge::impl::factory::device::physical
                 }
             }
 
-            for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i)
+            for (uint32_t i = 0; i < safe_cast<uint32_t>(queue_family_properties.size()); ++i)
             {
                 if
                 (
@@ -77,7 +78,7 @@ namespace ge::impl::factory::device::physical
 
             const auto queue_family_properties = device.getQueueFamilyProperties();
 
-            for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i)
+            for (uint32_t i = 0; i < safe_cast<uint32_t>(queue_family_properties.size()); ++i)
             {
                 if
                 (

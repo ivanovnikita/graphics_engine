@@ -1,6 +1,7 @@
 #include "factory/device/logical.h"
 #include "factory/device/requirements.h"
 #include "factory/tools.hpp"
+#include "utils/safe_cast.hpp"
 
 #include <set>
 
@@ -64,11 +65,11 @@ namespace ge::impl::factory::device::logical
         vk::DeviceCreateInfo device_create_info
         (
             {}
-          , static_cast<uint32_t>(std::size(queue_create_infos))
+          , safe_cast<uint32_t>(std::size(queue_create_infos))
           , std::data(queue_create_infos)
-          , static_cast<uint32_t>(std::size(required_layers))
+          , safe_cast<uint32_t>(std::size(required_layers))
           , std::data(required_layers)
-          , static_cast<uint32_t>(std::size(required_extensions))
+          , safe_cast<uint32_t>(std::size(required_extensions))
           , std::data(required_extensions)
           , &device_features
         );

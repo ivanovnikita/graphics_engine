@@ -1,5 +1,6 @@
 #include "factory/instance.h"
 #include "factory/tools.hpp"
+#include "utils/safe_cast.hpp"
 
 #include <vector>
 
@@ -92,9 +93,9 @@ namespace ge::impl::factory::instance
         {
             vk::InstanceCreateFlags()
           , &application_info
-          , static_cast<uint32_t>(std::size(required_layers))
+          , safe_cast<uint32_t>(std::size(required_layers))
           , std::data(required_layers)
-          , static_cast<uint32_t>(std::size(required_extensions))
+          , safe_cast<uint32_t>(std::size(required_extensions))
           , std::data(required_extensions)
         };
 

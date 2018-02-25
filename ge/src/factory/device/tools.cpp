@@ -1,4 +1,5 @@
 #include "factory/device/tools.h"
+#include "utils/safe_cast.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -19,7 +20,7 @@ namespace ge::impl::factory::device
              && device.getSurfaceSupportKHR(i, surface) == VK_TRUE
             )
             {
-                return static_cast<int32_t>(i);
+                return safe_cast<int32_t>(i);
             }
         }
         return -1; // TODO: optional

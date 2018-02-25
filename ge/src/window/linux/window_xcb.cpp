@@ -1,5 +1,6 @@
 #include "window_xcb.h"
 #include "exception.h"
+#include "utils/safe_cast.hpp"
 
 namespace ge::impl
 {
@@ -61,7 +62,7 @@ namespace ge::impl
           , XCB_ATOM_WM_NAME
           , XCB_ATOM_STRING
           , 8
-          , static_cast<uint32_t>(title.size())
+          , safe_cast<uint32_t>(title.size())
           , title.c_str()
         );
     }
