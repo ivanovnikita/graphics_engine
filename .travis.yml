@@ -24,6 +24,7 @@ arch:
     - gcc
     - clang
     - clang-tools-extra
+    - libc++
     - cmake
     - libxcb
     - vulkan-intel
