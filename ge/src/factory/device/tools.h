@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 
 namespace vk
 {
@@ -11,6 +12,6 @@ namespace vk
 namespace ge::impl::factory::device
 {
 
-    int32_t get_suitable_queue_family_index(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface);
+    std::optional<uint32_t> get_suitable_queue_family_index(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface);
 
 }

@@ -1,12 +1,11 @@
 #include "factory/device/tools.h"
-#include "utils/safe_cast.hpp"
 
 #include <vulkan/vulkan.hpp>
 
 namespace ge::impl::factory::device
 {
 
-    int32_t get_suitable_queue_family_index(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
+    std::optional<uint32_t> get_suitable_queue_family_index(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
         const auto queue_family_properties = device.getQueueFamilyProperties();
         const auto required_queue_family_flags = vk::QueueFlagBits::eGraphics;
@@ -20,10 +19,10 @@ namespace ge::impl::factory::device
              && device.getSurfaceSupportKHR(i, surface) == VK_TRUE
             )
             {
-                return safe_cast<int32_t>(i);
+                return i;
             }
         }
-        return -1; // TODO: optional
+        return {};
     }
 
 }
