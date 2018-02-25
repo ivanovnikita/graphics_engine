@@ -5,15 +5,7 @@
 namespace ge::impl::factory::device
 {
 
-    inline const auto& get_required_device_extensions()
-    {
-        static constexpr const char* required_extensions[] =
-        {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        };
-
-        return required_extensions;
-    }
+    std::vector<const char*> get_required_device_extensions();
 
 }
 
