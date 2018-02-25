@@ -31,8 +31,7 @@ arch:
     - python
     - conan
   script:
-    - echo $CC
-    - sudo sh ./ci/travis_build.sh
+    - sudo sh ./ci/travis_build.sh $CC
 
 script:
   - bash ci/arch-travis/arch-travis.sh

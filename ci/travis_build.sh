@@ -1,6 +1,16 @@
 #!/bin/sh
 
-echo $CC
+CC_COMPILER=$1
+
+export CC=$CC_COMPILER
+
+if [ $CC = "clang" ]
+then
+    export CXX="clang++"
+else
+    export CXX="g++"
+fi
+
 set -e
 
 conan remote add common https://api.bintray.com/conan/ivanovnikita/common --insert
