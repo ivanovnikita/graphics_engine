@@ -73,11 +73,11 @@ namespace ge::impl
         xcb_disconnect(connection_);
     }
 
-    std::unique_ptr<vk::UniqueSurfaceKHR> WindowXCB::create_surface(const vk::UniqueInstance& instance)
+    vk::UniqueSurfaceKHR WindowXCB::create_surface(const vk::Instance& instance)
     {
         vk::XcbSurfaceCreateInfoKHR create_info(vk::XcbSurfaceCreateFlagsKHR(), connection_, handle_);
 
-        return std::make_unique<vk::UniqueSurfaceKHR>(instance->createXcbSurfaceKHRUnique(create_info));
+        return vk::UniqueSurfaceKHR(instance.createXcbSurfaceKHRUnique(create_info));
     }
 
     std::pair<uint16_t, uint16_t> WindowXCB::extent() const

@@ -33,7 +33,7 @@ namespace ge::impl
 
         debug_callback_ = create_debug_callback();
         window_ = Window::create(500, 500);
-        surface_ = create_surface();
+        surface_ = window_->create_surface(instance_.get());
 
         constexpr factory::options::Graphics option_graphics{enabled};
 
@@ -106,11 +106,6 @@ namespace ge::impl
         );
 
         return instance_->createDebugReportCallbackEXTUnique(create_info);
-    }
-
-    vk::UniqueSurfaceKHR GraphicsEngineImpl::create_surface() const
-    {
-        return vk::UniqueSurfaceKHR(std::move(*(window_->create_surface(instance_).release())));
     }
 
 }

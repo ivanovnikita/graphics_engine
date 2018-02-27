@@ -13,7 +13,7 @@ namespace ge::impl
         WindowXCB(uint16_t width, uint16_t height);
         ~WindowXCB() override;
 
-        std::unique_ptr<vk::UniqueSurfaceKHR> create_surface(const vk::UniqueInstance& instance) override;
+        vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) override;
         std::pair<uint16_t, uint16_t> extent() const override;
     private:
         xcb_connection_t* connection_;

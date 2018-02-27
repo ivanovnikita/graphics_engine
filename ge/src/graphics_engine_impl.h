@@ -11,7 +11,6 @@ namespace ge::impl
         GraphicsEngineImpl();
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
-        vk::UniqueSurfaceKHR create_surface() const;
     private:
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
