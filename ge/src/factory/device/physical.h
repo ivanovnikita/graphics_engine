@@ -5,6 +5,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <optional>
+
 namespace ge::impl::factory::device::physical
 {
 
@@ -12,7 +14,7 @@ namespace ge::impl::factory::device::physical
     (
         const options::Device&
       , const vk::Instance&
-      , const vk::SurfaceKHR&
+      , const std::optional<vk::SurfaceKHR>& = std::optional<vk::SurfaceKHR>()
     );
 
 }

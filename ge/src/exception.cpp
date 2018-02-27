@@ -56,4 +56,11 @@ namespace ge
     {
         return std::overflow_error::what();
     }
+
+    invalid_options::~invalid_options() = default;
+
+    const char* invalid_options::what() const noexcept
+    {
+        return std::logic_error::what();
+    }
 }

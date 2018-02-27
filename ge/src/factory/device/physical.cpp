@@ -127,10 +127,15 @@ namespace ge::impl::factory::device::physical
     (
         const options::Device& options
       , const vk::Instance& instance
-      , const vk::SurfaceKHR& surface
+      , const std::optional<vk::SurfaceKHR>& surface
     )
     {
         using namespace tools;
+
+        if (options.graphics.enabled && !surface.has_value())
+        {
+            GE_THROW(invalid_options, "If graphics option enabled, you must pass surface parameter");
+        }
 
         auto devices = instance.enumeratePhysicalDevices();
 
@@ -145,7 +150,7 @@ namespace ge::impl::factory::device::physical
                 if (options.graphics.enabled)
                 {
                     indices.graphics = get_queue_family_index(device, vk::QueueFlagBits::eGraphics);
-                    indices.present = get_presentation_queue_family_index(device, surface);
+                    indices.present = get_presentation_queue_family_index(device, surface.value());
                 }
 
                 if (options.compute.enabled)
