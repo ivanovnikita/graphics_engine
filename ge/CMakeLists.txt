@@ -40,6 +40,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -Wsuggest-override
         -Wduplicated-branches
         -Wduplicated-cond
+        -Wno-unused-but-set-variable
         )
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
