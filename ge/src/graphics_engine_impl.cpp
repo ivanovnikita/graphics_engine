@@ -40,37 +40,37 @@ namespace ge::impl
 
             {
                 using namespace factory::device::physical;
-                const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+                const auto[physical_device, queue_family_indices] = factory::device::physical::create
                 (
                     options_device
                   , *instance_
                   , *surface_
                 );
                 physical_device_ = physical_device;
-                queue_family_indeces_ = queue_family_indeces;
+                queue_family_indices_ = queue_family_indices;
             }
 
             logical_device_ = factory::device::logical::create
             (
                 options_instance.debug.validation_layers
               , physical_device_
-              , queue_family_indeces_
+              , queue_family_indices_
             );
 
             if constexpr (options_device.graphics.enabled)
             {
-                queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics.value(), 0);
-                queues_.present = logical_device_->getQueue(queue_family_indeces_.present.value(), 0);
+                queues_.graphics = logical_device_->getQueue(queue_family_indices_.graphics.value(), 0);
+                queues_.present = logical_device_->getQueue(queue_family_indices_.present.value(), 0);
             }
 
             if constexpr (options_device.compute.enabled)
             {
-                queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute.value(), 0);
+                queues_.compute = logical_device_->getQueue(queue_family_indices_.compute.value(), 0);
             }
 
             if constexpr (options_device.transfer.enabled)
             {
-                queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer.value(), 0);
+                queues_.transfer = logical_device_->getQueue(queue_family_indices_.transfer.value(), 0);
             }
         }
 
@@ -82,7 +82,7 @@ namespace ge::impl
               , *logical_device_
               , *window_
               , *surface_
-              , queue_family_indeces_
+              , queue_family_indices_
             );
             swapchain_ = std::move(swapchain);
 

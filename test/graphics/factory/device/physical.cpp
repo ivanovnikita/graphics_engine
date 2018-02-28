@@ -18,17 +18,17 @@ TEST(PhysicalDeviceFactory, create_noQueue)
       , Compute{DISABLED}
       , Transfer{DISABLED}
     };
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , create_instance_without_window(options.validation_layers.enabled).get()
     );
 
     EXPECT_TRUE(physical_device);
-    EXPECT_FALSE(queue_family_indeces.graphics.has_value());
-    EXPECT_FALSE(queue_family_indeces.present.has_value());
-    EXPECT_FALSE(queue_family_indeces.compute.has_value());
-    EXPECT_FALSE(queue_family_indeces.transfer.has_value());
+    EXPECT_FALSE(queue_family_indices.graphics.has_value());
+    EXPECT_FALSE(queue_family_indices.present.has_value());
+    EXPECT_FALSE(queue_family_indices.compute.has_value());
+    EXPECT_FALSE(queue_family_indices.transfer.has_value());
 }
 
 TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
@@ -49,7 +49,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
     const auto window = Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -57,10 +57,10 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
     );
 
     EXPECT_TRUE(physical_device);
-    EXPECT_TRUE(queue_family_indeces.graphics.has_value());
-    EXPECT_TRUE(queue_family_indeces.present.has_value());
-    EXPECT_FALSE(queue_family_indeces.compute.has_value());
-    EXPECT_FALSE(queue_family_indeces.transfer.has_value());
+    EXPECT_TRUE(queue_family_indices.graphics.has_value());
+    EXPECT_TRUE(queue_family_indices.present.has_value());
+    EXPECT_FALSE(queue_family_indices.compute.has_value());
+    EXPECT_FALSE(queue_family_indices.transfer.has_value());
 }
 
 TEST(PhysicalDeviceFactory, create_graphicsQueue_withoutWindow)
@@ -95,17 +95,17 @@ TEST(PhysicalDeviceFactory, create_computeQueue)
       , Transfer{DISABLED}
     };
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , create_instance_without_window(options.validation_layers.enabled).get()
     );
 
     EXPECT_TRUE(physical_device);
-    EXPECT_FALSE(queue_family_indeces.graphics.has_value());
-    EXPECT_FALSE(queue_family_indeces.present.has_value());
-    EXPECT_TRUE(queue_family_indeces.compute.has_value());
-    EXPECT_FALSE(queue_family_indeces.transfer.has_value());
+    EXPECT_FALSE(queue_family_indices.graphics.has_value());
+    EXPECT_FALSE(queue_family_indices.present.has_value());
+    EXPECT_TRUE(queue_family_indices.compute.has_value());
+    EXPECT_FALSE(queue_family_indices.transfer.has_value());
 }
 
 TEST(PhysicalDeviceFactory, create_transferQueue)
@@ -122,17 +122,17 @@ TEST(PhysicalDeviceFactory, create_transferQueue)
       , Transfer{ENABLED}
     };
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , create_instance_without_window(options.validation_layers.enabled).get()
     );
 
     EXPECT_TRUE(physical_device);
-    EXPECT_FALSE(queue_family_indeces.graphics.has_value());
-    EXPECT_FALSE(queue_family_indeces.present.has_value());
-    EXPECT_FALSE(queue_family_indeces.compute.has_value());
-    EXPECT_TRUE(queue_family_indeces.transfer.has_value());
+    EXPECT_FALSE(queue_family_indices.graphics.has_value());
+    EXPECT_FALSE(queue_family_indices.present.has_value());
+    EXPECT_FALSE(queue_family_indices.compute.has_value());
+    EXPECT_TRUE(queue_family_indices.transfer.has_value());
 }
 
 TEST(PhysicalDeviceFactory, create_allQueues)
@@ -153,7 +153,7 @@ TEST(PhysicalDeviceFactory, create_allQueues)
     const auto window = Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -161,8 +161,8 @@ TEST(PhysicalDeviceFactory, create_allQueues)
     );
 
     EXPECT_TRUE(physical_device);
-    EXPECT_TRUE(queue_family_indeces.graphics.has_value());
-    EXPECT_TRUE(queue_family_indeces.present.has_value());
-    EXPECT_TRUE(queue_family_indeces.compute.has_value());
-    EXPECT_TRUE(queue_family_indeces.transfer.has_value());
+    EXPECT_TRUE(queue_family_indices.graphics.has_value());
+    EXPECT_TRUE(queue_family_indices.present.has_value());
+    EXPECT_TRUE(queue_family_indices.compute.has_value());
+    EXPECT_TRUE(queue_family_indices.transfer.has_value());
 }

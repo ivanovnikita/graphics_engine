@@ -17,7 +17,7 @@ namespace ge::impl
         std::unique_ptr<Window>             window_;
         vk::UniqueSurfaceKHR                surface_;
         vk::PhysicalDevice                  physical_device_;
-        QueueFamilyIndices                  queue_family_indeces_;
+        QueueFamilyIndices                  queue_family_indices_;
         vk::UniqueDevice                    logical_device_;
         Queues                              queues_;
         vk::UniqueSwapchainKHR              swapchain_;

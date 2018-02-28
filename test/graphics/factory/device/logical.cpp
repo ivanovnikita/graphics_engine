@@ -55,7 +55,7 @@ TEST(LogicalDeviceFactory, create_graphicsQueueWithLayers)
     const auto window = ge::impl::Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -66,7 +66,7 @@ TEST(LogicalDeviceFactory, create_graphicsQueueWithLayers)
     (
         options.validation_layers
       , physical_device
-      , queue_family_indeces
+      , queue_family_indices
     );
     EXPECT_TRUE(logical_device);
 }
@@ -86,7 +86,7 @@ TEST(LogicalDeviceFactory, create_computeQueue)
     };
     const auto instance = create_instance_without_window(options.validation_layers.enabled);
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -96,7 +96,7 @@ TEST(LogicalDeviceFactory, create_computeQueue)
     (
         options.validation_layers
       , physical_device
-      , queue_family_indeces
+      , queue_family_indices
     );
     EXPECT_TRUE(logical_device);
 }
@@ -116,7 +116,7 @@ TEST(LogicalDeviceFactory, create_transferQueue)
     };
     const auto instance = create_instance_without_window(options.validation_layers.enabled);
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -126,7 +126,7 @@ TEST(LogicalDeviceFactory, create_transferQueue)
     (
         options.validation_layers
       , physical_device
-      , queue_family_indeces
+      , queue_family_indices
     );
     EXPECT_TRUE(logical_device);
 }
