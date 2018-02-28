@@ -76,6 +76,42 @@ namespace ge::impl::factory::swapchain
             }
         }
 
+        uint32_t choose_image_count(const vk::SurfaceCapabilitiesKHR& surface_capabilities)
+        {
+            uint32_t count = surface_capabilities.minImageCount + 1;
+            if (surface_capabilities.maxImageCount != 0)
+            {
+                count = std::min(count, surface_capabilities.maxImageCount);
+            }
+            return count;
+        }
+
+        std::pair<vk::SharingMode, std::vector<uint32_t>> choose_sharing_mode_and_indices
+        (
+            const QueueFamilyIndices& queue_family_indices
+        )
+        {
+            assert(queue_family_indices.graphics.has_value());
+            assert(queue_family_indices.present.has_value());
+
+            if (queue_family_indices.graphics == queue_family_indices.present)
+            {
+                return
+                {
+                    vk::SharingMode::eExclusive
+                  , std::vector<uint32_t>()
+                };
+            }
+            else
+            {
+                return
+                {
+                    vk::SharingMode::eConcurrent
+                  , {queue_family_indices.graphics.value(), queue_family_indices.present.value()}
+                };
+            }
+        }
+
     } // unnamed namespace
 
     std::pair<vk::UniqueSwapchainKHR, vk::Format> create
@@ -89,36 +125,10 @@ namespace ge::impl::factory::swapchain
     {
         const auto surface_capabilities = physical_device.getSurfaceCapabilitiesKHR(surface);
 
-        const uint32_t image_count = [&surface_capabilities]
-        {
-            uint32_t count = surface_capabilities.minImageCount + 1;
-            if (surface_capabilities.maxImageCount != 0)
-            {
-                count = std::min(count, surface_capabilities.maxImageCount);
-            }
-            return count;
-        }();
+        const uint32_t image_count = choose_image_count(surface_capabilities);
 
         const auto format = choose_format(physical_device, surface);
-        const auto[sharing_mode, indices] = [&queue_family_indices]
-        {
-            if (queue_family_indices.graphics == queue_family_indices.present)
-            {
-                return std::pair<vk::SharingMode, std::vector<uint32_t>>
-                {
-                    vk::SharingMode::eExclusive
-                  , std::vector<uint32_t>()
-                };
-            }
-            else
-            {
-                return std::pair<vk::SharingMode, std::vector<uint32_t>>
-                {
-                    vk::SharingMode::eConcurrent
-                  , std::vector<uint32_t>{queue_family_indices.graphics.value(), queue_family_indices.present.value()}
-                };
-            }
-        }();
+        const auto[sharing_mode, indices] = choose_sharing_mode_and_indices(queue_family_indices);
 
         const uint32_t array_layers_count = 1;
         const auto is_clipped = VK_TRUE;
