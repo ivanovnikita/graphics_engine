@@ -1,47 +1,13 @@
 #include <gtest/gtest.h>
 
 #include "exception.h"
-#include "factory/instance.h"
 #include "factory/device/physical.h"
 #include "window/window.h"
-
-namespace
-{
-    vk::UniqueInstance create_instance_with_window()
-    {
-        using namespace ge::impl;
-        using namespace ge::impl::factory::options;
-        using ge::impl::factory::options::Window;
-
-        return factory::instance::create
-        (
-            Instance
-            {
-                Debug{DebugCallback{DISABLED}, ValidationLayers{DISABLED}}
-              , Window{ENABLED, WindowType::XCB}
-            }
-        );
-    }
-
-    vk::UniqueInstance create_instance_without_window()
-    {
-        using namespace ge::impl;
-        using namespace ge::impl::factory::options;
-        using ge::impl::factory::options::Window;
-
-        return factory::instance::create
-        (
-            Instance
-            {
-                Debug{DebugCallback{DISABLED}, ValidationLayers{DISABLED}}
-              , Window{DISABLED, WindowType::XCB}
-            }
-        );
-    }
-}
+#include "factory/test_tools.h"
 
 TEST(PhysicalDeviceFactory, create_noQueue)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
 
@@ -57,6 +23,7 @@ TEST(PhysicalDeviceFactory, create_noQueue)
 
 TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
     using ge::impl::Window;
@@ -77,6 +44,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
 
 TEST(PhysicalDeviceFactory, create_graphicsQueue_withoutWindow)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
 
@@ -94,6 +62,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withoutWindow)
 
 TEST(PhysicalDeviceFactory, create_computeQueue)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
 
@@ -109,6 +78,7 @@ TEST(PhysicalDeviceFactory, create_computeQueue)
 
 TEST(PhysicalDeviceFactory, create_transferQueue)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
 
@@ -124,6 +94,7 @@ TEST(PhysicalDeviceFactory, create_transferQueue)
 
 TEST(PhysicalDeviceFactory, create_allQueues)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
     using ge::impl::Window;
@@ -144,6 +115,7 @@ TEST(PhysicalDeviceFactory, create_allQueues)
 
 TEST(PhysicalDeviceFactory, create_validationLayers)
 {
+    using namespace test;
     using namespace ge::impl;
     using namespace ge::impl::factory::options;
 

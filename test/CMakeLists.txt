@@ -20,11 +20,12 @@ if (${GE_BUILD_GRAPHICS_TESTS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/etc/vulkan/explicit_layer.d")
     configure_file("graphics/graphics_config.txt.in" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/graphics_config.txt")
 
-    file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp")
+    file(GLOB_RECURSE GRAPHICS_TEST_SRC "graphics/*.cpp" "graphics/*.h")
 
     set(GRAPHICS_TEST "${CMAKE_PROJECT_NAME}-graphics-test")
     add_executable(${GRAPHICS_TEST} ${GRAPHICS_TEST_SRC})
     target_link_libraries(${GRAPHICS_TEST} ge GTest::Main Threads::Threads)
+    target_include_directories(${GRAPHICS_TEST} PRIVATE "graphics")
 
     add_test(NAME ${GRAPHICS_TEST} COMMAND ${GRAPHICS_TEST})
 endif()
