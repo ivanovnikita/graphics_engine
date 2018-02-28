@@ -58,6 +58,7 @@ namespace ge::impl::factory::options
 
     struct Device
     {
+        ValidationLayers validation_layers;
         Graphics graphics;
         Compute compute;
         Transfer transfer;

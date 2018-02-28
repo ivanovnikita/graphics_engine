@@ -11,40 +11,31 @@ namespace ge::impl
 {
 
     GraphicsEngineImpl::GraphicsEngineImpl()
-    {        
-        constexpr bool enabled = true;
-        constexpr bool disabled = false;
+    {
+        using namespace factory;
+        using namespace factory::options;
+
+        constexpr auto options_instance = Instance
         {
-            using namespace factory;
-            using namespace factory::instance;
-            instance_ = factory::instance::create
-            (
-                options::Instance
-                {
-                    options::Debug
-                    {
-                        options::DebugCallback{enabled}
-                      , options::ValidationLayers{enabled}
-                    }
-                  , options::Window{enabled, options::WindowType::XCB}
-                }
-            );
-        }
+            Debug{DebugCallback{ENABLED}, ValidationLayers{ENABLED}}
+          , options::Window{ENABLED, WindowType::XCB}
+        };
+
+        instance_ = factory::instance::create(options_instance);
 
         debug_callback_ = create_debug_callback();
-        window_ = Window::create(500, 500);
+        window_ = ge::impl::Window::create(500, 500);
         surface_ = window_->create_surface(instance_.get());
 
-        constexpr factory::options::Graphics option_graphics{enabled};
+        constexpr factory::options::Graphics option_graphics{ENABLED};
 
         {
-            using namespace factory;
-
             constexpr options::Device options_device
             {
-                option_graphics
-              , options::Compute{disabled}
-              , options::Transfer{disabled}
+                options_instance.debug.validation_layers
+              , option_graphics
+              , options::Compute{DISABLED}
+              , options::Transfer{DISABLED}
             };
 
             {

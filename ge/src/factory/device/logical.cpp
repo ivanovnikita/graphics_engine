@@ -25,10 +25,7 @@ namespace ge::impl::factory::device::logical
     {
         using namespace tools;
 
-        static constexpr const char* required_layers[] =
-        {
-            "VK_LAYER_LUNARG_standard_validation"
-        };
+        const auto& required_layers = get_required_layers(options.validation_layers);
         all_required_are_available(required_layers, get_available_device_layers(physical_device));
 
         std::set<uint32_t> unique_queue_family_indices;

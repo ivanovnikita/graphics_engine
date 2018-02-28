@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exception.h"
+#include "options.h"
 
 #include <vector>
 
@@ -26,6 +27,8 @@ namespace ge::impl::factory::tools
 
     template<typename Container>
     std::vector<std::string> layers_names(const Container& layers);
+
+    std::vector<const char*> get_required_layers(const options::ValidationLayers&);
 
 }
 
