@@ -115,7 +115,7 @@ namespace ge::impl::factory::swapchain
                 return std::pair<vk::SharingMode, std::vector<uint32_t>>
                 {
                     vk::SharingMode::eConcurrent
-                  , std::vector<uint32_t>{queue_family_indices.graphics, queue_family_indices.present}
+                  , std::vector<uint32_t>{queue_family_indices.graphics.value(), queue_family_indices.present.value()}
                 };
             }
         }();

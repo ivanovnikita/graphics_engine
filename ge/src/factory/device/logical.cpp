@@ -20,7 +20,7 @@ namespace ge::impl::factory::device::logical
     (
         const options::Device& options
       , const vk::PhysicalDevice& physical_device
-      , QueueFamilyIndices queue_family_indeces
+      , const QueueFamilyIndices& queue_family_indeces
     )
     {
         using namespace tools;
@@ -31,18 +31,18 @@ namespace ge::impl::factory::device::logical
         std::set<uint32_t> unique_queue_family_indices;
         if (options.graphics.enabled)
         {
-            unique_queue_family_indices.emplace(queue_family_indeces.graphics);
-            unique_queue_family_indices.emplace(queue_family_indeces.present);
+            unique_queue_family_indices.emplace(queue_family_indeces.graphics.value());
+            unique_queue_family_indices.emplace(queue_family_indeces.present.value());
         }
 
         if (options.compute.enabled)
         {
-            unique_queue_family_indices.emplace(queue_family_indeces.compute);
+            unique_queue_family_indices.emplace(queue_family_indeces.compute.value());
         }
 
         if (options.transfer.enabled)
         {
-            unique_queue_family_indices.emplace(queue_family_indeces.transfer);
+            unique_queue_family_indices.emplace(queue_family_indeces.transfer.value());
         }
 
         const auto queue_priority = 0.0f;

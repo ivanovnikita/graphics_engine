@@ -54,18 +54,18 @@ namespace ge::impl
 
             if constexpr (options_device.graphics.enabled)
             {
-                queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics, 0);
-                queues_.present = logical_device_->getQueue(queue_family_indeces_.present, 0);
+                queues_.graphics = logical_device_->getQueue(queue_family_indeces_.graphics.value(), 0);
+                queues_.present = logical_device_->getQueue(queue_family_indeces_.present.value(), 0);
             }
 
             if constexpr (options_device.compute.enabled)
             {
-                queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute, 0);
+                queues_.compute = logical_device_->getQueue(queue_family_indeces_.compute.value(), 0);
             }
 
             if constexpr (options_device.transfer.enabled)
             {
-                queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer, 0);
+                queues_.transfer = logical_device_->getQueue(queue_family_indeces_.transfer.value(), 0);
             }
         }
 

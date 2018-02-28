@@ -3,16 +3,17 @@
 #include <vulkan/vulkan.hpp>
 
 #include <cstdint>
+#include <optional>
 
 namespace ge::impl
 {
 
     struct QueueFamilyIndices
     {
-        uint32_t graphics;
-        uint32_t present;
-        uint32_t compute;
-        uint32_t transfer;
+        std::optional<uint32_t> graphics;
+        std::optional<uint32_t> present;
+        std::optional<uint32_t> compute;
+        std::optional<uint32_t> transfer;
     };
 
     struct Queues
