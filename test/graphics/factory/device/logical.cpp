@@ -22,7 +22,7 @@ TEST(LogicalDeviceFactory, create_graphicsQueueNoLayers)
     const auto window = ge::impl::Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indeces] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::device::physical::create
     (
         options
         , instance.get()
@@ -33,7 +33,7 @@ TEST(LogicalDeviceFactory, create_graphicsQueueNoLayers)
     (
         options.validation_layers
       , physical_device
-      , queue_family_indeces
+      , queue_family_indices
     );
     EXPECT_TRUE(logical_device);
 }
