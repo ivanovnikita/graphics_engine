@@ -13,8 +13,7 @@ TEST(PhysicalDeviceFactory, create_noQueue)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{DISABLED}
+        Graphics{DISABLED}
       , Compute{DISABLED}
       , Transfer{DISABLED}
     };
@@ -30,8 +29,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{ENABLED}
+        Graphics{ENABLED}
       , Compute{DISABLED}
       , Transfer{DISABLED}
     };
@@ -50,8 +48,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withoutWindow)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{ENABLED}
+        Graphics{ENABLED}
       , Compute{DISABLED}
       , Transfer{DISABLED}
     };
@@ -68,8 +65,7 @@ TEST(PhysicalDeviceFactory, create_computeQueue)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{DISABLED}
+        Graphics{DISABLED}
       , Compute{ENABLED}
       , Transfer{DISABLED}
     };
@@ -84,8 +80,7 @@ TEST(PhysicalDeviceFactory, create_transferQueue)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{DISABLED}
+        Graphics{DISABLED}
       , Compute{DISABLED}
       , Transfer{ENABLED}
     };
@@ -101,8 +96,7 @@ TEST(PhysicalDeviceFactory, create_allQueues)
 
     Device options
     {
-        ValidationLayers{DISABLED}
-      , Graphics{ENABLED}
+        Graphics{ENABLED}
       , Compute{ENABLED}
       , Transfer{ENABLED}
     };
@@ -111,20 +105,4 @@ TEST(PhysicalDeviceFactory, create_allQueues)
     const auto surface = window->create_surface(instance.get());
 
     EXPECT_NO_THROW(factory::device::physical::create(options, instance.get(), surface.get()));
-}
-
-TEST(PhysicalDeviceFactory, create_validationLayers)
-{
-    using namespace test;
-    using namespace ge::impl;
-    using namespace ge::impl::factory::options;
-
-    Device options
-    {
-        ValidationLayers{ENABLED}
-      , Graphics{DISABLED}
-      , Compute{DISABLED}
-      , Transfer{DISABLED}
-    };
-    EXPECT_NO_THROW(factory::device::physical::create(options, create_instance_without_window().get()));
 }

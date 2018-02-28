@@ -18,29 +18,30 @@ namespace ge::impl::factory::device::logical
 
     vk::UniqueDevice create
     (
-        const options::Device& options
+        const options::ValidationLayers& option_validation_layers
       , const vk::PhysicalDevice& physical_device
       , const QueueFamilyIndices& queue_family_indeces
     )
     {
         using namespace tools;
 
-        const auto& required_layers = get_required_layers(options.validation_layers);
+        const auto& required_layers = get_required_layers(option_validation_layers);
         all_required_are_available(required_layers, get_available_device_layers(physical_device));
 
         std::set<uint32_t> unique_queue_family_indices;
-        if (options.graphics.enabled)
+        if (queue_family_indeces.graphics.has_value())
         {
             unique_queue_family_indices.emplace(queue_family_indeces.graphics.value());
+        }
+        if (queue_family_indeces.present.has_value())
+        {
             unique_queue_family_indices.emplace(queue_family_indeces.present.value());
         }
-
-        if (options.compute.enabled)
+        if (queue_family_indeces.compute.has_value())
         {
             unique_queue_family_indices.emplace(queue_family_indeces.compute.value());
         }
-
-        if (options.transfer.enabled)
+        if (queue_family_indeces.transfer.has_value())
         {
             unique_queue_family_indices.emplace(queue_family_indeces.transfer.value());
         }

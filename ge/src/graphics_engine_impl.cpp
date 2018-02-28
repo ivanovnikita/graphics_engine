@@ -32,8 +32,7 @@ namespace ge::impl
         {
             constexpr options::Device options_device
             {
-                options_instance.debug.validation_layers
-              , option_graphics
+                option_graphics
               , options::Compute{DISABLED}
               , options::Transfer{DISABLED}
             };
@@ -50,7 +49,12 @@ namespace ge::impl
                 queue_family_indeces_ = queue_family_indeces;
             }
 
-            logical_device_ = factory::device::logical::create(options_device, physical_device_, queue_family_indeces_);
+            logical_device_ = factory::device::logical::create
+            (
+                options_instance.debug.validation_layers
+              , physical_device_
+              , queue_family_indeces_
+            );
 
             if constexpr (options_device.graphics.enabled)
             {

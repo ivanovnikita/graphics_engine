@@ -8,6 +8,6 @@
 namespace ge::impl::factory::device::logical
 {
 
-    vk::UniqueDevice create(const options::Device&, const vk::PhysicalDevice&, const QueueFamilyIndices&);
+    vk::UniqueDevice create(const options::ValidationLayers&, const vk::PhysicalDevice&, const QueueFamilyIndices&);
 
 }
