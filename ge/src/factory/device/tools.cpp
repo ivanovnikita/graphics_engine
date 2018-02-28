@@ -1,4 +1,5 @@
 #include "factory/device/tools.h"
+#include"factory/tools.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -23,6 +24,11 @@ namespace ge::impl::factory::device
             }
         }
         return {};
+    }
+
+    std::vector<std::string> get_available_device_layers(const vk::PhysicalDevice& device)
+    {
+        return tools::layers_names(device.enumerateDeviceLayerProperties());
     }
 
 }

@@ -1,5 +1,6 @@
 #include "factory/device/logical.h"
 #include "factory/device/requirements.h"
+#include "factory/device/tools.h"
 #include "factory/tools.hpp"
 #include "utils/safe_cast.hpp"
 
@@ -7,14 +8,6 @@
 
 namespace ge::impl::factory::device::logical
 {
-
-    namespace
-    {
-        std::vector<std::string> get_available_device_layers(const vk::PhysicalDevice& device)
-        {
-            return tools::layers_names(device.enumerateDeviceLayerProperties());
-        }
-    } // unnamed namespace
 
     vk::UniqueDevice create
     (

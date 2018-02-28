@@ -1,5 +1,6 @@
 #include "factory/device/physical.h"
 #include "factory/device/requirements.h"
+#include "factory/device/tools.h"
 #include "factory/tools.hpp"
 #include "utils/safe_cast.hpp"
 #include "exception.h"
@@ -145,6 +146,9 @@ namespace ge::impl::factory::device::physical
         {
             try
             {
+                const auto& required_layers = get_required_layers(options.validation_layers);
+                all_required_are_available(required_layers, get_available_device_layers(device));
+
                 QueueFamilyIndices indices;
 
                 if (options.graphics.enabled)

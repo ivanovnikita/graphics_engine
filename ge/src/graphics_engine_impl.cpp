@@ -32,7 +32,8 @@ namespace ge::impl
         {
             constexpr options::Device options_device
             {
-                option_graphics
+                options_instance.debug.validation_layers
+              , option_graphics
               , options::Compute{DISABLED}
               , options::Transfer{DISABLED}
             };
