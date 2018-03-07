@@ -15,6 +15,7 @@ include("third_party/cmake-conan/conan.cmake")
 conan_cmake_run(CONANFILE conanfile.txt
                 ${CONAN_STD_OPTION}
                 BASIC_SETUP
+                CMAKE_TARGETS
                 BUILD missing)
 
 option(GE_BUILD_TESTS "Build internal tests?" ON)
