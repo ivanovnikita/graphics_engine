@@ -60,4 +60,12 @@ namespace ge
         virtual const char* what() const noexcept override;
     };
 
+    class invalid_shader : public ge::exception, public std::logic_error
+    {
+    public:
+        using std::logic_error::logic_error;
+        virtual ~invalid_shader() override;
+        virtual const char* what() const noexcept override;
+    };
+
 }

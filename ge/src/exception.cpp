@@ -63,4 +63,11 @@ namespace ge
     {
         return std::logic_error::what();
     }
+
+    invalid_shader::~invalid_shader() = default;
+
+    const char* invalid_shader::what() const noexcept
+    {
+        return std::logic_error::what();
+    }
 }
