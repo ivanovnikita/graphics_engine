@@ -1,7 +1,7 @@
 [requires]
 googletest/1.8@ivanovnikita/stable
-shaderc/5d4b3f4@ivanovnikita/stable
-Vulkan-LoaderAndValidationLayers/sdk-1.0.68.0@ivanovnikita/stable
+shaderc/563bc6e@ivanovnikita/stable
+Vulkan-LoaderAndValidationLayers/sdk-1.1.70.0_13eb25c@ivanovnikita/stable
 
 [generators]
 cmake  
