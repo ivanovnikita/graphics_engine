@@ -42,6 +42,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -Wduplicated-cond
         -Wno-unused-but-set-variable
         )
+    target_link_libraries(${PROJECT_NAME} -lstdc++fs)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Weverything
@@ -50,9 +51,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-c++14-compat
         -Wno-unreachable-code
         )
+    target_link_libraries(${PROJECT_NAME} -lc++experimental)
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
-target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM} CONAN_PKG::shaderc)
+target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM} CONAN_PKG::shaderc -lc++experimental)
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${API_DIRS})
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CONAN_INCLUDE_DIRS_SHADERC})
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)

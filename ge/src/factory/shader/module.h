@@ -4,7 +4,7 @@
 
 #include <experimental/filesystem>
 
-namespace ge::impl::factory::shader
+namespace ge::impl::factory::shader::module
 {
 
     namespace fs = std::experimental::filesystem;

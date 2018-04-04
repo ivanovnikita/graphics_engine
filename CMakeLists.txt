@@ -20,6 +20,11 @@ conan_cmake_run(CONANFILE conanfile.txt
 
 option(GE_BUILD_TESTS "Build internal tests?" ON)
 
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "Install path prefix" FORCE)
+endif()
+
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
