@@ -58,4 +58,3 @@ target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan ${WINDOW_SYSTEM} CONAN_PKG:
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${API_DIRS})
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CONAN_INCLUDE_DIRS_SHADERC})
-install(TARGETS ${PROJECT_NAME} DESTINATION lib)

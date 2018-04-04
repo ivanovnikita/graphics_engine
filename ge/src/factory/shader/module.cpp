@@ -29,6 +29,8 @@ namespace ge::impl::factory::shader::module
                 GE_THROW(invalid_shader, "Unknown shader type");
             }
             }
+
+            GE_THROW(invalid_shader, "Unknown shader type");
         }
 
         std::string read_file_content(const fs::path& filename)

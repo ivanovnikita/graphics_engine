@@ -13,8 +13,6 @@ target_link_libraries(${COMMON_TEST} ge GTest::Main Threads::Threads)
 
 add_test(NAME ${COMMON_TEST} COMMAND ${COMMON_TEST})
 
-install(TARGETS ${COMMON_TEST} DESTINATION bin)
-
 cmake_dependent_option(GE_BUILD_GRAPHICS_TESTS "Build graphics tests?" ON
                        "GE_BUILD_TESTS" OFF)
 
@@ -31,7 +29,6 @@ if (${GE_BUILD_GRAPHICS_TESTS})
 
     add_test(NAME ${GRAPHICS_TEST} COMMAND ${GRAPHICS_TEST})
 
-    file(GLOB SHADERS "shaders/*")
+    file(GLOB SHADERS "graphics/factory/shaders/*")
     install(FILES ${SHADERS} DESTINATION bin/shaders)
-    install(TARGETS ${GRAPHICS_TEST} DESTINATION bin)
 endif()
