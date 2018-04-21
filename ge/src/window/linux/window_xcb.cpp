@@ -80,7 +80,7 @@ namespace ge::impl
         return vk::UniqueSurfaceKHR(instance.createXcbSurfaceKHRUnique(create_info));
     }
 
-    std::pair<uint16_t, uint16_t> WindowXCB::extent() const
+    vk::Extent2D WindowXCB::extent() const
     {
         return {width_, height_};
     }

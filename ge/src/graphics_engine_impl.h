@@ -23,6 +23,9 @@ namespace ge::impl
         vk::UniqueSwapchainKHR              swapchain_;
         std::vector<vk::Image>              images_;
         std::vector<vk::UniqueImageView>    image_views_;
+        vk::UniqueRenderPass                render_pass_;
+        vk::UniquePipelineLayout            pipeline_layout_;
+        vk::UniquePipeline                  pipeline_;
     };
 
 }

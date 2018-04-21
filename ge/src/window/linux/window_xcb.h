@@ -14,7 +14,7 @@ namespace ge::impl
         ~WindowXCB() override;
 
         vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) override;
-        std::pair<uint16_t, uint16_t> extent() const override;
+        vk::Extent2D extent() const override;
     private:
         xcb_connection_t* connection_;
         xcb_window_t handle_;

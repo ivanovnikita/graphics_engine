@@ -4,6 +4,8 @@
 #include "factory/device/logical.h"
 #include "factory/swapchain.h"
 #include "factory/image_view.h"
+#include "factory/pipeline/graphics/pipeline.h"
+#include "storage/shaders.h"
 #include "debug_callback.h"
 #include "exception.h"
 
@@ -88,6 +90,17 @@ namespace ge::impl
 
             images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
             image_views_ = factory::image_view::create(images_, format, *logical_device_);
+            storage::Shaders shaders(*logical_device_, "shaders");
+            auto[pipeline, layout, render_pass] = factory::pipeline::graphics::create
+            (
+                *logical_device_
+              , format
+              , shaders
+              , *window_
+            );
+            pipeline_ = std::move(pipeline);
+            pipeline_layout_ = std::move(layout);
+            render_pass_ = std::move(render_pass);
         }
     }
 
