@@ -4,6 +4,12 @@
 namespace ge::impl::factory::pipeline::graphics
 {
 
-    vk::Pipeline create(const storage::Shaders&, const Window&);
+    std::tuple<vk::UniquePipeline, vk::UniquePipelineLayout, vk::UniqueRenderPass> create
+    (
+        const vk::Device&
+      , const vk::Format&
+      , const storage::Shaders&
+      , const Window&
+    );
 
 }

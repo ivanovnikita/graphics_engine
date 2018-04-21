@@ -1,6 +1,8 @@
 #include "pipeline.h"
 #include "factory/shader/tools.h"
 #include "factory/shader/module.h"
+#include "factory/pipeline/graphics/render_pass.h"
+#include "utils/safe_cast.hpp"
 
 namespace ge::impl::factory::pipeline::graphics
 {
@@ -32,11 +34,19 @@ namespace ge::impl::factory::pipeline::graphics
         }
     }
 
-    vk::Pipeline create(const storage::Shaders& shaders_storage, const Window& window)
+    std::tuple<vk::UniquePipeline, vk::UniquePipelineLayout, vk::UniqueRenderPass> create
+    (
+        const vk::Device& logical_device
+      , const vk::Format& format
+      , const storage::Shaders& shaders_storage
+      , const Window& window
+    )
     {
         const auto shader_stage_create_info = get_shader_stage_create_info(shaders_storage);
 
-        const vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
+        const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
+            .setVertexBindingDescriptionCount(0)
+            .setVertexAttributeDescriptionCount(0);
         const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
             .setTopology(vk::PrimitiveTopology::eTriangleList)
             .setPrimitiveRestartEnable(VK_FALSE);
@@ -86,10 +96,34 @@ namespace ge::impl::factory::pipeline::graphics
             .setPAttachments(&blend_attachment)
             .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
 
-        const vk::PipelineLayoutCreateInfo layout_info{};
+        const auto layout_info = vk::PipelineLayoutCreateInfo()
+            .setSetLayoutCount(0)
+            .setPushConstantRangeCount(0);
 
-        vk::GraphicsPipelineCreateInfo pipeline_create_info;
-        return vk::Pipeline();
+        vk::UniquePipelineLayout layout = logical_device.createPipelineLayoutUnique(layout_info);
+
+        vk::UniqueRenderPass render_pass = render_pass::create(logical_device, format);
+
+        const auto pipeline_create_info = vk::GraphicsPipelineCreateInfo()
+            .setStageCount(safe_cast<uint32_t>(shader_stage_create_info.size()))
+            .setPStages(shader_stage_create_info.data())
+            .setPVertexInputState(&vertex_input_info)
+            .setPInputAssemblyState(&input_assembly_info)
+            .setPViewportState(&viewport_info)
+            .setPRasterizationState(&raster_info)
+            .setPMultisampleState(&multisample_info)
+            .setPColorBlendState(&blend_state_info)
+            .setLayout(*layout)
+            .setRenderPass(*render_pass)
+            .setSubpass(0);
+
+        vk::UniquePipeline pipeline = logical_device.createGraphicsPipelineUnique
+        (
+            vk::PipelineCache()
+          , pipeline_create_info
+        );
+
+        return {std::move(pipeline), std::move(layout), std::move(render_pass)};
     }
 
 }

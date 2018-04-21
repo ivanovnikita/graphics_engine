@@ -84,7 +84,7 @@ namespace ge::impl::factory::shader::module
         const vk::ShaderModuleCreateInfo creation_info
         {
             vk::ShaderModuleCreateFlags{}
-          , spirv_code.size()
+          , spirv_code.size() * sizeof(uint32_t)
           , spirv_code.data()
         };
 
