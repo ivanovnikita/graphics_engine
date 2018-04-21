@@ -26,6 +26,7 @@ namespace ge::impl
         vk::UniqueRenderPass                render_pass_;
         vk::UniquePipelineLayout            pipeline_layout_;
         vk::UniquePipeline                  pipeline_;
+        std::vector<vk::UniqueFramebuffer>  framebuffers_;
     };
 
 }

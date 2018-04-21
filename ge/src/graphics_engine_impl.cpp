@@ -5,6 +5,7 @@
 #include "factory/swapchain.h"
 #include "factory/image_view.h"
 #include "factory/pipeline/graphics/pipeline.h"
+#include "factory/framebuffer.h"
 #include "storage/shaders.h"
 #include "debug_callback.h"
 #include "exception.h"
@@ -101,6 +102,18 @@ namespace ge::impl
             pipeline_ = std::move(pipeline);
             pipeline_layout_ = std::move(layout);
             render_pass_ = std::move(render_pass);
+
+            framebuffers_.reserve(image_views_.size());
+            for (const auto& image_view : image_views_)
+            {
+                framebuffers_.emplace_back(factory::framebuffer::create
+                (
+                    *logical_device_
+                  , *render_pass_
+                  , *image_view
+                  , vk::Extent2D(window_->extent())
+                ));
+            }
         }
     }
 
