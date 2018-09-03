@@ -33,7 +33,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -Wlogical-op
         -Wmissing-declarations
         -Wredundant-decls
-        -Winline
+#        -Winline
         -Wno-return-local-addr
         -Wsuggest-final-types
         -Wsuggest-final-methods
