@@ -27,6 +27,8 @@ namespace ge::impl
         vk::UniquePipelineLayout            pipeline_layout_;
         vk::UniquePipeline                  pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
+        vk::UniqueCommandPool               command_pool_;
+        std::vector<vk::CommandBuffer>      command_buffers_;
     };
 
 }

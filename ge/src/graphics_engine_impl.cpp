@@ -6,6 +6,8 @@
 #include "factory/image_view.h"
 #include "factory/pipeline/graphics/pipeline.h"
 #include "factory/framebuffer.h"
+#include "factory/command_pool.h"
+#include "factory/command_buffer.h"
 #include "storage/shaders.h"
 #include "debug_callback.h"
 #include "exception.h"
@@ -114,6 +116,17 @@ namespace ge::impl
                   , vk::Extent2D(window_->extent())
                 ));
             }
+
+            command_pool_ = factory::command_pool::create(*logical_device_, queue_family_indices_);
+            command_buffers_ = factory::command_buffer::create
+            (
+                *logical_device_
+                , *command_pool_
+                , framebuffers_
+                , *render_pass_
+                , window_->extent()
+                , *pipeline_
+            );
         }
     }
 
