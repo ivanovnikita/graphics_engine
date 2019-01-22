@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 
 #include <vulkan/vulkan.hpp>
 
@@ -25,4 +25,4 @@ namespace ge::impl
         Window();
     };
 
-} // namespace ge::impl
+}

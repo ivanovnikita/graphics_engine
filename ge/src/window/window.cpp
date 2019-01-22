@@ -23,4 +23,4 @@ namespace ge::impl
 #endif        
     }
 
-} // namespace ge::impl
+}
