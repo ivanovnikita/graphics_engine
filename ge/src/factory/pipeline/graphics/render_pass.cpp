@@ -25,11 +25,26 @@ namespace ge::impl::factory::pipeline::graphics::render_pass
             .setPColorAttachments(&color_attachment_ref); // The index of the attachment in this array is directly
                                                           // referenced from the fragment shader with the
                                                           // layout(location = 0) out vec4 outColor directive!
+
+        const auto dependency = vk::SubpassDependency{}
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setSrcAccessMask(vk::AccessFlags{})
+            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setDstAccessMask
+            (
+                vk::AccessFlagBits::eColorAttachmentRead
+                | vk::AccessFlagBits::eColorAttachmentWrite
+            );
+
         const auto render_pass_info = vk::RenderPassCreateInfo()
             .setAttachmentCount(1)
             .setPAttachments(&color_attachment)
             .setSubpassCount(1)
-            .setPSubpasses(&subpass);
+            .setPSubpasses(&subpass)
+            .setDependencyCount(1)
+            .setPDependencies(&dependency);
 
         return logical_device.createRenderPassUnique(render_pass_info);
     }

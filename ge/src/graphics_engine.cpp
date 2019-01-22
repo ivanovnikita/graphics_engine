@@ -11,4 +11,9 @@ namespace ge
 
     GraphicsEngine::~GraphicsEngine() = default;
 
+    void GraphicsEngine::main_loop()
+    {
+        impl_->main_loop();
+    }
+
 }

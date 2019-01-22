@@ -15,6 +15,7 @@ namespace ge
     public:
         GraphicsEngine();
         ~GraphicsEngine();
+        void main_loop();
     private:
         std::unique_ptr<impl::GraphicsEngineImpl> impl_;
     };

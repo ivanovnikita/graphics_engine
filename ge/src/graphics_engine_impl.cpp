@@ -8,6 +8,7 @@
 #include "factory/framebuffer.h"
 #include "factory/command_pool.h"
 #include "factory/command_buffer.h"
+#include "factory/semaphore.h"
 #include "storage/shaders.h"
 #include "debug_callback.h"
 #include "exception.h"
@@ -127,6 +128,9 @@ namespace ge::impl
                 , window_->extent()
                 , *pipeline_
             );
+
+            image_available_semaphore_ = factory::semaphore::create(*logical_device_);
+            render_finished_semaphore_ = factory::semaphore::create(*logical_device_);
         }
     }
 
@@ -141,6 +145,63 @@ namespace ge::impl
         );
 
         return instance_->createDebugReportCallbackEXTUnique(create_info);
+    }
+
+    void GraphicsEngineImpl::draw_frame()
+    {
+        constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+        const uint32_t image_index = logical_device_->acquireNextImageKHR
+        (
+            *swapchain_
+            , timeout
+            , *image_available_semaphore_
+            , vk::Fence{nullptr}
+        ).value;
+
+        const std::array<vk::Semaphore, 1> wait_semaphores{*image_available_semaphore_};
+        const std::array<vk::PipelineStageFlags, 1> wait_stages
+        {
+            vk::PipelineStageFlagBits::eColorAttachmentOutput
+        };
+
+        const std::array<vk::Semaphore, 1> signal_semaphores{*render_finished_semaphore_};
+
+        const auto submit_info = vk::SubmitInfo{}
+            .setWaitSemaphoreCount(wait_semaphores.size())
+            .setPWaitSemaphores(wait_semaphores.data())
+            .setPWaitDstStageMask(wait_stages.data())
+            .setCommandBufferCount(1)
+            .setPCommandBuffers(&command_buffers_[image_index])
+            .setSignalSemaphoreCount(signal_semaphores.size())
+            .setPSignalSemaphores(signal_semaphores.data());
+
+        constexpr uint32_t submit_info_count = 1;
+        queues_.graphics.submit(submit_info_count, &submit_info, vk::Fence{nullptr});
+
+        const std::array<vk::SwapchainKHR, 1> swapchains{*swapchain_};
+
+        const auto present_info = vk::PresentInfoKHR{}
+            .setWaitSemaphoreCount(signal_semaphores.size())
+            .setPWaitSemaphores(signal_semaphores.data())
+            .setSwapchainCount(swapchains.size())
+            .setPSwapchains(swapchains.data())
+            .setPImageIndices(&image_index);
+
+        queues_.present.presentKHR(present_info);
+        queues_.present.waitIdle();
+    }
+
+    void GraphicsEngineImpl::main_loop()
+    {
+        window_->start_display();
+
+        while (not window_->closed())
+        {
+            draw_frame();
+            window_->process_events();
+        }
+
+        logical_device_->waitIdle();
     }
 
 }

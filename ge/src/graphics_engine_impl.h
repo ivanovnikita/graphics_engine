@@ -9,6 +9,8 @@ namespace ge::impl
     {
     public:
         GraphicsEngineImpl();
+        void draw_frame();
+        void main_loop();
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
     private:
@@ -29,6 +31,8 @@ namespace ge::impl
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;
+        vk::UniqueSemaphore                 image_available_semaphore_;
+        vk::UniqueSemaphore                 render_finished_semaphore_;
     };
 
 }
