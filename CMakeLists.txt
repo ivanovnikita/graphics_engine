@@ -33,4 +33,7 @@ add_subdirectory(ge)
 if (${GE_BUILD_TESTS})
     enable_testing()
     add_subdirectory(test)
+    add_subdirectory(examples)
 endif()
+
+# TODO: install targets (disable install by conan)
