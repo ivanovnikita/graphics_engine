@@ -17,6 +17,10 @@ namespace ge::impl
         virtual vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) = 0;
         virtual vk::Extent2D extent() const = 0;
 
+        virtual void start_display() = 0;
+        virtual void process_events() = 0;
+        virtual bool closed() const = 0;
+
     protected:
         Window();
     };

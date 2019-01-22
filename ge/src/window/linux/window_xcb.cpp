@@ -8,6 +8,8 @@ namespace ge::impl
     WindowXCB::WindowXCB(uint16_t width, uint16_t height)
         : width_ (width)
         , height_ (height)
+        , delete_reply_(nullptr)
+        , closed_(false)
     {
         int screen_index = 0;
         connection_ = xcb_connect(nullptr, &screen_index);
@@ -83,6 +85,82 @@ namespace ge::impl
     vk::Extent2D WindowXCB::extent() const
     {
         return {width_, height_};
+    }
+
+    void WindowXCB::start_display()
+    {
+        constexpr std::string_view name_protocols("WM_PROTOCOLS");
+        const xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom
+        (
+            connection_
+            , 1
+            , name_protocols.length()
+            , name_protocols.data()
+        );
+        xcb_intern_atom_reply_t* protocols_reply = xcb_intern_atom_reply
+        (
+            connection_
+            , protocols_cookie
+            , nullptr
+        );
+        constexpr std::string_view delete_window("WM_DELETE_WINDOW");
+        const xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom
+        (
+            connection_
+            , 0
+            , delete_window.length()
+            , delete_window.data()
+        );
+        delete_reply_ = xcb_intern_atom_reply
+        (
+            connection_
+            , delete_cookie
+            , nullptr
+        );
+        xcb_change_property
+        (
+            connection_
+            , XCB_PROP_MODE_REPLACE
+            , handle_
+            , protocols_reply->atom
+            , 4
+            , 32
+            , 1
+            , &delete_reply_->atom
+        );
+        free(protocols_reply);
+
+        xcb_map_window(connection_, handle_);
+        xcb_flush(connection_);
+    }
+
+    void WindowXCB::process_events()
+    {
+        xcb_generic_event_t* event = xcb_poll_for_event(connection_);
+
+        if (event == nullptr)
+        {
+            return;
+        }
+
+        switch (event->response_type & 0x7f)
+        {
+        case XCB_CLIENT_MESSAGE:
+        {
+            if (reinterpret_cast<xcb_client_message_event_t*>(event)->data.data32[0] == delete_reply_->atom)
+            {
+                closed_ = true;
+                free(delete_reply_);
+                delete_reply_ = nullptr;
+            }
+            break;
+        }
+        }
+    }
+
+    bool WindowXCB::closed() const
+    {
+        return closed_;
     }
 
 }
