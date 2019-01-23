@@ -9,6 +9,7 @@
 #include "factory/command_pool.h"
 #include "factory/command_buffer.h"
 #include "factory/semaphore.h"
+#include "factory/fence.h"
 #include "storage/shaders.h"
 #include "debug_callback.h"
 #include "exception.h"
@@ -132,6 +133,8 @@ namespace ge::impl
             image_available_semaphore_ = factory::semaphore::create(*logical_device_);
             render_finished_semaphore_ = factory::semaphore::create(*logical_device_);
 
+            render_finished_fence_ = factory::fence::create(*logical_device_);
+
             window_->start_display();
         }
     }
@@ -183,7 +186,7 @@ namespace ge::impl
             .setPSignalSemaphores(signal_semaphores.data());
 
         constexpr uint32_t submit_info_count = 1;
-        queues_.graphics.submit(submit_info_count, &submit_info, vk::Fence{nullptr});
+        queues_.graphics.submit(submit_info_count, &submit_info, *render_finished_fence_);
 
         const std::array<vk::SwapchainKHR, 1> swapchains{*swapchain_};
 
@@ -195,7 +198,9 @@ namespace ge::impl
             .setPImageIndices(&image_index);
 
         queues_.present.presentKHR(present_info);
-        queues_.present.waitIdle();
+
+        logical_device_->waitForFences(1, &*render_finished_fence_, VK_TRUE, timeout);
+        logical_device_->resetFences(1, &*render_finished_fence_);
     }
 
     void GraphicsEngineImpl::process_events()

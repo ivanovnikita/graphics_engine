@@ -35,6 +35,7 @@ namespace ge::impl
         std::vector<vk::CommandBuffer>      command_buffers_;
         vk::UniqueSemaphore                 image_available_semaphore_;
         vk::UniqueSemaphore                 render_finished_semaphore_;
+        vk::UniqueFence                     render_finished_fence_;
     };
 
 }
