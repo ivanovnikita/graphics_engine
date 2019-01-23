@@ -160,6 +160,24 @@ namespace ge::impl
     {
         xcb_map_window(connection_, handle_);
         xcb_flush(connection_);
+
+        auto wait_event = [this] (const int event_type)
+        {
+            while (true)
+            {
+                xcb_generic_event_t* const event = xcb_wait_for_event(connection_);
+                const auto received_event_type = event->response_type & ~0x80;
+                free(event);
+                if (received_event_type == event_type)
+                {
+                    break;
+                }
+            }
+        };
+
+        wait_event(XCB_MAP_NOTIFY);
+        wait_event(XCB_EXPOSE);
+        wait_event(XCB_CONFIGURE_NOTIFY);
     }
 
     void WindowXCB::process_events()

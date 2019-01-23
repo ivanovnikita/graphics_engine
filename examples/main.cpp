@@ -6,9 +6,9 @@ int main()
 {
     ge::GraphicsEngine engine;
 
+    engine.draw_frame();
     while (not engine.stopped())
     {
-        engine.draw_frame();
         engine.process_events();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
