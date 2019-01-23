@@ -4,20 +4,20 @@
 
 namespace ge
 {
-
     namespace impl
     {
         class GraphicsEngineImpl;
-    } // namespace impl
+    }
 
     class GraphicsEngine final
     {
     public:
         GraphicsEngine();
         ~GraphicsEngine();
-        void main_loop();
+        void draw_frame();
+        void process_events();
+        bool stopped() const;
     private:
         std::unique_ptr<impl::GraphicsEngineImpl> impl_;
     };
-
-} // namespace ge
+}

@@ -3,7 +3,6 @@
 
 namespace ge
 {
-
     GraphicsEngine::GraphicsEngine()
         : impl_ (std::make_unique<impl::GraphicsEngineImpl>())
     {
@@ -11,9 +10,18 @@ namespace ge
 
     GraphicsEngine::~GraphicsEngine() = default;
 
-    void GraphicsEngine::main_loop()
+    void GraphicsEngine::draw_frame()
     {
-        impl_->main_loop();
+        impl_->draw_frame();
     }
 
+    void GraphicsEngine::process_events()
+    {
+        impl_->process_events();
+    }
+
+    bool GraphicsEngine::stopped() const
+    {
+        return impl_->stopped();
+    }
 }

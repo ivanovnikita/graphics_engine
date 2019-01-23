@@ -9,8 +9,10 @@ namespace ge::impl
     {
     public:
         GraphicsEngineImpl();
+        ~GraphicsEngineImpl();
         void draw_frame();
-        void main_loop();
+        void process_events();
+        bool stopped() const;
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
     private:

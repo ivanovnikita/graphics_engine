@@ -131,7 +131,14 @@ namespace ge::impl
 
             image_available_semaphore_ = factory::semaphore::create(*logical_device_);
             render_finished_semaphore_ = factory::semaphore::create(*logical_device_);
+
+            window_->start_display();
         }
+    }
+
+    GraphicsEngineImpl::~GraphicsEngineImpl()
+    {
+        logical_device_->waitIdle();
     }
 
     vk::UniqueDebugReportCallbackEXT GraphicsEngineImpl::create_debug_callback() const
@@ -191,17 +198,13 @@ namespace ge::impl
         queues_.present.waitIdle();
     }
 
-    void GraphicsEngineImpl::main_loop()
+    void GraphicsEngineImpl::process_events()
     {
-        window_->start_display();
-
-        while (not window_->closed())
-        {
-            draw_frame();
-            window_->process_events();
-        }
-
-        logical_device_->waitIdle();
+        window_->process_events();
     }
 
+    bool GraphicsEngineImpl::stopped() const
+    {
+        return window_->closed();
+    }
 }
