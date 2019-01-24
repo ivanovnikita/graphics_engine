@@ -10,8 +10,8 @@
 TEST(ImageView, create)
 {
     using namespace test;
-    using namespace ge::impl;
-    using namespace ge::impl::factory::options;
+    using namespace ge;
+    using namespace ge::factory::options;
 
     const Device options
     {
@@ -21,24 +21,24 @@ TEST(ImageView, create)
       , Transfer{DISABLED}
     };
     const auto instance = create_instance_with_window(options.validation_layers.enabled);
-    const auto window = ge::impl::Window::create(500, 500);
+    const auto window = ge::Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indices] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::create_physical_device
     (
         options
         , instance.get()
         , surface.get()
     );
 
-    const auto logical_device = factory::device::logical::create
+    const auto logical_device = factory::create_logical_device
     (
         options.validation_layers
       , physical_device
       , queue_family_indices
     );
 
-    auto[swapchain, format] = factory::swapchain::create
+    auto[swapchain, format] = factory::create_swapchain
     (
         physical_device
       , logical_device.get()
@@ -48,7 +48,7 @@ TEST(ImageView, create)
     );
 
     const auto images = logical_device->getSwapchainImagesKHR(swapchain.get());
-    const auto image_views = factory::image_view::create(images, format, logical_device.get());
+    const auto image_views = factory::create_image_view(images, format, logical_device.get());
 
     EXPECT_EQ(images.size(), image_views.size());
 

@@ -9,7 +9,7 @@ file(GLOB_RECURSE COMMON_TEST_SRC "common/*.cpp")
 
 set(COMMON_TEST "${CMAKE_PROJECT_NAME}-common-test")
 add_executable(${COMMON_TEST} ${COMMON_TEST_SRC})
-target_link_libraries(${COMMON_TEST} ge GTest::Main Threads::Threads)
+target_link_libraries(${COMMON_TEST} GE::Render GTest::Main Threads::Threads)
 
 add_test(NAME ${COMMON_TEST} COMMAND ${COMMON_TEST})
 
@@ -24,7 +24,7 @@ if (${GE_BUILD_GRAPHICS_TESTS})
 
     set(GRAPHICS_TEST "${CMAKE_PROJECT_NAME}-graphics-test")
     add_executable(${GRAPHICS_TEST} ${GRAPHICS_TEST_SRC})
-    target_link_libraries(${GRAPHICS_TEST} ge GTest::Main Threads::Threads)
+    target_link_libraries(${GRAPHICS_TEST} GE::Render GTest::Main Threads::Threads Vulkan::Vulkan)
     target_include_directories(${GRAPHICS_TEST} PRIVATE "graphics")
 
     add_test(NAME ${GRAPHICS_TEST} COMMAND ${GRAPHICS_TEST})

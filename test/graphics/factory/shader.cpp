@@ -9,8 +9,8 @@
 TEST(ShaderModule, create_vertex)
 {
     using namespace test;
-    using namespace ge::impl;
-    using namespace ge::impl::factory::options;
+    using namespace ge;
+    using namespace ge::factory::options;
 
     const Device options
     {
@@ -20,23 +20,23 @@ TEST(ShaderModule, create_vertex)
       , Transfer{DISABLED}
     };
     const auto instance = create_instance_with_window(options.validation_layers.enabled);
-    const auto window = ge::impl::Window::create(500, 500);
+    const auto window = ge::Window::create(500, 500);
     const auto surface = window->create_surface(instance.get());
 
-    const auto[physical_device, queue_family_indices] = factory::device::physical::create
+    const auto[physical_device, queue_family_indices] = factory::create_physical_device
     (
         options
         , instance.get()
         , surface.get()
     );
 
-    const auto logical_device = factory::device::logical::create
+    const auto logical_device = factory::create_logical_device
     (
         options.validation_layers
       , physical_device
       , queue_family_indices
     );
 
-    const auto shader_module =  factory::shader::module::create(*logical_device, "shaders/triangle.vert");
+    const auto shader_module =  factory::create_shader_module(*logical_device, "shaders/triangle.vert");
     EXPECT_TRUE(shader_module);
 }

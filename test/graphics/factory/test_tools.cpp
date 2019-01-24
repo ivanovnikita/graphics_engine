@@ -4,11 +4,11 @@ namespace test
 {
     vk::UniqueInstance create_instance_with_window(bool validation_layers)
     {
-        using namespace ge::impl;
-        using namespace ge::impl::factory::options;
-        using ge::impl::factory::options::Window;
+        using namespace ge;
+        using namespace ge::factory::options;
+        using ge::factory::options::Window;
 
-        return factory::instance::create
+        return factory::create_instance
         (
             Instance
             {
@@ -20,11 +20,11 @@ namespace test
 
     vk::UniqueInstance create_instance_without_window(bool validation_layers)
     {
-        using namespace ge::impl;
-        using namespace ge::impl::factory::options;
-        using ge::impl::factory::options::Window;
+        using namespace ge;
+        using namespace ge::factory::options;
+        using ge::factory::options::Window;
 
-        return factory::instance::create
+        return factory::create_instance
         (
             Instance
             {

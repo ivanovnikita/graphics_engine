@@ -1,15 +1,15 @@
-#include "ge/graphics_engine.h"
+#include "render.h"
 
 #include <thread>
 
 int main()
 {
-    ge::GraphicsEngine engine;
+    ge::Render render;
 
-    engine.draw_frame();
-    while (not engine.stopped())
+    render.draw_frame();
+    while (not render.stopped())
     {
-        engine.process_events();
+        render.process_events();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
