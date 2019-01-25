@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ge/window/window_events.h"
+
 #include <vulkan/vulkan.hpp>
 
 #include <memory>
@@ -18,8 +20,7 @@ namespace ge
         virtual vk::Extent2D extent() const = 0;
 
         virtual void start_display() = 0;
-        virtual void process_events() = 0;
-        virtual bool closed() const = 0;
+        virtual std::vector<WindowEvent> grab_events() = 0;
 
     protected:
         Window();

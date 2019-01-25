@@ -16,8 +16,7 @@ namespace ge
         vk::Extent2D extent() const override;
 
         void start_display() override;
-        void process_events() override;
-        bool closed() const override;
+        std::vector<WindowEvent> grab_events() override;
 
     private:
         xcb_connection_t* connection_;
@@ -25,6 +24,5 @@ namespace ge
         uint16_t width_;
         uint16_t height_;
         xcb_intern_atom_reply_t* delete_reply_;
-        bool closed_;
     };
 }

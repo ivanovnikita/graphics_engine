@@ -23,7 +23,6 @@ namespace ge
         : width_ (width)
         , height_ (height)
         , delete_reply_(nullptr)
-        , closed_(false)
     {
         int screen_index = 0;
         connection_ = xcb_connect(nullptr, &screen_index);
@@ -31,7 +30,7 @@ namespace ge
 
         if (connection_ == nullptr)
         {
-//            GE_THROW(window_error, "Connection to xcb failed");
+            throw std::runtime_error("Connection to xcb failed");
         }
 
         const xcb_setup_t* const setup = xcb_get_setup(connection_);
@@ -179,34 +178,30 @@ namespace ge
         wait_event(XCB_CONFIGURE_NOTIFY);
     }
 
-    void WindowXCB::process_events()
+    std::vector<WindowEvent> WindowXCB::grab_events()
     {
+        std::vector<WindowEvent> events;
+
         xcb_generic_event_t* const event = xcb_poll_for_event(connection_);
-
-        if (event == nullptr)
+        while (event != nullptr)
         {
-            return;
-        }
-
-        switch (event->response_type & 0x7f)
-        {
-        case XCB_CLIENT_MESSAGE:
-        {
-            if (reinterpret_cast<xcb_client_message_event_t*>(event)->data.data32[0] == delete_reply_->atom)
+            switch (event->response_type & 0x7f)
             {
-                closed_ = true;
-                free(delete_reply_);
-                delete_reply_ = nullptr;
+            case XCB_CLIENT_MESSAGE:
+            {
+                if (reinterpret_cast<xcb_client_message_event_t*>(event)->data.data32[0] == delete_reply_->atom)
+                {
+                    free(delete_reply_);
+                    delete_reply_ = nullptr;
+                    events.emplace_back(WindowEventClose{});
+                }
+                break;
             }
-            break;
-        }
+            }
+
+            free(event);
         }
 
-        free(event);
-    }
-
-    bool WindowXCB::closed() const
-    {
-        return closed_;
+        return events;
     }
 }
