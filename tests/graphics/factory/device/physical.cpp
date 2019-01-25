@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "render/exception.h"
-#include "render/factory/device/physical.h"
-#include "render/window/window.h"
 #include "factory/test_tools.h"
+
+#include "ge/render/exception.h"
+#include "ge/render/factory/device/physical.h"
+
+#include "ge/window/window.h"
 
 TEST(PhysicalDeviceFactory, create_noQueue)
 {

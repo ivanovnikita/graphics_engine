@@ -107,32 +107,52 @@ elseif(UNIX)
     set(window_libs XCB::XCB)
 endif()
 
-sources_in_dir_recurse(src/render render_sources)
-add_library(render ${render_sources})
-target_compile_options(render PRIVATE ${compile_options})
-set_target_properties(render PROPERTIES ${target_properties})
-target_compile_definitions(render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
-target_link_libraries(render
+sources_in_dir_recurse(src/ge/window window_sources)
+add_library(ge_window ${window_sources})
+target_compile_options(ge_window PRIVATE ${compile_options})
+set_target_properties(ge_window PROPERTIES ${target_properties})
+target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_link_libraries(ge_window
     PRIVATE
-        CONAN_PKG::shaderc
         Vulkan::Vulkan
         ${window_libs}
+)
+target_include_directories(ge_window
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+)
+add_library(GE::window ALIAS ge_window)
+
+sources_in_dir_recurse(src/ge/render render_sources)
+add_library(ge_render ${render_sources})
+target_compile_options(ge_render PRIVATE ${compile_options})
+set_target_properties(ge_render PROPERTIES ${target_properties})
+target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_link_libraries(ge_render
+    PRIVATE
+        GE::window
+        CONAN_PKG::shaderc
+        Vulkan::Vulkan
         ${std_libs}
 )
-target_include_directories(render
+target_include_directories(ge_render
     SYSTEM PRIVATE
         $<BUILD_INTERFACE:${CONAN_INCLUDE_DIRS_SHADERC}>
     PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/render>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/render>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
 )
-add_library(GE::render ALIAS render)
+add_library(GE::render ALIAS ge_render)
 
 install(
     TARGETS
-        render
+        ge_window
+        ge_render
     EXPORT
         GraphicsEngine
     RUNTIME DESTINATION bin
@@ -141,9 +161,15 @@ install(
 )
 install(
     FILES
-        src/render/render/render.h
+        src/ge/render/render.h
     DESTINATION
-        include/render
+        include/ge/render
+)
+install(
+    FILES
+        src/ge/window/window.h
+    DESTINATION
+        include/ge/window
 )
 # TODO: install deps too (it is not usable now)
 install(
@@ -177,7 +203,13 @@ if (${GE_BUILD_TESTS})
             ${graphics_tests_sources}
             "tests/graphics/graphics_config.txt.in"
         )
-        target_link_libraries(tests_graphics GE::render GTest::Main Threads::Threads Vulkan::Vulkan)
+        target_link_libraries(tests_graphics
+            GE::window
+            GE::render
+            GTest::Main
+            Threads::Threads
+            Vulkan::Vulkan
+        )
         target_include_directories(tests_graphics PRIVATE "tests/graphics")
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "render/utils/safe_cast.hpp"
+#include "ge/render/utils/safe_cast.hpp"
 
 template<typename T, typename U>
 struct CastPair

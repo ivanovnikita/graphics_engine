@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 
 #include "factory/test_tools.h"
-#include "render/factory/device/physical.h"
-#include "render/factory/device/logical.h"
-#include "render/factory/swapchain.h"
-#include "render/window/window.h"
+#include "ge/render/factory/device/physical.h"
+#include "ge/render/factory/device/logical.h"
+#include "ge/render/factory/swapchain.h"
+
+#include "ge/window/window.h"
 
 TEST(Swapchain, create)
 {

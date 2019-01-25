@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "render/factory/instance.h"
+#include "ge/render/factory/instance.h"
 
 TEST(InstanceFactory, create_withoutAll)
 {
