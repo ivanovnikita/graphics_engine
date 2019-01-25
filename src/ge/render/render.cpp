@@ -1,10 +1,26 @@
 #include "ge/render/render.h"
 #include "ge/render/render_impl.h"
 
+#include <vulkan/vulkan.h>
+
 namespace ge
 {
-    Render::Render()
-        : impl_(new RenderImpl())
+    Render::Render
+    (
+        const std::function<SurfaceCreator>& create_surface
+      , const uint16_t surface_width
+      , const uint16_t surface_heigth
+    )
+        : impl_
+        (
+            new RenderImpl
+            (
+                create_surface
+              , vk::Extent2D{}
+                  .setWidth(surface_width)
+                  .setHeight(surface_heigth)
+            )
+        )
     {
     }
 
@@ -13,15 +29,5 @@ namespace ge
     void Render::draw_frame()
     {
         impl_->draw_frame();
-    }
-
-    void Render::process_events()
-    {
-        impl_->process_events();
-    }
-
-    bool Render::stopped() const
-    {
-        return impl_->stopped();
     }
 }

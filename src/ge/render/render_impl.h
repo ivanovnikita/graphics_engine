@@ -3,25 +3,25 @@
 #include "ge/render/render.h"
 #include "ge/render/queue.h"
 
-#include "ge/window/window.h"
-
 namespace ge
 {
     class Render::RenderImpl final
     {
     public:
-        RenderImpl();
+        RenderImpl
+        (
+            const std::function<SurfaceCreator>&
+          , vk::Extent2D surface_extent
+        );
         ~RenderImpl();
         void draw_frame();
-        void process_events();
-        bool stopped() const;
 
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
 
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
-        std::unique_ptr<Window>             window_;
+        vk::Extent2D                        surface_extent_;
         vk::UniqueSurfaceKHR                surface_;
         vk::PhysicalDevice                  physical_device_;
         QueueFamilyIndices                  queue_family_indices_;
@@ -40,5 +40,4 @@ namespace ge
         vk::UniqueSemaphore                 render_finished_semaphore_;
         vk::UniqueFence                     render_finished_fence_;
     };
-
 }

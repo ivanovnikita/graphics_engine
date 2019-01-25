@@ -16,7 +16,12 @@
 
 namespace ge
 {
-    Render::RenderImpl::RenderImpl()
+    Render::RenderImpl::RenderImpl
+    (
+        const std::function<SurfaceCreator>& create_surface
+      , vk::Extent2D surface_extent
+    )
+        : surface_extent_(std::move(surface_extent))
     {
         using namespace factory;
         using namespace factory::options;
@@ -30,8 +35,7 @@ namespace ge
         instance_ = factory::create_instance(options_instance);
 
         debug_callback_ = create_debug_callback();
-        window_ = ge::Window::create(500, 500);
-        surface_ = window_->create_surface(instance_.get());
+        surface_ = vk::UniqueSurfaceKHR(create_surface(*instance_));
 
         constexpr factory::options::Graphics option_graphics{ENABLED};
 
@@ -85,7 +89,7 @@ namespace ge
             (
                 physical_device_
               , *logical_device_
-              , *window_
+              , surface_extent_
               , *surface_
               , queue_family_indices_
             );
@@ -99,7 +103,7 @@ namespace ge
                 *logical_device_
               , format
               , shaders
-              , *window_
+              , surface_extent_
             );
             pipeline_ = std::move(pipeline);
             pipeline_layout_ = std::move(layout);
@@ -113,7 +117,7 @@ namespace ge
                     *logical_device_
                   , *render_pass_
                   , *image_view
-                  , vk::Extent2D(window_->extent())
+                  , surface_extent_
                 ));
             }
 
@@ -124,7 +128,7 @@ namespace ge
                 , *command_pool_
                 , framebuffers_
                 , *render_pass_
-                , window_->extent()
+                , surface_extent_
                 , *pipeline_
             );
 
@@ -132,8 +136,6 @@ namespace ge
             render_finished_semaphore_ = factory::create_semaphore(*logical_device_);
 
             render_finished_fence_ = factory::create_fence(*logical_device_);
-
-            window_->start_display();
         }
     }
 
@@ -199,15 +201,5 @@ namespace ge
 
         logical_device_->waitForFences(1, &*render_finished_fence_, VK_TRUE, timeout);
         logical_device_->resetFences(1, &*render_finished_fence_);
-    }
-
-    void Render::RenderImpl::process_events()
-    {
-        window_->process_events();
-    }
-
-    bool Render::RenderImpl::stopped() const
-    {
-        return window_->closed();
     }
 }

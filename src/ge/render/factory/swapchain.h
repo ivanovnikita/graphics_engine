@@ -2,8 +2,6 @@
 
 #include "ge/render/queue.h"
 
-#include "ge/window/window.h"
-
 #include <vulkan/vulkan.hpp>
 
 namespace ge::factory
@@ -12,7 +10,7 @@ namespace ge::factory
     (
         const vk::PhysicalDevice&
       , const vk::Device&
-      , const Window&
+      , const vk::Extent2D&
       , const vk::SurfaceKHR&
       , const QueueFamilyIndices&
     );

@@ -38,7 +38,7 @@ namespace ge::factory
         const vk::Device& logical_device
       , const vk::Format& format
       , const storage::Shaders& shaders_storage
-      , const Window& window
+      , const vk::Extent2D& extent
     )
     {
         const auto shader_stage_create_info = get_shader_stage_create_info(shaders_storage);
@@ -50,7 +50,6 @@ namespace ge::factory
             .setTopology(vk::PrimitiveTopology::eTriangleList)
             .setPrimitiveRestartEnable(VK_FALSE);
 
-        const vk::Extent2D& extent = window.extent();
         const auto viewport = vk::Viewport()
             .setX(0.0f)
             .setY(0.0f)

@@ -133,7 +133,6 @@ set_target_properties(ge_render PROPERTIES ${target_properties})
 target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_render
     PRIVATE
-        GE::window
         CONAN_PKG::shaderc
         Vulkan::Vulkan
         ${std_libs}
@@ -225,7 +224,7 @@ endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
-    target_link_libraries(example_triangle GE::render)
+    target_link_libraries(example_triangle GE::render GE::window Vulkan::Vulkan)
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)

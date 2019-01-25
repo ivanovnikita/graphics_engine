@@ -21,7 +21,9 @@ TEST(Swapchain, create)
       , Transfer{DISABLED}
     };
     const auto instance = create_instance_with_window(options.validation_layers.enabled);
-    const auto window = ge::Window::create(500, 500);
+    constexpr uint16_t width = 500;
+    constexpr uint16_t height = 500;
+    const auto window = ge::Window::create(width, height);
     const auto surface = window->create_surface(instance.get());
 
     const auto[physical_device, queue_family_indices] = factory::create_physical_device
@@ -42,7 +44,7 @@ TEST(Swapchain, create)
     (
         physical_device
       , logical_device.get()
-      , *window
+      , vk::Extent2D{}.setWidth(width).setHeight(height)
       , surface.get()
       , queue_family_indices
     );

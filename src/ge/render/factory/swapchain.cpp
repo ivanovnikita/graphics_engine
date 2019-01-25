@@ -49,7 +49,7 @@ namespace ge::factory
             return best;
         }
 
-        vk::Extent2D choose_extent(const vk::SurfaceCapabilitiesKHR& capabilities, const Window& window)
+        vk::Extent2D choose_extent(const vk::SurfaceCapabilitiesKHR& capabilities, const vk::Extent2D& extent)
         {
             if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
             {
@@ -57,7 +57,8 @@ namespace ge::factory
             }
             else
             {
-                const auto[width, height] = window.extent();
+                const auto width = extent.width;
+                const auto height = extent.height;
                 return
                 {
                     std::max
@@ -115,7 +116,7 @@ namespace ge::factory
     (
         const vk::PhysicalDevice& physical_device
       , const vk::Device& logical_device
-      , const Window& window
+      , const vk::Extent2D& extent
       , const vk::SurfaceKHR& surface
       , const QueueFamilyIndices& queue_family_indices
     )
@@ -137,7 +138,7 @@ namespace ge::factory
           , image_count
           , format.format
           , format.colorSpace
-          , choose_extent(surface_capabilities, window)
+          , choose_extent(surface_capabilities, extent)
           , array_layers_count
           , vk::ImageUsageFlagBits::eColorAttachment
           , sharing_mode
