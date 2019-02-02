@@ -182,7 +182,7 @@ namespace ge
     {
         std::vector<WindowEvent> events;
 
-        xcb_generic_event_t* const event = xcb_poll_for_event(connection_);
+        xcb_generic_event_t* event = xcb_poll_for_event(connection_);
         while (event != nullptr)
         {
             switch (event->response_type & 0x7f)
@@ -200,6 +200,7 @@ namespace ge
             }
 
             free(event);
+            event = xcb_poll_for_event(connection_);
         }
 
         return events;
