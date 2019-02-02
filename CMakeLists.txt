@@ -102,8 +102,7 @@ find_package(Vulkan REQUIRED)
 
 if (WIN32)
 elseif(UNIX)
-    find_package(XCB REQUIRED)
-    set(window_libs XCB::XCB)
+    set(window_libs CONAN_PKG::xcb)
 endif()
 
 sources_in_dir_recurse(src/ge/window window_sources)

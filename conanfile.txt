@@ -2,6 +2,7 @@
 googletest/1.8@ivanovnikita/stable
 shaderc/563bc6e@ivanovnikita/stable
 Vulkan-LoaderAndValidationLayers/sdk-1.1.70.0_13eb25c@ivanovnikita/stable
+xcb/1.13.1@ivanovnikita/stable
 
 [generators]
 cmake  
