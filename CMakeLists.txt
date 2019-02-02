@@ -52,8 +52,8 @@ set(warnings
     -pedantic-errors
 )
 
+set(std_libs -lstdc++fs)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(std_libs -lstdc++fs)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.7")
         set(warnings ${warnings}
             -Wfloat-equal
@@ -73,7 +73,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             )
     endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(std_libs -lc++experimental)
     set(warnings ${warnings}
         -Weverything
         -Wno-c++98-compat
