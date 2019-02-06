@@ -22,8 +22,7 @@ namespace ge::factory
             case vk::ShaderStageFlagBits::eGeometry: return shaderc_shader_kind::shaderc_geometry_shader;
             case vk::ShaderStageFlagBits::eTessellationControl: return shaderc_shader_kind::shaderc_tess_control_shader;
             case vk::ShaderStageFlagBits::eTessellationEvaluation: return shaderc_shader_kind::shaderc_tess_evaluation_shader;
-            case vk::ShaderStageFlagBits::eAll:
-            case vk::ShaderStageFlagBits::eAllGraphics:
+            default:
             {
                 GE_THROW(invalid_shader, "Unknown shader type");
             }

@@ -98,8 +98,6 @@ function(sources_in_dir_recurse directory result)
     set(${result} ${output} PARENT_SCOPE)
 endfunction()
 
-find_package(Vulkan REQUIRED)
-
 if (WIN32)
 elseif(UNIX)
     set(window_libs CONAN_PKG::xcb)
@@ -112,7 +110,7 @@ set_target_properties(ge_window PROPERTIES ${target_properties})
 target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_window
     PRIVATE
-        Vulkan::Vulkan
+        CONAN_PKG::Vulkan-Loader
         ${window_libs}
 )
 target_include_directories(ge_window
@@ -132,7 +130,7 @@ target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::shaderc
-        Vulkan::Vulkan
+        CONAN_PKG::Vulkan-Loader
         ${std_libs}
 )
 target_include_directories(ge_render
@@ -205,7 +203,9 @@ if (${GE_BUILD_TESTS})
             GE::render
             GTest::Main
             Threads::Threads
-            Vulkan::Vulkan
+            CONAN_PKG::SPIRV-Tools
+            CONAN_PKG::Vulkan-Loader
+            dl
         )
         target_include_directories(tests_graphics PRIVATE "tests/graphics")
         gtest_discover_tests(tests_graphics)
@@ -214,7 +214,7 @@ if (${GE_BUILD_TESTS})
         file(GLOB shaders "tests/graphics/factory/shaders/*")
         install(FILES ${shaders} DESTINATION tests/bin/shaders)
 
-        set(VK_LAYER_PATH "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/etc/vulkan/explicit_layer.d")
+        set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
         configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
         install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION tests/bin)
     endif()
@@ -222,7 +222,14 @@ endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
-    target_link_libraries(example_triangle GE::render GE::window Vulkan::Vulkan)
+    target_link_libraries(example_triangle
+        GE::render
+        GE::window
+        CONAN_PKG::SPIRV-Tools
+        CONAN_PKG::Vulkan-Loader
+        Threads::Threads
+        dl
+    )
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)
