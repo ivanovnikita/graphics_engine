@@ -98,6 +98,8 @@ function(sources_in_dir_recurse directory result)
     set(${result} ${output} PARENT_SCOPE)
 endfunction()
 
+find_package(Threads REQUIRED)
+
 if (WIN32)
 elseif(UNIX)
     set(window_libs CONAN_PKG::xcb)
@@ -131,7 +133,9 @@ target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::shaderc
         CONAN_PKG::Vulkan-Loader
+        Threads::Threads
         ${std_libs}
+        dl
 )
 target_include_directories(ge_render
     SYSTEM PRIVATE
@@ -178,12 +182,14 @@ install(
         cmake
 )
 
+set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
+configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
+
 if (${GE_BUILD_TESTS})
     enable_testing()
 
     include(GoogleTest)
 
-    find_package(Threads REQUIRED)
     find_package(GTest REQUIRED)
 
     sources_in_dir_recurse(tests/common common_tests_sources)
@@ -198,15 +204,7 @@ if (${GE_BUILD_TESTS})
             ${graphics_tests_sources}
             "tests/graphics/graphics_config.txt.in"
         )
-        target_link_libraries(tests_graphics
-            GE::window
-            GE::render
-            GTest::Main
-            Threads::Threads
-            CONAN_PKG::SPIRV-Tools
-            CONAN_PKG::Vulkan-Loader
-            dl
-        )
+        target_link_libraries(tests_graphics GE::window GE::render GTest::Main)
         target_include_directories(tests_graphics PRIVATE "tests/graphics")
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
@@ -214,23 +212,15 @@ if (${GE_BUILD_TESTS})
         file(GLOB shaders "tests/graphics/factory/shaders/*")
         install(FILES ${shaders} DESTINATION tests/bin/shaders)
 
-        set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
-        configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
         install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION tests/bin)
     endif()
 endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
-    target_link_libraries(example_triangle
-        GE::render
-        GE::window
-        CONAN_PKG::SPIRV-Tools
-        CONAN_PKG::Vulkan-Loader
-        Threads::Threads
-        dl
-    )
+    target_link_libraries(example_triangle GE::render GE::window)
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)
+    install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION examples/triangle)
 endif()

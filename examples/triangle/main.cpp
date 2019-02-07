@@ -2,6 +2,8 @@
 #include "ge/window/window.h"
 
 #include <thread>
+#include <fstream>
+#include <regex>
 
 namespace
 {
@@ -65,6 +67,17 @@ namespace
 
 int main()
 {
+    std::ifstream file("graphics_config.txt");
+    std::string config;
+    std::getline(file, config);
+    std::regex layerRegex("(VK_LAYER_PATH)=([a-zA-Z0-9.\\-/]+explicit_layer.d)");
+    std::smatch matches;
+    if (std::regex_search(config, matches, layerRegex))
+    {
+        const int override = 1;
+        setenv(matches[1].str().c_str(), matches[2].str().c_str(), override);
+    }
+
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
     auto window = ge::Window::create(width, height);
