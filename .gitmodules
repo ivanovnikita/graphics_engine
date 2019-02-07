@@ -1,6 +1,3 @@
-[submodule "ci/arch-travis"]
-	path = ci/arch-travis
-	url = https://github.com/mikkeloscar/arch-travis
 [submodule "third_party/cmake-conan"]
 	path = third_party/cmake-conan
 	url = git@github.com:ivanovnikita/cmake-conan.git
