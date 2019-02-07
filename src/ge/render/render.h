@@ -8,10 +8,12 @@ namespace vk
     class Instance;
     class SurfaceKHR;
 
-    template <typename Type>
+    template <typename Type, typename Dispatch>
     class UniqueHandle;
 
-    using UniqueSurfaceKHR = UniqueHandle<SurfaceKHR>;
+    class DispatchLoaderStatic;
+
+    using UniqueSurfaceKHR = UniqueHandle<SurfaceKHR, DispatchLoaderStatic>;
 }
 
 namespace ge

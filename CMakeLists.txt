@@ -98,7 +98,7 @@ function(sources_in_dir_recurse directory result)
     set(${result} ${output} PARENT_SCOPE)
 endfunction()
 
-find_package(Vulkan REQUIRED)
+find_package(Threads REQUIRED)
 
 if (WIN32)
 elseif(UNIX)
@@ -112,7 +112,7 @@ set_target_properties(ge_window PROPERTIES ${target_properties})
 target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_window
     PRIVATE
-        Vulkan::Vulkan
+        CONAN_PKG::Vulkan-Loader
         ${window_libs}
 )
 target_include_directories(ge_window
@@ -132,8 +132,10 @@ target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::shaderc
-        Vulkan::Vulkan
+        CONAN_PKG::Vulkan-Loader
+        Threads::Threads
         ${std_libs}
+        dl
 )
 target_include_directories(ge_render
     SYSTEM PRIVATE
@@ -180,12 +182,14 @@ install(
         cmake
 )
 
+set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
+configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
+
 if (${GE_BUILD_TESTS})
     enable_testing()
 
     include(GoogleTest)
 
-    find_package(Threads REQUIRED)
     find_package(GTest REQUIRED)
 
     sources_in_dir_recurse(tests/common common_tests_sources)
@@ -200,13 +204,7 @@ if (${GE_BUILD_TESTS})
             ${graphics_tests_sources}
             "tests/graphics/graphics_config.txt.in"
         )
-        target_link_libraries(tests_graphics
-            GE::window
-            GE::render
-            GTest::Main
-            Threads::Threads
-            Vulkan::Vulkan
-        )
+        target_link_libraries(tests_graphics GE::window GE::render GTest::Main)
         target_include_directories(tests_graphics PRIVATE "tests/graphics")
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
@@ -214,16 +212,15 @@ if (${GE_BUILD_TESTS})
         file(GLOB shaders "tests/graphics/factory/shaders/*")
         install(FILES ${shaders} DESTINATION tests/bin/shaders)
 
-        set(VK_LAYER_PATH "${CONAN_VULKAN-LOADERANDVALIDATIONLAYERS_ROOT}/etc/vulkan/explicit_layer.d")
-        configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
         install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION tests/bin)
     endif()
 endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
-    target_link_libraries(example_triangle GE::render GE::window Vulkan::Vulkan)
+    target_link_libraries(example_triangle GE::render GE::window)
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)
+    install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION examples/triangle)
 endif()
