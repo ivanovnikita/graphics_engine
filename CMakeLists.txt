@@ -204,7 +204,12 @@ if (${GE_BUILD_TESTS})
             ${graphics_tests_sources}
             "tests/graphics/graphics_config.txt.in"
         )
-        target_link_libraries(tests_graphics GE::window GE::render GTest::Main)
+        target_link_libraries(tests_graphics
+            GE::window
+            GE::render
+            GTest::Main
+            CONAN_PKG::Vulkan-Headers
+        )
         target_include_directories(tests_graphics PRIVATE "tests/graphics")
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
@@ -218,7 +223,11 @@ endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
-    target_link_libraries(example_triangle GE::render GE::window)
+    target_link_libraries(example_triangle
+        GE::render
+        GE::window
+        CONAN_PKG::Vulkan-Headers
+    )
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)
