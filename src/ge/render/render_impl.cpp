@@ -28,13 +28,19 @@ namespace ge
 
         constexpr auto options_instance = Instance
         {
+#ifndef NDEBUG
             Debug{DebugCallback{ENABLED}, ValidationLayers{ENABLED}}
+#else
+            Debug{DebugCallback{DISABLED}, ValidationLayers{DISABLED}}
+#endif
           , options::Window{ENABLED, WindowType::XCB}
         };
 
         instance_ = factory::create_instance(options_instance);
 
+#ifndef NDEBUG
         debug_callback_ = create_debug_callback();
+#endif
         surface_ = vk::UniqueSurfaceKHR(create_surface(*instance_));
 
         constexpr factory::options::Graphics option_graphics{ENABLED};

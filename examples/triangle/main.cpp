@@ -67,6 +67,7 @@ namespace
 
 int main()
 {
+#ifndef NDEBUG
     std::ifstream file("graphics_config.txt");
     std::string config;
     std::getline(file, config);
@@ -77,6 +78,7 @@ int main()
         const int override = 1;
         setenv(matches[1].str().c_str(), matches[2].str().c_str(), override);
     }
+#endif
 
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
