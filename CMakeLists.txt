@@ -4,6 +4,14 @@ project(graphics_engine)
 
 include(CMakeDependentOption)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(default_debug_layers OFF)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(default_debug_layers ON)
+endif()
+
+option(GE_ENABLE_LTO "Enable LTO?" OFF)
+option(GE_ENABLE_DEBUG_LAYERS "Enable vulkan debug layers?" ${default_debug_layers})
 option(GE_BUILD_EXAMPLES "Build examples?" ON)
 option(GE_BUILD_TESTS "Build internal tests?" ON)
 cmake_dependent_option(
@@ -15,13 +23,40 @@ cmake_dependent_option(
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include("third_party/cmake-conan/conan.cmake")
 
+if (WIN32)
+elseif(UNIX)
+    list(APPEND conan_options with_xcb=True)
+endif()
+
+if (${GE_ENABLE_LTO})
+    include(CheckIPOSupported)
+    check_ipo_supported()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+    set(linker_flags "${linker_flags} -fuse-ld=gold -fuse-linker-plugin")
+
+    list(APPEND conan_options lto=True)
+endif()
+
+if (${GE_ENABLE_DEBUG_LAYERS})
+    list(APPEND conan_options with_debug_layers=True)
+endif()
+
+if (${GE_BUILD_TESTS})
+    list(APPEND conan_options with_gtests=True)
+endif()
+
 conan_cmake_run(
-    CONANFILE conanfile.txt
+    CONANFILE conanfile.py
     BASIC_SETUP
     CMAKE_TARGETS
     BUILD missing
     NO_OUTPUT_DIRS
+    OPTIONS ${conan_options}
 )
+
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linker_flags}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linker_flags}")
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX
@@ -34,9 +69,9 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(cxx_flags -Ofast)
+    list(APPEND cxx_flags -Ofast)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(cxx_flags -O0)
+    list(APPEND cxx_flags -O0)
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
 endif()
@@ -44,7 +79,7 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(warnings
+list(APPEND warnings
     -Werror
     -Wall
     -Wextra
@@ -55,7 +90,7 @@ set(warnings
 set(std_libs -lstdc++fs)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.7")
-        set(warnings ${warnings}
+        list(APPEND warnings
             -Wfloat-equal
             -Wpointer-arith
             -Wcast-qual
@@ -67,13 +102,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             )
     endif()
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0")
-        set(warnings ${warnings}
+        list(APPEND warnings
             -Wduplicated-branches
             -Wduplicated-cond
             )
     endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(warnings ${warnings}
+    list(APPEND warnings
         -Weverything
         -Wno-c++98-compat
         -Wno-c++11-compat
