@@ -1,3 +1,7 @@
+#ifdef GE_DEBUG_LAYERS_ENABLED
+#include "vk_layer_path.h"
+#endif
+
 #include <gtest/gtest.h>
 
 #include <cstdlib>
@@ -10,16 +14,10 @@ class GraphicsTestsEnvironment final : public ::testing::Environment
 public:
     void SetUp() final
     {
-        std::ifstream file("graphics_config.txt");
-        std::string config;
-        std::getline(file, config);
-        std::regex layerRegex("(VK_LAYER_PATH)=([a-zA-Z0-9.\\-/]+explicit_layer.d)");
-        std::smatch matches;
-        if (std::regex_search(config, matches, layerRegex))
-        {
-            const int override = 1;
-            setenv(matches[1].str().c_str(), matches[2].str().c_str(), override);
-        }
+#ifdef GE_DEBUG_LAYERS_ENABLED
+        constexpr int override = 1;
+        setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
+#endif
     }
 };
 

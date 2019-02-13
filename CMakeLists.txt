@@ -162,10 +162,23 @@ target_include_directories(ge_window
 add_library(GE::window ALIAS ge_window)
 
 sources_in_dir_recurse(src/ge/render render_sources)
+
+
+if (${GE_ENABLE_DEBUG_LAYERS})
+    set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
+    configure_file("src/ge/render/vk_layer_path.h.in" "${CMAKE_BINARY_DIR}/generated_include/vk_layer_path.h")
+    list(APPEND render_sources "src/ge/render/vk_layer_path.h.in")
+endif()
+
 add_library(ge_render ${render_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
 set_target_properties(ge_render PROPERTIES ${target_properties})
-target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_compile_definitions(ge_render
+    PRIVATE
+        -DVK_USE_PLATFORM_XCB_KHR=1
+    PUBLIC
+        -DGE_DEBUG_LAYERS_ENABLED=1
+)
 target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::shaderc
@@ -219,9 +232,6 @@ install(
         cmake
 )
 
-set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
-configure_file("tests/graphics/graphics_config.txt.in" "${CMAKE_BINARY_DIR}/graphics_config.txt")
-
 if (${GE_BUILD_TESTS})
     enable_testing()
 
@@ -237,17 +247,18 @@ if (${GE_BUILD_TESTS})
 
     if (${GE_BUILD_GRAPHICS_TESTS})
         sources_in_dir_recurse(tests/graphics graphics_tests_sources)
-        add_executable(tests_graphics
-            ${graphics_tests_sources}
-            "tests/graphics/graphics_config.txt.in"
-        )
+        add_executable(tests_graphics ${graphics_tests_sources})
         target_link_libraries(tests_graphics
             GE::window
             GE::render
             GTest::Main
             CONAN_PKG::Vulkan-Headers
         )
-        target_include_directories(tests_graphics PRIVATE "tests/graphics")
+        target_include_directories(tests_graphics
+            PRIVATE
+                "tests/graphics"
+                "${CMAKE_BINARY_DIR}/generated_include"
+        )
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
 
@@ -265,6 +276,7 @@ if (${GE_BUILD_EXAMPLES})
         GE::window
         CONAN_PKG::Vulkan-Headers
     )
+    target_include_directories(example_triangle PRIVATE "${CMAKE_BINARY_DIR}/generated_include")
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)

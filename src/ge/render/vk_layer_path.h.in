@@ -1,0 +1,6 @@
+#include <string_view>
+
+namespace ge
+{
+    constexpr std::string_view VK_LAYER_PATH{"@VK_LAYER_PATH@"};
+}
