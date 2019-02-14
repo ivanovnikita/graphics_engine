@@ -161,15 +161,18 @@ target_include_directories(ge_window
 )
 add_library(GE::window ALIAS ge_window)
 
+sources_in_dir_recurse(src/ge/shader_compiler shader_compiler_sources)
+add_executable(ge_shader_compiler ${shader_compiler_sources})
+target_compile_options(ge_shader_compiler PRIVATE ${compile_options})
+set_target_properties(ge_shader_compiler PROPERTIES ${target_properties})
+target_link_libraries(ge_shader_compiler PRIVATE CONAN_PKG::shaderc Threads::Threads ${std_libs})
+
 sources_in_dir_recurse(src/ge/render render_sources)
-
-
 if (${GE_ENABLE_DEBUG_LAYERS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
     configure_file("src/ge/render/vk_layer_path.h.in" "${CMAKE_BINARY_DIR}/generated_include/vk_layer_path.h")
     list(APPEND render_sources "src/ge/render/vk_layer_path.h.in")
 endif()
-
 add_library(ge_render ${render_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
 set_target_properties(ge_render PROPERTIES ${target_properties})
