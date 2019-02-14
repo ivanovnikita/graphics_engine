@@ -173,12 +173,11 @@ endif()
 add_library(ge_render ${render_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
 set_target_properties(ge_render PROPERTIES ${target_properties})
-target_compile_definitions(ge_render
-    PRIVATE
-        -DVK_USE_PLATFORM_XCB_KHR=1
-    PUBLIC
-        -DGE_DEBUG_LAYERS_ENABLED=1
-)
+target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+if (${GE_ENABLE_DEBUG_LAYERS})
+    target_compile_definitions(ge_render PUBLIC -DGE_DEBUG_LAYERS_ENABLED=1)
+endif()
+
 target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::shaderc
@@ -264,8 +263,6 @@ if (${GE_BUILD_TESTS})
 
         file(GLOB shaders "tests/graphics/factory/shaders/*")
         install(FILES ${shaders} DESTINATION tests/bin/shaders)
-
-        install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION tests/bin)
     endif()
 endif()
 
@@ -280,5 +277,4 @@ if (${GE_BUILD_EXAMPLES})
     install(TARGETS example_triangle DESTINATION examples/triangle)
     file(GLOB shaders "examples/triangle/shaders/*")
     install(FILES ${shaders} DESTINATION examples/triangle/shaders)
-    install(FILES "${CMAKE_BINARY_DIR}/graphics_config.txt" DESTINATION examples/triangle)
 endif()
