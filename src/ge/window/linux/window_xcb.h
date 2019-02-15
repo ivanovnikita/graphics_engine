@@ -4,6 +4,8 @@
 
 #include <xcb/xcb.h>
 
+#include <vulkan/vulkan.hpp>
+
 namespace ge
 {
     class WindowXCB final : public Window

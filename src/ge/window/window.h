@@ -2,13 +2,25 @@
 
 #include "ge/window/window_events.h"
 
-#include <vulkan/vulkan.hpp>
-
 #include <memory>
+#include <vector>
+
+namespace vk
+{
+    class Instance;
+    class SurfaceKHR;
+    struct Extent2D;
+
+    template <typename Type, typename Dispatch>
+    class UniqueHandle;
+
+    class DispatchLoaderStatic;
+
+    using UniqueSurfaceKHR = UniqueHandle<SurfaceKHR, DispatchLoaderStatic>;
+}
 
 namespace ge
 {
-
     class Window
     {
     public:
@@ -25,5 +37,4 @@ namespace ge
     protected:
         Window();
     };
-
 }

@@ -1,6 +1,8 @@
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 
+#include <vulkan/vulkan.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(Render, create)

@@ -226,6 +226,24 @@ target_include_directories(ge_render
 )
 add_library(GE::render ALIAS ge_render)
 
+sources_in_dir_recurse(src/ge/render_loop render_loop_sources)
+add_library(ge_render_loop ${render_loop_sources})
+target_compile_options(ge_render_loop PRIVATE ${compile_options})
+set_target_properties(ge_render_loop PROPERTIES ${target_properties})
+target_include_directories(ge_render_loop
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(ge_render_loop
+    PRIVATE
+        GE::render
+        GE::window
+)
+add_library(GE::render_loop ALIAS ge_render_loop)
+
 install(
     TARGETS
         ge_window
@@ -297,6 +315,7 @@ if (${GE_BUILD_EXAMPLES})
     target_link_libraries(example_triangle
         GE::render
         GE::window
+        GE::render_loop
         CONAN_PKG::Vulkan-Headers
     )
     target_include_directories(example_triangle PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
