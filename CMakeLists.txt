@@ -167,13 +167,32 @@ target_compile_options(ge_shader_compiler PRIVATE ${compile_options})
 set_target_properties(ge_shader_compiler PROPERTIES ${target_properties})
 target_link_libraries(ge_shader_compiler PRIVATE CONAN_PKG::shaderc Threads::Threads ${std_libs})
 
+file(GLOB shaders_sources src/ge/render/shaders/*)
+set(generated_shaders_sources
+    "${CMAKE_CURRENT_BINARY_DIR}/generated_shaders/generated_shaders.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/generated_shaders/generated_shaders.cpp"
+)
+add_custom_command(
+    OUTPUT
+        ${generated_shaders_sources}
+    COMMAND
+        ge_shader_compiler
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/ge/render/shaders"
+            ge
+            "${CMAKE_CURRENT_BINARY_DIR}/generated_shaders"
+            generated_shaders
+    DEPENDS
+        ge_shader_compiler
+        ${shaders_sources}
+)
+
 sources_in_dir_recurse(src/ge/render render_sources)
 if (${GE_ENABLE_DEBUG_LAYERS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
-    configure_file("src/ge/render/vk_layer_path.h.in" "${CMAKE_BINARY_DIR}/generated_include/vk_layer_path.h")
+    configure_file("src/ge/render/vk_layer_path.h.in" "${CMAKE_CURRENT_BINARY_DIR}/generated_include/vk_layer_path.h")
     list(APPEND render_sources "src/ge/render/vk_layer_path.h.in")
 endif()
-add_library(ge_render ${render_sources})
+add_library(ge_render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
 set_target_properties(ge_render PROPERTIES ${target_properties})
 target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
@@ -183,7 +202,6 @@ endif()
 
 target_link_libraries(ge_render
     PRIVATE
-        CONAN_PKG::shaderc
         CONAN_PKG::Vulkan-Loader
         Threads::Threads
         ${std_libs}
@@ -194,8 +212,10 @@ target_include_directories(ge_render
         $<BUILD_INTERFACE:${CONAN_INCLUDE_DIRS_SHADERC}>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_shaders>
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_shaders>
         $<INSTALL_INTERFACE:include>
 )
 add_library(GE::render ALIAS ge_render)
@@ -259,13 +279,10 @@ if (${GE_BUILD_TESTS})
         target_include_directories(tests_graphics
             PRIVATE
                 "tests/graphics"
-                "${CMAKE_BINARY_DIR}/generated_include"
+                "${CMAKE_CURRENT_BINARY_DIR}/generated_include"
         )
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
-
-        file(GLOB shaders "tests/graphics/factory/shaders/*")
-        install(FILES ${shaders} DESTINATION tests/bin/shaders)
     endif()
 endif()
 
@@ -276,8 +293,6 @@ if (${GE_BUILD_EXAMPLES})
         GE::window
         CONAN_PKG::Vulkan-Headers
     )
-    target_include_directories(example_triangle PRIVATE "${CMAKE_BINARY_DIR}/generated_include")
+    target_include_directories(example_triangle PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
     install(TARGETS example_triangle DESTINATION examples/triangle)
-    file(GLOB shaders "examples/triangle/shaders/*")
-    install(FILES ${shaders} DESTINATION examples/triangle/shaders)
 endif()

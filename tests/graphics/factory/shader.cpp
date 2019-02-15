@@ -7,6 +7,8 @@
 
 #include "ge/window/window.h"
 
+#include "generated_shaders.h"
+
 TEST(ShaderModule, create_vertex)
 {
     using namespace test;
@@ -38,6 +40,6 @@ TEST(ShaderModule, create_vertex)
       , queue_family_indices
     );
 
-    const auto shader_module =  factory::create_shader_module(*logical_device, "shaders/triangle.vert");
+    const auto shader_module =  factory::create_shader_module(*logical_device, triangle_Vertex);
     EXPECT_TRUE(shader_module);
 }

@@ -103,7 +103,7 @@ namespace ge
 
             images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
             image_views_ = factory::create_image_view(images_, format, *logical_device_);
-            storage::Shaders shaders(*logical_device_, "shaders");
+            storage::Shaders shaders(*logical_device_);
             auto[pipeline, layout, render_pass] = factory::create_graphics_pipeline
             (
                 *logical_device_
