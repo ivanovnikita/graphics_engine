@@ -165,7 +165,13 @@ sources_in_dir_recurse(src/ge/shader_compiler shader_compiler_sources)
 add_executable(ge_shader_compiler ${shader_compiler_sources})
 target_compile_options(ge_shader_compiler PRIVATE ${compile_options})
 set_target_properties(ge_shader_compiler PROPERTIES ${target_properties})
-target_link_libraries(ge_shader_compiler PRIVATE CONAN_PKG::shaderc Threads::Threads ${std_libs})
+target_link_libraries(ge_shader_compiler
+    PRIVATE
+        CONAN_PKG::Vulkan-Headers
+        CONAN_PKG::shaderc
+        Threads::Threads
+        ${std_libs}
+)
 
 file(GLOB shaders_sources src/ge/render/shaders/*)
 set(generated_shaders_sources
