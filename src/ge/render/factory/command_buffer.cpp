@@ -19,27 +19,28 @@ namespace ge::factory
 
         const std::vector<vk::CommandBuffer> command_buffers = logical_device.allocateCommandBuffers(alloc_info);
 
+        const auto begin_info = vk::CommandBufferBeginInfo{}
+            .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
+        const vk::ClearValue clear_color
+        {
+            vk::ClearColorValue{std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f}}
+        };
+        auto render_pass_info = vk::RenderPassBeginInfo{}
+            .setRenderPass(render_pass)
+            .setRenderArea
+            (
+                vk::Rect2D{}
+                    .setOffset(vk::Offset2D{0, 0})
+                    .setExtent(extent)
+            )
+            .setClearValueCount(1)
+            .setPClearValues(&clear_color);
+
         for (size_t i = 0; i < command_buffers.size(); ++i)
         {
-            const auto begin_info = vk::CommandBufferBeginInfo{}
-                .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
             command_buffers[i].begin(begin_info);
 
-            const vk::ClearValue clear_color
-            {
-                vk::ClearColorValue{std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f}}
-            };
-            const auto render_pass_info = vk::RenderPassBeginInfo{}
-                .setRenderPass(render_pass)
-                .setFramebuffer(*framebuffes[i])
-                .setRenderArea
-                (
-                    vk::Rect2D{}
-                        .setOffset(vk::Offset2D{0, 0})
-                        .setExtent(extent)
-                )
-                .setClearValueCount(1)
-                .setPClearValues(&clear_color);
+            render_pass_info.setFramebuffer(*framebuffes[i]);
             command_buffers[i].beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
             command_buffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);

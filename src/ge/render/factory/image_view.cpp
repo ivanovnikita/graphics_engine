@@ -12,30 +12,21 @@ namespace ge::factory
         std::vector<vk::UniqueImageView> image_views;
         image_views.reserve(images.size());
 
-        const uint32_t base_mip_level = 0;
-        const uint32_t level_count = 1;
-        const uint32_t base_array_layer = 0;
-        const uint32_t layer_count = 1;
+        const auto subresource_range = vk::ImageSubresourceRange{}
+            .setAspectMask(vk::ImageAspectFlagBits::eColor)
+            .setBaseMipLevel(0)
+            .setLevelCount(1)
+            .setBaseArrayLayer(0)
+            .setLayerCount(1);
+
+        auto create_info = vk::ImageViewCreateInfo{}
+            .setViewType(vk::ImageViewType::e2D)
+            .setFormat(format)
+            .setSubresourceRange(subresource_range);
 
         for (const auto& image : images)
         {
-            const vk::ImageViewCreateInfo create_info
-            {
-                vk::ImageViewCreateFlags{}
-              , image
-              , vk::ImageViewType::e2D
-              , format
-              , vk::ComponentMapping{}
-              , vk::ImageSubresourceRange
-                {
-                    vk::ImageAspectFlagBits::eColor
-                  , base_mip_level
-                  , level_count
-                  , base_array_layer
-                  , layer_count
-                }
-            };
-
+            create_info.setImage(image);
             image_views.emplace_back(logical_device.createImageViewUnique(create_info));
         }
 

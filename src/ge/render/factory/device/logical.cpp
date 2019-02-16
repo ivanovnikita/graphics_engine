@@ -34,16 +34,22 @@ namespace ge::factory
         {
             const std::set<uint32_t> unique_queue_family_indices = get_unique(queue_family_indeces);
 
-            const auto queue_priority = 0.0f;
-            const auto queue_count = 1;
-            std::vector<vk::DeviceQueueCreateInfo> queue_create_info;
-            queue_create_info.reserve(unique_queue_family_indices.size());
+            constexpr float queue_priority = 0.0f;
+
+            auto queue_create_info = vk::DeviceQueueCreateInfo{}
+                .setQueueCount(1)
+                .setPQueuePriorities(&queue_priority);
+
+            std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
+            queue_create_infos.reserve(unique_queue_family_indices.size());
+
             for (const auto& queue_family_index : unique_queue_family_indices)
             {
-                queue_create_info.emplace_back(vk::DeviceQueueCreateFlags(), queue_family_index, queue_count, &queue_priority);
+                queue_create_info.setQueueFamilyIndex(queue_family_index);
+                queue_create_infos.emplace_back(queue_create_info);
             }
 
-            return queue_create_info;
+            return queue_create_infos;
         }
     }
 

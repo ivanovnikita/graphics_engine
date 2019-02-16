@@ -34,7 +34,7 @@ namespace ge::factory
 
             vk::PresentModeKHR best = vk::PresentModeKHR::eFifo;
 
-            for (const auto& mode : surface_present_modes)
+            for (const vk::PresentModeKHR& mode : surface_present_modes)
             {
                 if (mode == vk::PresentModeKHR::eMailbox)
                 {
@@ -57,8 +57,8 @@ namespace ge::factory
             }
             else
             {
-                const auto width = extent.width;
-                const auto height = extent.height;
+                const unsigned int width{extent.width};
+                const unsigned int height{extent.height};
                 return
                 {
                     std::max
@@ -77,7 +77,7 @@ namespace ge::factory
 
         uint32_t choose_image_count(const vk::SurfaceCapabilitiesKHR& surface_capabilities)
         {
-            uint32_t count = surface_capabilities.minImageCount + 1;
+            uint32_t count{surface_capabilities.minImageCount + 1};
             if (surface_capabilities.maxImageCount != 0)
             {
                 count = std::min(count, surface_capabilities.maxImageCount);
@@ -121,15 +121,15 @@ namespace ge::factory
       , const QueueFamilyIndices& queue_family_indices
     )
     {
-        const auto surface_capabilities = physical_device.getSurfaceCapabilitiesKHR(surface);
+        const vk::SurfaceCapabilitiesKHR surface_capabilities = physical_device.getSurfaceCapabilitiesKHR(surface);
 
         const uint32_t image_count = choose_image_count(surface_capabilities);
 
-        const auto format = choose_format(physical_device, surface);
+        const vk::SurfaceFormatKHR format = choose_format(physical_device, surface);
         const auto[sharing_mode, indices] = choose_sharing_mode_and_indices(queue_family_indices);
 
-        const uint32_t array_layers_count = 1;
-        const auto is_clipped = VK_TRUE;
+        constexpr uint32_t array_layers_count = 1;
+        constexpr auto is_clipped = VK_TRUE;
 
         const vk::SwapchainCreateInfoKHR create_info
         {

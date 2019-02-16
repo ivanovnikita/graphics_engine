@@ -136,11 +136,12 @@ namespace ge::factory
 
         sort_by_type(devices);
 
+        const auto& required_layers = get_required_layers(options.validation_layers);
+
         for (const auto& device : devices)
         {
             try
             {
-                const auto& required_layers = get_required_layers(options.validation_layers);
                 all_required_are_available(required_layers, get_available_device_layers(device));
 
                 QueueFamilyIndices indices;
