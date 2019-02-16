@@ -73,26 +73,61 @@ namespace ge
         (
             xcb_connection_t& connection
             , const xcb_window_t& handle
-            , const uint16_t min_width
-            , const uint16_t min_height
-            , const uint16_t max_width
-            , const uint16_t max_height
+            , const std::optional<Size>& min_size
+            , const std::optional<Size>& max_size
         )
         {
+            assert(min_size.has_value() or max_size.has_value());
+
             xcb_size_hints_t hints;
 
-            xcb_icccm_size_hints_set_min_size(&hints, min_width, min_height);
-            xcb_icccm_size_hints_set_max_size(&hints, max_width, max_height);
+            if (min_size.has_value())
+            {
+                const auto& [width, height] = *min_size;
+                xcb_icccm_size_hints_set_min_size(&hints, width, height);
+            }
+            if (max_size.has_value())
+            {
+                const auto& [width, height] = *max_size;
+                xcb_icccm_size_hints_set_max_size(&hints, width, height);
+            }
 
             xcb_icccm_set_wm_size_hints(&connection, handle, XCB_ATOM_WM_NORMAL_HINTS, &hints);
         }
     }
 
-    WindowXCB::WindowXCB(uint16_t width, uint16_t height)
-        : width_ (width)
-        , height_ (height)
-        , delete_reply_(nullptr)
+    template <>
+    void WindowXCB::init_window_size<StaticSize>(const StaticSize& size)
     {
+        current_size_ = size;
+    }
+
+    template <>
+    void WindowXCB::init_window_size<DynamicSize>(const DynamicSize& size)
+    {
+        current_size_ = size.default_size;
+    }
+
+    template <>
+    void WindowXCB::init_window_size_constraints<StaticSize>(const StaticSize& size)
+    {
+        set_min_max_sizes(*connection_, handle_, size, size);
+    }
+
+    template <>
+    void WindowXCB::init_window_size_constraints<DynamicSize>(const DynamicSize& size)
+    {
+        if (size.min_size.has_value() or size.max_size.has_value())
+        {
+            set_min_max_sizes(*connection_, handle_, size.min_size, size.max_size);
+        }
+    }
+
+    WindowXCB::WindowXCB(const WindowSize& size)
+        : delete_reply_(nullptr)
+    {
+        std::visit([this] (const auto& s) { this->init_window_size(s); } , size);
+
         int screen_index = 0;
         connection_ = xcb_connect(nullptr, &screen_index);
         handle_ = xcb_generate_id(connection_);
@@ -132,8 +167,8 @@ namespace ge
           , screen->root
           , x
           , y
-          , width_
-          , height_
+          , current_size_.width
+          , current_size_.height
           , border_width
           , XCB_WINDOW_CLASS_INPUT_OUTPUT
           , screen->root_visual
@@ -158,15 +193,7 @@ namespace ge
 
         delete_reply_ = &subscribe_to_close_event(*connection_, handle_);
 
-        set_min_max_sizes
-        (
-            *connection_
-            , handle_
-            , width_
-            , height_
-            , width_
-            , height_
-        );
+        std::visit([this] (const auto& s) { this->init_window_size_constraints(s); } , size);
 
         xcb_flush(connection_);
     }
@@ -187,11 +214,6 @@ namespace ge
         vk::XcbSurfaceCreateInfoKHR create_info(vk::XcbSurfaceCreateFlagsKHR(), connection_, handle_);
 
         return vk::UniqueSurfaceKHR(instance.createXcbSurfaceKHRUnique(create_info));
-    }
-
-    vk::Extent2D WindowXCB::extent() const
-    {
-        return {width_, height_};
     }
 
     void WindowXCB::start_display()

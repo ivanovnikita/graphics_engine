@@ -9,7 +9,8 @@ TEST(Render, create)
 {
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
-    auto window = ge::Window::create(width, height);
+    constexpr ge::StaticSize size{width, height};
+    auto window = ge::Window::create(size);
 
     ASSERT_NO_THROW
     (
