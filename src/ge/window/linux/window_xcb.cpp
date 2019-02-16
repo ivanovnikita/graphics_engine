@@ -1,5 +1,6 @@
 #include "ge/window/linux/window_xcb.h"
-//#include "render/exception.h"
+
+#include <xcb/xcb_icccm.h>
 
 namespace ge
 {
@@ -17,6 +18,74 @@ namespace ge
             CREATE_IF_NOT_EXISTS = 0
             , ONLY_IF_EXISTS = 1
         };
+
+        xcb_intern_atom_reply_t& subscribe_to_close_event
+        (
+            xcb_connection_t& connection
+            , const xcb_window_t& handle
+        )
+        {
+            constexpr std::string_view name_protocols("WM_PROTOCOLS");
+            const xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom
+            (
+                &connection
+                , InternAtom::ONLY_IF_EXISTS
+                , name_protocols.length()
+                , name_protocols.data()
+            );
+            xcb_intern_atom_reply_t* const protocols_reply = xcb_intern_atom_reply
+            (
+                &connection
+                , protocols_cookie
+                , nullptr
+            );
+            constexpr std::string_view delete_window("WM_DELETE_WINDOW");
+            const xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom
+            (
+                &connection
+                , InternAtom::CREATE_IF_NOT_EXISTS
+                , delete_window.length()
+                , delete_window.data()
+            );
+            xcb_intern_atom_reply_t* delete_reply = xcb_intern_atom_reply
+            (
+                &connection
+                , delete_cookie
+                , nullptr
+            );
+            xcb_change_property
+            (
+                &connection
+                , XCB_PROP_MODE_REPLACE
+                , handle
+                , protocols_reply->atom
+                , 4
+                , 32
+                , 1
+                , &delete_reply->atom
+            );
+            free(protocols_reply);
+
+            return *delete_reply;
+        }
+
+        void set_min_max_sizes
+        (
+            xcb_connection_t& connection
+            , const xcb_window_t& handle
+            , const uint16_t min_width
+            , const uint16_t min_height
+            , const uint16_t max_width
+            , const uint16_t max_height
+        )
+        {
+            xcb_size_hints_t hints;
+
+            xcb_icccm_size_hints_set_min_size(&hints, min_width, min_height);
+            xcb_icccm_size_hints_set_max_size(&hints, max_width, max_height);
+
+            xcb_icccm_set_wm_size_hints(&connection, handle, XCB_ATOM_WM_NORMAL_HINTS, &hints);
+        }
     }
 
     WindowXCB::WindowXCB(uint16_t width, uint16_t height)
@@ -87,46 +156,17 @@ namespace ge
           , title.data()
         );
 
-        constexpr std::string_view name_protocols("WM_PROTOCOLS");
-        const xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom
+        delete_reply_ = &subscribe_to_close_event(*connection_, handle_);
+
+        set_min_max_sizes
         (
-            connection_
-            , InternAtom::ONLY_IF_EXISTS
-            , name_protocols.length()
-            , name_protocols.data()
-        );
-        xcb_intern_atom_reply_t* const protocols_reply = xcb_intern_atom_reply
-        (
-            connection_
-            , protocols_cookie
-            , nullptr
-        );
-        constexpr std::string_view delete_window("WM_DELETE_WINDOW");
-        const xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom
-        (
-            connection_
-            , InternAtom::CREATE_IF_NOT_EXISTS
-            , delete_window.length()
-            , delete_window.data()
-        );
-        delete_reply_ = xcb_intern_atom_reply
-        (
-            connection_
-            , delete_cookie
-            , nullptr
-        );
-        xcb_change_property
-        (
-            connection_
-            , XCB_PROP_MODE_REPLACE
+            *connection_
             , handle_
-            , protocols_reply->atom
-            , 4
-            , 32
-            , 1
-            , &delete_reply_->atom
+            , width_
+            , height_
+            , width_
+            , height_
         );
-        free(protocols_reply);
 
         xcb_flush(connection_);
     }

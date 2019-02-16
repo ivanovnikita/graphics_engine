@@ -35,6 +35,7 @@ class GraphicsEngineConan(ConanFile):
         self.options["xau"].lto = self.options.lto
         self.options["xdmcp"].lto = self.options.lto
         self.options["xcb"].lto = self.options.lto
+        self.options["xcb-util-wm"].lto = self.options.lto
 
     def requirements(self):
         self.requires.add("shaderc/14ae0de@ivanovnikita/stable", private=False)
@@ -42,6 +43,7 @@ class GraphicsEngineConan(ConanFile):
 
         if self.options.with_xcb:
             self.requires.add("xcb/1.13.1@ivanovnikita/stable", private=False)
+            self.requires.add("xcb-util-wm/0.4.1@ivanovnikita/stable", private=False)
 
         if self.options.with_gtests:
             self.requires.add("googletest/1.8@ivanovnikita/stable", private=True)
