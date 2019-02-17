@@ -41,7 +41,7 @@ TEST(Swapchain, create)
       , queue_family_indices
     );
 
-    auto[swapchain, format] = factory::create_swapchain
+    auto[swapchain, format, extent] = factory::create_swapchain
     (
         physical_device
       , logical_device.get()

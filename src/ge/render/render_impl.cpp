@@ -13,6 +13,7 @@
 #include "ge/render/storage/shaders.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
+#include "ge/render/utils/safe_cast.hpp"
 
 namespace ge
 {
@@ -91,52 +92,9 @@ namespace ge
 
         if constexpr (option_graphics.enabled)
         {
-            auto[swapchain, format] = factory::create_swapchain
-            (
-                physical_device_
-              , *logical_device_
-              , surface_extent_
-              , *surface_
-              , queue_family_indices_
-            );
-            swapchain_ = std::move(swapchain);
+            shaders_storage_ = storage::Shaders{*logical_device_};
 
-            images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
-            image_views_ = factory::create_image_view(images_, format, *logical_device_);
-            storage::Shaders shaders(*logical_device_);
-            auto[pipeline, layout, render_pass] = factory::create_graphics_pipeline
-            (
-                *logical_device_
-              , format
-              , shaders
-              , surface_extent_
-            );
-            pipeline_ = std::move(pipeline);
-            pipeline_layout_ = std::move(layout);
-            render_pass_ = std::move(render_pass);
-
-            framebuffers_.reserve(image_views_.size());
-            for (const auto& image_view : image_views_)
-            {
-                framebuffers_.emplace_back(factory::create_framebuffer
-                (
-                    *logical_device_
-                  , *render_pass_
-                  , *image_view
-                  , surface_extent_
-                ));
-            }
-
-            command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
-            command_buffers_ = factory::create_command_buffer
-            (
-                *logical_device_
-                , *command_pool_
-                , framebuffers_
-                , *render_pass_
-                , surface_extent_
-                , *pipeline_
-            );
+            create_graphics_pipeline();
 
             image_available_semaphore_ = factory::create_semaphore(*logical_device_);
             render_finished_semaphore_ = factory::create_semaphore(*logical_device_);
@@ -148,6 +106,79 @@ namespace ge
     Render::RenderImpl::~RenderImpl()
     {
         logical_device_->waitIdle();
+    }
+
+    void Render::RenderImpl::create_graphics_pipeline()
+    {
+        auto[swapchain, format, extent] = factory::create_swapchain
+        (
+            physical_device_
+          , *logical_device_
+          , surface_extent_
+          , *surface_
+          , queue_family_indices_
+        );
+        surface_extent_ = extent;
+        swapchain_ = std::move(swapchain);
+        images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
+        image_views_ = factory::create_image_view(images_, format, *logical_device_);
+
+        auto[pipeline, layout, render_pass] = factory::create_graphics_pipeline
+        (
+            *logical_device_
+          , format
+          , shaders_storage_
+          , surface_extent_
+        );
+        pipeline_ = std::move(pipeline);
+        pipeline_layout_ = std::move(layout);
+        render_pass_ = std::move(render_pass);
+
+        framebuffers_.reserve(image_views_.size());
+        for (const auto& image_view : image_views_)
+        {
+            framebuffers_.emplace_back(factory::create_framebuffer
+            (
+                *logical_device_
+              , *render_pass_
+              , *image_view
+              , surface_extent_
+            ));
+        }
+
+        command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
+        command_buffers_ = factory::create_command_buffer
+        (
+            *logical_device_
+            , *command_pool_
+            , framebuffers_
+            , *render_pass_
+            , surface_extent_
+            , *pipeline_
+        );
+    }
+
+    void Render::RenderImpl::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
+    {
+        logical_device_->waitIdle();
+
+        logical_device_->freeCommandBuffers
+        (
+            *command_pool_
+            , safe_cast<uint32_t>(command_buffers_.size())
+            , command_buffers_.data()
+        );
+        framebuffers_.clear();
+        pipeline_.reset();
+        pipeline_layout_.reset();
+        render_pass_.reset();
+        image_views_.clear();
+        images_.clear();
+        swapchain_.reset();
+
+        surface_extent_ = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
+
+        create_graphics_pipeline();
     }
 
     vk::UniqueDebugReportCallbackEXT Render::RenderImpl::create_debug_callback() const
@@ -166,13 +197,24 @@ namespace ge
     void Render::RenderImpl::draw_frame()
     {
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-        const uint32_t image_index = logical_device_->acquireNextImageKHR
+        const vk::ResultValue<uint32_t> image_index_result = logical_device_->acquireNextImageKHR
         (
             *swapchain_
             , timeout
             , *image_available_semaphore_
             , vk::Fence{nullptr}
-        ).value;
+        );
+
+        if
+        (
+            image_index_result.result == vk::Result::eErrorOutOfDateKHR
+            or image_index_result.result == vk::Result::eSuboptimalKHR
+        )
+        {
+            return;
+        }
+
+        const uint32_t image_index = image_index_result.value;
 
         const std::array<vk::Semaphore, 1> wait_semaphores{*image_available_semaphore_};
         const std::array<vk::PipelineStageFlags, 1> wait_stages
@@ -192,6 +234,7 @@ namespace ge
             .setPSignalSemaphores(signal_semaphores.data());
 
         constexpr uint32_t submit_info_count = 1;
+        logical_device_->resetFences(1, &*render_finished_fence_);
         queues_.graphics.submit(submit_info_count, &submit_info, *render_finished_fence_);
 
         const std::array<vk::SwapchainKHR, 1> swapchains{*swapchain_};
@@ -203,9 +246,16 @@ namespace ge
             .setPSwapchains(swapchains.data())
             .setPImageIndices(&image_index);
 
-        queues_.present.presentKHR(present_info);
+        const vk::Result present_result = queues_.present.presentKHR(&present_info);
+        if (present_result == vk::Result::eErrorOutOfDateKHR or present_result == vk::Result::eSuboptimalKHR)
+        {
+            return;
+        }
+        else if (present_result != vk::Result::eSuccess)
+        {
+            vk::throwResultException(present_result, VULKAN_HPP_NAMESPACE_STRING"::Queue::presentKHR");
+        }
 
         logical_device_->waitForFences(1, &*render_finished_fence_, VK_TRUE, timeout);
-        logical_device_->resetFences(1, &*render_finished_fence_);
     }
 }

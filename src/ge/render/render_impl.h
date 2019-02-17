@@ -2,6 +2,7 @@
 
 #include "ge/render/render.h"
 #include "ge/render/queue.h"
+#include "ge/render/storage/shaders.h"
 
 namespace ge
 {
@@ -15,9 +16,11 @@ namespace ge
         );
         ~RenderImpl();
         void draw_frame();
+        void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
+        void create_graphics_pipeline();
 
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
@@ -27,6 +30,7 @@ namespace ge
         QueueFamilyIndices                  queue_family_indices_;
         vk::UniqueDevice                    logical_device_;
         Queues                              queues_;
+        storage::Shaders                    shaders_storage_;
         vk::UniqueSwapchainKHR              swapchain_;
         std::vector<vk::Image>              images_;
         std::vector<vk::UniqueImageView>    image_views_;

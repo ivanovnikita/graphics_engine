@@ -6,7 +6,7 @@
 
 namespace ge::factory
 {
-    std::pair<vk::UniqueSwapchainKHR, vk::Format> create_swapchain
+    std::tuple<vk::UniqueSwapchainKHR, vk::Format, vk::Extent2D> create_swapchain
     (
         const vk::PhysicalDevice&
       , const vk::Device&

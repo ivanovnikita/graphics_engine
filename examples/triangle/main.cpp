@@ -21,7 +21,12 @@ int main()
 
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
-    constexpr ge::StaticSize size{width, height};
+    constexpr ge::DynamicSize size
+    {
+        ge::Size{width, height}
+        , ge::Size{100, 100}
+        , ge::Size{700, 700}
+    };
     auto window = ge::Window::create(size);
 
     ge::Render render

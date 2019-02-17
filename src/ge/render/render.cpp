@@ -30,4 +30,9 @@ namespace ge
     {
         impl_->draw_frame();
     }
+
+    void Render::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
+    {
+        impl_->resize(new_surface_width, new_surface_height);
+    }
 }

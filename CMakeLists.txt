@@ -139,7 +139,7 @@ find_package(Threads REQUIRED)
 
 if (WIN32)
 elseif(UNIX)
-    set(window_libs CONAN_PKG::xcb CONAN_PKG::xcb-util-wm)
+    set(window_libs CONAN_PKG::xcb CONAN_PKG::xcb-util CONAN_PKG::xcb-util-wm)
 endif()
 
 sources_in_dir_recurse(src/ge/window window_sources)

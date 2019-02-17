@@ -18,6 +18,7 @@ namespace ge
 
         void start_display() override;
         std::vector<WindowEvent> grab_events() override;
+        void resize(const Size&) override;
 
     private:
         template <typename T>

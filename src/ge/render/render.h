@@ -31,6 +31,7 @@ namespace ge
         );
         ~Render();
         void draw_frame();
+        void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
     private:
         class RenderImpl;

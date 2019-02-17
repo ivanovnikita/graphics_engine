@@ -51,28 +51,30 @@ namespace ge::factory
 
         vk::Extent2D choose_extent(const vk::SurfaceCapabilitiesKHR& capabilities, const vk::Extent2D& extent)
         {
+            vk::Extent2D result;
+
             if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
             {
-                return capabilities.currentExtent;
+                result = capabilities.currentExtent;
             }
             else
             {
-                const unsigned int width{extent.width};
-                const unsigned int height{extent.height};
-                return
+                result = vk::Extent2D
                 {
                     std::max
                     (
                         capabilities.minImageExtent.width
-                      , std::min(capabilities.maxImageExtent.width, safe_cast<uint32_t>(width))
+                      , std::min(capabilities.maxImageExtent.width, extent.width)
                     )
                   , std::max
                     (
                         capabilities.minImageExtent.height
-                      , std::min(capabilities.maxImageExtent.height, safe_cast<uint32_t>(height))
+                      , std::min(capabilities.maxImageExtent.height, extent.height)
                     )
                 };
             }
+
+            return result;
         }
 
         uint32_t choose_image_count(const vk::SurfaceCapabilitiesKHR& surface_capabilities)
@@ -112,7 +114,7 @@ namespace ge::factory
         }
     }
 
-    std::pair<vk::UniqueSwapchainKHR, vk::Format> create_swapchain
+    std::tuple<vk::UniqueSwapchainKHR, vk::Format, vk::Extent2D> create_swapchain
     (
         const vk::PhysicalDevice& physical_device
       , const vk::Device& logical_device
@@ -126,6 +128,7 @@ namespace ge::factory
         const uint32_t image_count = choose_image_count(surface_capabilities);
 
         const vk::SurfaceFormatKHR format = choose_format(physical_device, surface);
+        const vk::Extent2D result_extent = choose_extent(surface_capabilities, extent);
         const auto[sharing_mode, indices] = choose_sharing_mode_and_indices(queue_family_indices);
 
         constexpr uint32_t array_layers_count = 1;
@@ -138,7 +141,7 @@ namespace ge::factory
           , image_count
           , format.format
           , format.colorSpace
-          , choose_extent(surface_capabilities, extent)
+          , result_extent
           , array_layers_count
           , vk::ImageUsageFlagBits::eColorAttachment
           , sharing_mode
@@ -150,6 +153,6 @@ namespace ge::factory
           , is_clipped
         };
 
-        return {logical_device.createSwapchainKHRUnique(create_info), format.format};
+        return {logical_device.createSwapchainKHRUnique(create_info), format.format, result_extent};
     }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ge/window/window_size.h"
+
 #include <cstdint>
 #include <variant>
 
@@ -11,8 +13,7 @@ namespace ge
 
     struct WindowEventResize final
     {
-        uint16_t new_width;
-        uint16_t new_height;
+        Size new_size;
     };
 
     using WindowEvent = std::variant

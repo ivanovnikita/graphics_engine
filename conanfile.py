@@ -43,6 +43,7 @@ class GraphicsEngineConan(ConanFile):
 
         if self.options.with_xcb:
             self.requires.add("xcb/1.13.1@ivanovnikita/stable", private=False)
+            self.requires.add("xcb-util/0.4.0@ivanovnikita/stable", private=False)
             self.requires.add("xcb-util-wm/0.4.1@ivanovnikita/stable", private=False)
 
         if self.options.with_gtests:

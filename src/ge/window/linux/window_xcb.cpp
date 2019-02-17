@@ -1,6 +1,7 @@
 #include "ge/window/linux/window_xcb.h"
 
 #include <xcb/xcb_icccm.h>
+#include <xcb/xcb_aux.h>
 
 namespace ge
 {
@@ -73,6 +74,7 @@ namespace ge
         (
             xcb_connection_t& connection
             , const xcb_window_t& handle
+            , const Size& current_size
             , const std::optional<Size>& min_size
             , const std::optional<Size>& max_size
         )
@@ -80,19 +82,20 @@ namespace ge
             assert(min_size.has_value() or max_size.has_value());
 
             xcb_size_hints_t hints;
+            std::memset(&hints, 0, sizeof(hints));
+
+            xcb_icccm_size_hints_set_size(&hints, true, current_size.width, current_size.height);
 
             if (min_size.has_value())
             {
-                const auto& [width, height] = *min_size;
-                xcb_icccm_size_hints_set_min_size(&hints, width, height);
+                xcb_icccm_size_hints_set_min_size(&hints, min_size->width, min_size->height);
             }
             if (max_size.has_value())
             {
-                const auto& [width, height] = *max_size;
-                xcb_icccm_size_hints_set_max_size(&hints, width, height);
+                xcb_icccm_size_hints_set_max_size(&hints, max_size->width, max_size->height);
             }
 
-            xcb_icccm_set_wm_size_hints(&connection, handle, XCB_ATOM_WM_NORMAL_HINTS, &hints);
+            xcb_icccm_set_wm_normal_hints(&connection, handle, &hints);
         }
     }
 
@@ -111,7 +114,7 @@ namespace ge
     template <>
     void WindowXCB::init_window_size_constraints<StaticSize>(const StaticSize& size)
     {
-        set_min_max_sizes(*connection_, handle_, size, size);
+        set_min_max_sizes(*connection_, handle_, size, size, size);
     }
 
     template <>
@@ -119,14 +122,14 @@ namespace ge
     {
         if (size.min_size.has_value() or size.max_size.has_value())
         {
-            set_min_max_sizes(*connection_, handle_, size.min_size, size.max_size);
+            set_min_max_sizes(*connection_, handle_, size.default_size, size.min_size, size.max_size);
         }
     }
 
     WindowXCB::WindowXCB(const WindowSize& size)
         : delete_reply_(nullptr)
     {
-        std::visit([this] (const auto& s) { this->init_window_size(s); } , size);
+        std::visit([this] (const auto& s) { this->init_window_size(s); }, size);
 
         int screen_index = 0;
         connection_ = xcb_connect(nullptr, &screen_index);
@@ -193,7 +196,7 @@ namespace ge
 
         delete_reply_ = &subscribe_to_close_event(*connection_, handle_);
 
-        std::visit([this] (const auto& s) { this->init_window_size_constraints(s); } , size);
+        std::visit([this] (const auto& s) { this->init_window_size_constraints(s); }, size);
 
         xcb_flush(connection_);
     }
@@ -244,6 +247,8 @@ namespace ge
     {
         std::vector<WindowEvent> events;
 
+        std::optional<WindowEventResize> last_resize_event;
+
         xcb_generic_event_t* event = xcb_poll_for_event(connection_);
         while (event != nullptr)
         {
@@ -259,12 +264,52 @@ namespace ge
                 }
                 break;
             }
+            case XCB_CONFIGURE_NOTIFY:
+            {
+                const auto resize_event = reinterpret_cast<const xcb_configure_notify_event_t*>(event);
+                if
+                (
+                    resize_event->width != current_size_.width
+                    or resize_event->height != current_size_.height
+                )
+                {
+                    current_size_.width = resize_event->width;
+                    current_size_.height = resize_event->height;
+                    if (current_size_.width > 0 and current_size_.height > 0)
+                    {
+                        last_resize_event = WindowEventResize{current_size_};
+                    }
+                }
+            }
             }
 
             free(event);
             event = xcb_poll_for_event(connection_);
         }
 
+        if (last_resize_event.has_value())
+        {
+            events.emplace_back(*last_resize_event);
+            last_resize_event.reset();
+        }
+
         return events;
+    }
+
+    void WindowXCB::resize(const Size& size)
+    {
+        if (size.width != current_size_.width or size.height != current_size_.height)
+        {
+            const uint32_t values[] = {size.width, size.height};
+            xcb_configure_window
+            (
+                connection_
+                , handle_
+                , XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT
+                , values
+            );
+            xcb_flush(connection_);
+            xcb_aux_sync(connection_);
+        }
     }
 }

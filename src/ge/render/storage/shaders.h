@@ -10,6 +10,7 @@ namespace ge::storage
         using ShaderModuleRef = std::reference_wrapper<const vk::ShaderModule>;
         using Shader = std::pair<vk::ShaderStageFlagBits, ShaderModuleRef>;
 
+        Shaders() = default;
         explicit Shaders(const vk::Device& device);
 
         std::vector<Shader> shaders() const;

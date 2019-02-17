@@ -1,11 +1,10 @@
 #pragma once
 
 #include "ge/window/window_events.h"
+#include "ge/window/window_size.h"
 
 #include <memory>
 #include <vector>
-#include <variant>
-#include <optional>
 
 namespace vk
 {
@@ -23,23 +22,6 @@ namespace vk
 
 namespace ge
 {
-    struct Size final
-    {
-        uint16_t width;
-        uint16_t height;
-    };
-
-    using StaticSize = Size;
-
-    struct DynamicSize final
-    {
-        Size default_size;
-        std::optional<Size> min_size;
-        std::optional<Size> max_size;
-    };
-
-    using WindowSize = std::variant<StaticSize, DynamicSize>;
-
     class Window
     {
     public:
@@ -51,6 +33,7 @@ namespace ge
 
         virtual void start_display() = 0;
         virtual std::vector<WindowEvent> grab_events() = 0;
+        virtual void resize(const Size&) = 0;
 
     protected:
         Window();

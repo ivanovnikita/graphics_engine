@@ -12,8 +12,10 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event<ge::WindowEventResize>(const ge::WindowEventResize&)
+    void RenderLoop::handle_window_event<ge::WindowEventResize>(const ge::WindowEventResize& event)
     {
+        render_.resize(event.new_size.width, event.new_size.height);
+        render_.draw_frame();
     }
 
     RenderLoop::RenderLoop(ge::Window& window, ge::Render& render)
