@@ -149,8 +149,8 @@ namespace ge
                     source << "    };\n";
                 }
             }
-            header << "}";
-            source << "}";;
+            header << "}\n";
+            source << "}\n";;
 
             GeneratedCppSources result;
             result.header = header.str();
