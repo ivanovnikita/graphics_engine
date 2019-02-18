@@ -113,9 +113,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND warnings
         -Weverything
         -Wno-c++98-compat
+        -Wno-c++98-compat-pedantic
         -Wno-c++11-compat
         -Wno-c++14-compat
         -Wno-unreachable-code
+        -Wno-padded
         )
 endif()
 
