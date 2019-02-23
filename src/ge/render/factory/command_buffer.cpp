@@ -10,6 +10,8 @@ namespace ge::factory
         , const vk::RenderPass& render_pass
         , const vk::Extent2D& extent
         , const vk::Pipeline& pipeline
+        , const vk::Buffer& vertex_buffer
+        , const Span<const Vertex>& vertices
     )
     {
         const auto alloc_info = vk::CommandBufferAllocateInfo{}
@@ -45,13 +47,23 @@ namespace ge::factory
 
             command_buffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 
-            constexpr uint32_t vertex_count = 3;
+            constexpr vk::DeviceSize offsets[] = {0};
+            constexpr uint32_t first_binding = 0;
+            constexpr uint32_t binding_count = 1;
+            command_buffers[i].bindVertexBuffers
+            (
+                first_binding
+                , binding_count
+                , &vertex_buffer
+                , offsets
+            );
+
             constexpr uint32_t instance_count = 1;
             constexpr uint32_t first_vertex = 0;
             constexpr uint32_t first_instance = 0;
             command_buffers[i].draw
             (
-                vertex_count
+                static_cast<uint32_t>(vertices.size())
                 , instance_count
                 , first_vertex
                 , first_instance

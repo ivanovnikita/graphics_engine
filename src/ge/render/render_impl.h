@@ -38,6 +38,8 @@ namespace ge
         vk::UniquePipelineLayout            pipeline_layout_;
         vk::UniquePipeline                  pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
+        vk::UniqueDeviceMemory              vertex_buffer_memory_;
+        vk::UniqueBuffer                    vertex_buffer_;
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;
         vk::UniqueSemaphore                 image_available_semaphore_;

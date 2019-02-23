@@ -211,6 +211,7 @@ endif()
 target_link_libraries(ge_render
     PRIVATE
         CONAN_PKG::Vulkan-Loader
+        CONAN_PKG::glm
         Threads::Threads
         ${std_libs}
         dl

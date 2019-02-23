@@ -10,13 +10,25 @@
 #include "ge/render/factory/command_buffer.h"
 #include "ge/render/factory/semaphore.h"
 #include "ge/render/factory/fence.h"
+#include "ge/render/factory/vertex_buffer.h"
 #include "ge/render/storage/shaders.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
 #include "ge/render/utils/safe_cast.hpp"
+#include "ge/render/vertex.h"
 
 namespace ge
 {
+    namespace
+    {
+        const std::array VERTICES
+        {
+            Vertex{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}}
+            , Vertex{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
+            , Vertex{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+        };
+    }
+
     Render::RenderImpl::RenderImpl
     (
         const std::function<SurfaceCreator>& create_surface
@@ -146,6 +158,29 @@ namespace ge
             ));
         }
 
+        {
+            const uint32_t buffer_size = sizeof(Vertex) * VERTICES.size();
+            auto [buffer, memory] = factory::create_vertex_buffer
+            (
+                physical_device_
+                , *logical_device_
+                , buffer_size
+            );
+            vertex_buffer_memory_ = std::move(memory);
+            vertex_buffer_ = std::move(buffer);
+
+            constexpr uint32_t offset = 0;
+            void* data = logical_device_->mapMemory
+            (
+                *vertex_buffer_memory_
+                , offset
+                , buffer_size
+                , vk::MemoryMapFlags{}
+            );
+            std::memcpy(data, VERTICES.data(), static_cast<size_t>(buffer_size));
+            logical_device_->unmapMemory(*vertex_buffer_memory_);
+        }
+
         command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
         command_buffers_ = factory::create_command_buffer
         (
@@ -155,6 +190,8 @@ namespace ge
             , *render_pass_
             , surface_extent_
             , *pipeline_
+            , *vertex_buffer_
+            , VERTICES
         );
     }
 

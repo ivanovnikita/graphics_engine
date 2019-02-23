@@ -40,6 +40,7 @@ class GraphicsEngineConan(ConanFile):
     def requirements(self):
         self.requires.add("shaderc/14ae0de@ivanovnikita/stable", private=False)
         self.requires.add("Vulkan-Loader/1.1.97@ivanovnikita/stable", private=False)
+        self.requires.add("glm/0.9.9.1@g-truc/stable", private=False)
 
         if self.options.with_xcb:
             self.requires.add("xcb/1.13.1@ivanovnikita/stable", private=False)

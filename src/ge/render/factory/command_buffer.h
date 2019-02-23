@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ge/render/factory/command_pool.h"
+#include "ge/render/utils/span.hpp"
+#include "ge/render/vertex.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -14,5 +16,7 @@ namespace ge::factory
         , const vk::RenderPass&
         , const vk::Extent2D&
         , const vk::Pipeline&
+        , const vk::Buffer&
+        , const Span<const Vertex>&
     );
 }
