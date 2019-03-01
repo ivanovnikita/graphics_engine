@@ -10,7 +10,7 @@
 #include "ge/render/factory/command_buffer.h"
 #include "ge/render/factory/semaphore.h"
 #include "ge/render/factory/fence.h"
-#include "ge/render/factory/vertex_buffer.h"
+#include "ge/render/factory/buffer.h"
 #include "ge/render/storage/shaders.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
@@ -27,6 +27,46 @@ namespace ge
             , Vertex{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
             , Vertex{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
         };
+
+        void copy_buffer
+        (
+            const vk::Buffer& src
+            , const vk::Buffer& dst
+            , const size_t size
+            , const vk::Device& logical_device
+            , const vk::CommandPool& command_pool
+            , const vk::Queue& graphics_queue
+        )
+        {
+            const auto alloc_info = vk::CommandBufferAllocateInfo{}
+                .setLevel(vk::CommandBufferLevel::ePrimary)
+                .setCommandPool(command_pool)
+                .setCommandBufferCount(1);
+
+            const std::vector<vk::UniqueCommandBuffer> command_buffers = logical_device.allocateCommandBuffersUnique
+            (
+                alloc_info
+            );
+            const vk::CommandBuffer& command_buffer = *command_buffers.front();
+
+            const auto begin_info = vk::CommandBufferBeginInfo{}
+                .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+
+            command_buffer.begin(begin_info);
+            const auto copy_region = vk::BufferCopy{}
+                .setSrcOffset(0)
+                .setDstOffset(0)
+                .setSize(size);
+            command_buffer.copyBuffer(src, dst, copy_region);
+            command_buffer.end();
+
+            const auto submit_info = vk::SubmitInfo{}
+                .setCommandBufferCount(1)
+                .setPCommandBuffers(&command_buffer);
+
+            graphics_queue.submit(1, &submit_info, nullptr);
+            graphics_queue.waitIdle();
+        }
     }
 
     Render::RenderImpl::RenderImpl
@@ -158,30 +198,55 @@ namespace ge
             ));
         }
 
+        command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
+
         {
             const uint32_t buffer_size = sizeof(Vertex) * VERTICES.size();
-            auto [buffer, memory] = factory::create_vertex_buffer
+
+            auto [staging_buffer, staging_memory] = factory::create_buffer
             (
                 physical_device_
                 , *logical_device_
                 , buffer_size
+                , vk::BufferUsageFlagBits::eTransferSrc
+                , vk::MemoryPropertyFlagBits::eHostVisible
+                | vk::MemoryPropertyFlagBits::eHostCoherent
             );
-            vertex_buffer_memory_ = std::move(memory);
-            vertex_buffer_ = std::move(buffer);
 
             constexpr uint32_t offset = 0;
             void* data = logical_device_->mapMemory
             (
-                *vertex_buffer_memory_
+                *staging_memory
                 , offset
                 , buffer_size
                 , vk::MemoryMapFlags{}
             );
             std::memcpy(data, VERTICES.data(), static_cast<size_t>(buffer_size));
-            logical_device_->unmapMemory(*vertex_buffer_memory_);
+            logical_device_->unmapMemory(*staging_memory);
+
+            auto [vertex_buffer, vertex_memory] = factory::create_buffer
+            (
+                physical_device_
+                , *logical_device_
+                , buffer_size
+                , vk::BufferUsageFlagBits::eTransferDst
+                | vk::BufferUsageFlagBits::eVertexBuffer
+                , vk::MemoryPropertyFlagBits::eDeviceLocal
+            );
+            vertex_buffer_memory_ = std::move(vertex_memory);
+            vertex_buffer_ = std::move(vertex_buffer);
+
+            copy_buffer
+            (
+                *staging_buffer
+                , *vertex_buffer_
+                , buffer_size
+                , *logical_device_
+                , *command_pool_
+                , queues_.graphics
+            );
         }
 
-        command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
         command_buffers_ = factory::create_command_buffer
         (
             *logical_device_

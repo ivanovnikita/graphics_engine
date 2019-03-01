@@ -1,4 +1,4 @@
-#include "vertex_buffer.h"
+#include "buffer.h"
 
 namespace ge::factory
 {
@@ -28,16 +28,18 @@ namespace ge::factory
         }
     }
 
-    std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> create_vertex_buffer
+    std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> create_buffer
     (
         const vk::PhysicalDevice& physical_device
         , const vk::Device& logical_device
         , const size_t size
+        , const vk::BufferUsageFlags usage
+        , const vk::MemoryPropertyFlags mem_properties
     )
     {
         const auto buffer_create_info = vk::BufferCreateInfo{}
             .setSize(size)
-            .setUsage(vk::BufferUsageFlagBits::eVertexBuffer)
+            .setUsage(usage)
             .setSharingMode(vk::SharingMode::eExclusive);
 
         vk::UniqueBuffer buffer = logical_device.createBufferUnique(buffer_create_info);
@@ -51,8 +53,7 @@ namespace ge::factory
                 (
                     physical_device
                     , mem_requirements.memoryTypeBits
-                    , vk::MemoryPropertyFlagBits::eHostVisible
-                    | vk::MemoryPropertyFlagBits::eHostCoherent
+                    , mem_properties
                 )
             );
 
