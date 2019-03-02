@@ -2,7 +2,7 @@
 #include "ge/render/factory/shader/module.h"
 #include "ge/render/factory/pipeline/graphics/render_pass.h"
 #include "ge/render/utils/safe_cast.hpp"
-#include "ge/render/vertex.h"
+#include "ge/render/vertex_description.h"
 
 namespace ge::factory
 {
@@ -43,8 +43,8 @@ namespace ge::factory
     {
         const auto shader_stage_create_info = get_shader_stage_create_info(shaders_storage);
 
-        const auto binding_description = Vertex::binding_description();
-        const auto attribute_description = Vertex::attribute_descriptions();
+        const auto binding_description = vertex_binding_description();
+        const auto attribute_description = vertex_attribute_descriptions();
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(1)
             .setPVertexBindingDescriptions(&binding_description)

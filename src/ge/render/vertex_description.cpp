@@ -1,10 +1,10 @@
-#include "vertex.h"
+#include "vertex_description.h"
 
 #include <array>
 
 namespace ge
 {
-    vk::VertexInputBindingDescription Vertex::binding_description()
+    vk::VertexInputBindingDescription vertex_binding_description()
     {
         return vk::VertexInputBindingDescription{}
             .setBinding(0)
@@ -12,7 +12,7 @@ namespace ge
             .setInputRate(vk::VertexInputRate::eVertex);
     }
 
-    Span<const vk::VertexInputAttributeDescription> Vertex::attribute_descriptions()
+    Span<const vk::VertexInputAttributeDescription> vertex_attribute_descriptions()
     {
         static const std::array descriptions
         {

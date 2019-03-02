@@ -3,6 +3,7 @@
 #include "ge/render/render.h"
 #include "ge/render/queue.h"
 #include "ge/render/storage/shaders.h"
+#include "ge/render/vertex.h"
 
 namespace ge
 {
@@ -15,12 +16,14 @@ namespace ge
           , vk::Extent2D surface_extent
         );
         ~RenderImpl();
+        void set_object_to_draw(const Span<const Vertex>, const Span<const uint16_t> indices);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
         void create_graphics_pipeline();
+        void create_command_buffers();
 
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
@@ -48,5 +51,8 @@ namespace ge
         vk::UniqueSemaphore                 render_finished_semaphore_;
         vk::UniqueFence                     render_finished_fence_;
         vk::UniqueFence                     transfer_finished_fence_;
+
+        std::vector<Vertex>                 vertices_;
+        std::vector<uint16_t>               indices_;
     };
 }

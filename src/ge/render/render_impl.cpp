@@ -19,22 +19,6 @@
 
 namespace ge
 {
-    namespace
-    {
-        const std::array VERTICES
-        {
-            Vertex{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}
-            , Vertex{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}
-            , Vertex{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-            , Vertex{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-        };
-
-        const std::array<uint16_t, 6> INDICES
-        {
-            0, 1, 2, 2, 3, 0
-        };
-    }
-
     Render::RenderImpl::RenderImpl
     (
         const std::function<SurfaceCreator>& create_surface
@@ -119,6 +103,8 @@ namespace ge
             transfer_finished_fence_ = factory::create_fence(*logical_device_);
 
             create_graphics_pipeline();
+
+            command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
         }
     }
 
@@ -164,43 +150,6 @@ namespace ge
               , surface_extent_
             ));
         }
-
-        command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
-
-        std::tie(vertex_buffer_, vertex_buffer_memory_) = factory::create_and_fill_buffer
-        (
-            physical_device_
-            , *logical_device_
-            , *command_pool_
-            , queues_.graphics
-            , *transfer_finished_fence_
-            , vk::BufferUsageFlagBits::eVertexBuffer
-            , Span<const Vertex>{VERTICES}
-        );
-
-        std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
-        (
-            physical_device_
-            , *logical_device_
-            , *command_pool_
-            , queues_.graphics
-            , *transfer_finished_fence_
-            , vk::BufferUsageFlagBits::eIndexBuffer
-            , Span<const uint16_t>{INDICES}
-        );
-
-        command_buffers_ = factory::create_command_buffer
-        (
-            *logical_device_
-            , *command_pool_
-            , framebuffers_
-            , *render_pass_
-            , surface_extent_
-            , *pipeline_
-            , *vertex_buffer_
-            , *index_buffer_
-            , INDICES.size()
-        );
     }
 
     void Render::RenderImpl::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
@@ -213,6 +162,7 @@ namespace ge
             , safe_cast<uint32_t>(command_buffers_.size())
             , command_buffers_.data()
         );
+        command_buffers_.clear();
         framebuffers_.clear();
         pipeline_.reset();
         pipeline_layout_.reset();
@@ -224,6 +174,7 @@ namespace ge
         surface_extent_ = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
 
         create_graphics_pipeline();
+        create_command_buffers();
     }
 
     vk::UniqueDebugReportCallbackEXT Render::RenderImpl::create_debug_callback() const
@@ -239,8 +190,77 @@ namespace ge
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
+    void Render::RenderImpl::set_object_to_draw(const Span<const Vertex> vertices, const Span<const uint16_t> indices)
+    {
+        vertices_.clear();
+        indices_.clear();
+
+        vertices_.reserve(vertices.size());
+        std::copy(vertices.begin(), vertices.end(), std::back_inserter(vertices_));
+
+        indices_.reserve(indices.size());
+        std::copy(indices.begin(), indices.end(), std::back_inserter(indices_));
+
+        create_command_buffers();
+    }
+
+    void Render::RenderImpl::create_command_buffers()
+    {
+        if (not command_buffers_.empty())
+        {
+            logical_device_->waitIdle();
+            logical_device_->freeCommandBuffers
+            (
+                *command_pool_
+                , safe_cast<uint32_t>(command_buffers_.size())
+                , command_buffers_.data()
+            );
+            command_buffers_.clear();
+        }
+
+        std::tie(vertex_buffer_, vertex_buffer_memory_) = factory::create_and_fill_buffer
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics
+            , *transfer_finished_fence_
+            , vk::BufferUsageFlagBits::eVertexBuffer
+            , Span<const Vertex>{vertices_}
+        );
+
+        std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics
+            , *transfer_finished_fence_
+            , vk::BufferUsageFlagBits::eIndexBuffer
+            , Span<const uint16_t>{indices_}
+        );
+
+        command_buffers_ = factory::create_command_buffer
+        (
+            *logical_device_
+            , *command_pool_
+            , framebuffers_
+            , *render_pass_
+            , surface_extent_
+            , *pipeline_
+            , *vertex_buffer_
+            , *index_buffer_
+            , indices_.size()
+        );
+    }
+
     void Render::RenderImpl::draw_frame()
     {
+        if (command_buffers_.empty())
+        {
+            throw std::logic_error("there is no object to draw!");
+        }
+
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
         const vk::ResultValue<uint32_t> image_index_result = logical_device_->acquireNextImageKHR
         (

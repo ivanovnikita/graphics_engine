@@ -41,6 +41,18 @@ int main()
 
     window->start_display();
 
+    const std::array vertices
+    {
+        ge::Vertex{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}}
+        , ge::Vertex{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
+        , ge::Vertex{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+    };
+    const std::array<uint16_t, 3> indices
+    {
+        0, 1, 2
+    };
+    render.set_object_to_draw(vertices, indices);
+
     render.draw_frame();
 
     ge::RenderLoop render_loop(*window, render);

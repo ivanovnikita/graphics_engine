@@ -260,8 +260,16 @@ install(
 install(
     FILES
         src/ge/render/render.h
+        src/ge/render/vertex.h
     DESTINATION
         include/ge/render
+)
+install(
+    FILES
+        src/ge/render/utils/span.hpp
+        src/ge/render/utils/span_impl.hpp
+    DESTINATION
+        include/ge/render/utils
 )
 install(
     FILES
