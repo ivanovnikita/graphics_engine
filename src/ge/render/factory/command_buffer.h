@@ -16,7 +16,8 @@ namespace ge::factory
         , const vk::RenderPass&
         , const vk::Extent2D&
         , const vk::Pipeline&
-        , const vk::Buffer&
-        , const Span<const Vertex>&
+        , const vk::Buffer& vertices
+        , const vk::Buffer& indices
+        , const size_t indices_count
     );
 }

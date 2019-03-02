@@ -40,10 +40,13 @@ namespace ge
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
         vk::UniqueDeviceMemory              vertex_buffer_memory_;
         vk::UniqueBuffer                    vertex_buffer_;
+        vk::UniqueDeviceMemory              index_buffer_memory_;
+        vk::UniqueBuffer                    index_buffer_;
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;
         vk::UniqueSemaphore                 image_available_semaphore_;
         vk::UniqueSemaphore                 render_finished_semaphore_;
         vk::UniqueFence                     render_finished_fence_;
+        vk::UniqueFence                     transfer_finished_fence_;
     };
 }

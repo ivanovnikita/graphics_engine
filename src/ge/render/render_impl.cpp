@@ -10,7 +10,7 @@
 #include "ge/render/factory/command_buffer.h"
 #include "ge/render/factory/semaphore.h"
 #include "ge/render/factory/fence.h"
-#include "ge/render/factory/buffer.h"
+#include "ge/render/factory/buffer.hpp"
 #include "ge/render/storage/shaders.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
@@ -23,50 +23,16 @@ namespace ge
     {
         const std::array VERTICES
         {
-            Vertex{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}}
-            , Vertex{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
-            , Vertex{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+            Vertex{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}
+            , Vertex{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}
+            , Vertex{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+            , Vertex{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
         };
 
-        void copy_buffer
-        (
-            const vk::Buffer& src
-            , const vk::Buffer& dst
-            , const size_t size
-            , const vk::Device& logical_device
-            , const vk::CommandPool& command_pool
-            , const vk::Queue& graphics_queue
-        )
+        const std::array<uint16_t, 6> INDICES
         {
-            const auto alloc_info = vk::CommandBufferAllocateInfo{}
-                .setLevel(vk::CommandBufferLevel::ePrimary)
-                .setCommandPool(command_pool)
-                .setCommandBufferCount(1);
-
-            const std::vector<vk::UniqueCommandBuffer> command_buffers = logical_device.allocateCommandBuffersUnique
-            (
-                alloc_info
-            );
-            const vk::CommandBuffer& command_buffer = *command_buffers.front();
-
-            const auto begin_info = vk::CommandBufferBeginInfo{}
-                .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-
-            command_buffer.begin(begin_info);
-            const auto copy_region = vk::BufferCopy{}
-                .setSrcOffset(0)
-                .setDstOffset(0)
-                .setSize(size);
-            command_buffer.copyBuffer(src, dst, copy_region);
-            command_buffer.end();
-
-            const auto submit_info = vk::SubmitInfo{}
-                .setCommandBufferCount(1)
-                .setPCommandBuffers(&command_buffer);
-
-            graphics_queue.submit(1, &submit_info, nullptr);
-            graphics_queue.waitIdle();
-        }
+            0, 1, 2, 2, 3, 0
+        };
     }
 
     Render::RenderImpl::RenderImpl
@@ -146,12 +112,13 @@ namespace ge
         {
             shaders_storage_ = storage::Shaders{*logical_device_};
 
-            create_graphics_pipeline();
-
             image_available_semaphore_ = factory::create_semaphore(*logical_device_);
             render_finished_semaphore_ = factory::create_semaphore(*logical_device_);
 
             render_finished_fence_ = factory::create_fence(*logical_device_);
+            transfer_finished_fence_ = factory::create_fence(*logical_device_);
+
+            create_graphics_pipeline();
         }
     }
 
@@ -200,52 +167,27 @@ namespace ge
 
         command_pool_ = factory::create_command_pool(*logical_device_, queue_family_indices_);
 
-        {
-            const uint32_t buffer_size = sizeof(Vertex) * VERTICES.size();
+        std::tie(vertex_buffer_, vertex_buffer_memory_) = factory::create_and_fill_buffer
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics
+            , *transfer_finished_fence_
+            , vk::BufferUsageFlagBits::eVertexBuffer
+            , Span<const Vertex>{VERTICES}
+        );
 
-            auto [staging_buffer, staging_memory] = factory::create_buffer
-            (
-                physical_device_
-                , *logical_device_
-                , buffer_size
-                , vk::BufferUsageFlagBits::eTransferSrc
-                , vk::MemoryPropertyFlagBits::eHostVisible
-                | vk::MemoryPropertyFlagBits::eHostCoherent
-            );
-
-            constexpr uint32_t offset = 0;
-            void* data = logical_device_->mapMemory
-            (
-                *staging_memory
-                , offset
-                , buffer_size
-                , vk::MemoryMapFlags{}
-            );
-            std::memcpy(data, VERTICES.data(), static_cast<size_t>(buffer_size));
-            logical_device_->unmapMemory(*staging_memory);
-
-            auto [vertex_buffer, vertex_memory] = factory::create_buffer
-            (
-                physical_device_
-                , *logical_device_
-                , buffer_size
-                , vk::BufferUsageFlagBits::eTransferDst
-                | vk::BufferUsageFlagBits::eVertexBuffer
-                , vk::MemoryPropertyFlagBits::eDeviceLocal
-            );
-            vertex_buffer_memory_ = std::move(vertex_memory);
-            vertex_buffer_ = std::move(vertex_buffer);
-
-            copy_buffer
-            (
-                *staging_buffer
-                , *vertex_buffer_
-                , buffer_size
-                , *logical_device_
-                , *command_pool_
-                , queues_.graphics
-            );
-        }
+        std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics
+            , *transfer_finished_fence_
+            , vk::BufferUsageFlagBits::eIndexBuffer
+            , Span<const uint16_t>{INDICES}
+        );
 
         command_buffers_ = factory::create_command_buffer
         (
@@ -256,7 +198,8 @@ namespace ge
             , surface_extent_
             , *pipeline_
             , *vertex_buffer_
-            , VERTICES
+            , *index_buffer_
+            , INDICES.size()
         );
     }
 

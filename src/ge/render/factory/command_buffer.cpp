@@ -1,4 +1,5 @@
 #include "ge/render/factory/command_buffer.h"
+#include "ge/render/utils/safe_cast.hpp"
 
 namespace ge::factory
 {
@@ -10,8 +11,9 @@ namespace ge::factory
         , const vk::RenderPass& render_pass
         , const vk::Extent2D& extent
         , const vk::Pipeline& pipeline
-        , const vk::Buffer& vertex_buffer
-        , const Span<const Vertex>& vertices
+        , const vk::Buffer& vertices
+        , const vk::Buffer& indices
+        , const size_t indices_count
     )
     {
         const auto alloc_info = vk::CommandBufferAllocateInfo{}
@@ -40,38 +42,50 @@ namespace ge::factory
 
         for (size_t i = 0; i < command_buffers.size(); ++i)
         {
-            command_buffers[i].begin(begin_info);
+            const vk::CommandBuffer& command_buffer = command_buffers[i];
+
+            command_buffer.begin(begin_info);
 
             render_pass_info.setFramebuffer(*framebuffes[i]);
-            command_buffers[i].beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
+            command_buffer.beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
-            command_buffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 
-            constexpr vk::DeviceSize offsets[] = {0};
-            constexpr uint32_t first_binding = 0;
-            constexpr uint32_t binding_count = 1;
-            command_buffers[i].bindVertexBuffers
+            constexpr vk::DeviceSize vertices_offsets[]{0};
+            constexpr uint32_t first_binding{0};
+            constexpr uint32_t binding_count{1};
+            command_buffer.bindVertexBuffers
             (
                 first_binding
                 , binding_count
-                , &vertex_buffer
-                , offsets
+                , &vertices
+                , vertices_offsets
             );
 
-            constexpr uint32_t instance_count = 1;
-            constexpr uint32_t first_vertex = 0;
-            constexpr uint32_t first_instance = 0;
-            command_buffers[i].draw
+            constexpr vk::DeviceSize indices_offset{0};
+            command_buffer.bindIndexBuffer
             (
-                static_cast<uint32_t>(vertices.size())
+                indices
+                , indices_offset
+                , vk::IndexType::eUint16
+            );
+
+            constexpr uint32_t instance_count{1};
+            constexpr uint32_t first_index{0};
+            constexpr uint32_t vertex_offset{0};
+            constexpr uint32_t first_instance{0};
+            command_buffer.drawIndexed
+            (
+                safe_cast<uint32_t>(indices_count)
                 , instance_count
-                , first_vertex
+                , first_index
+                , vertex_offset
                 , first_instance
             );
 
-            command_buffers[i].endRenderPass();
+            command_buffer.endRenderPass();
 
-            command_buffers[i].end();
+            command_buffer.end();
         }
 
         return command_buffers;

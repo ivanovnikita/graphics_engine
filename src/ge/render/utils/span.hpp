@@ -8,6 +8,7 @@ namespace ge
     class Span final
     {
     public:
+        using element_type = T;
         using index_type = size_t;
         using pointer = T*;
         using iterator = T*;
