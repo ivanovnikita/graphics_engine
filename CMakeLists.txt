@@ -54,6 +54,7 @@ conan_cmake_run(
     CMAKE_TARGETS
     BUILD missing
     NO_OUTPUT_DIRS
+    KEEP_RPATHS
     OPTIONS ${conan_options}
 )
 
@@ -77,6 +78,9 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
 endif()
+
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

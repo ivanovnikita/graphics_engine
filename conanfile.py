@@ -36,6 +36,10 @@ class GraphicsEngineConan(ConanFile):
         self.options["xcb"].lto = self.options.lto
         self.options["xcb-util-wm"].lto = self.options.lto
 
+        self.options["xcb"].shared = True
+        self.options["xau"].shared = True
+        self.options["xdmcp"].shared = True
+
     def requirements(self):
         self.requires.add("shaderc/f537926", private=False)
         self.requires.add("Vulkan-Loader/1.2.133", private=False)
@@ -51,3 +55,8 @@ class GraphicsEngineConan(ConanFile):
 
         if self.options.with_debug_layers:
             self.requires.add("Vulkan-ValidationLayers/1.2.133", private=False)
+
+    def imports(self):
+        self.copy("*xcb.so*", "lib", "lib")
+        self.copy("*Xau.so*", "lib", "lib")
+        self.copy("*Xdmcp.so*", "lib", "lib")
