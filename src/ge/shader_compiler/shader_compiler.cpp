@@ -14,7 +14,7 @@ namespace ge
     {
         vk::ShaderStageFlagBits shader_kind(const fs::path& shader_code)
         {
-            const auto extension = shader_code.extension().u8string();
+            const auto extension = shader_code.extension().string();
             if (extension == ".vert")
             {
                 return vk::ShaderStageFlagBits::eVertex;
