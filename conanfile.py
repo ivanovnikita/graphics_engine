@@ -38,17 +38,17 @@ class GraphicsEngineConan(ConanFile):
         self.options["xcb-util-wm"].lto = self.options.lto
 
     def requirements(self):
-        self.requires.add("shaderc/14ae0de@ivanovnikita/stable", private=False)
-        self.requires.add("Vulkan-Loader/1.1.97@ivanovnikita/stable", private=False)
+        self.requires.add("shaderc/f537926", private=False)
+        self.requires.add("Vulkan-Loader/1.2.133", private=False)
         self.requires.add("glm/0.9.9.1@g-truc/stable", private=False)
 
         if self.options.with_xcb:
-            self.requires.add("xcb/1.13.1@ivanovnikita/stable", private=False)
-            self.requires.add("xcb-util/0.4.0@ivanovnikita/stable", private=False)
-            self.requires.add("xcb-util-wm/0.4.1@ivanovnikita/stable", private=False)
+            self.requires.add("xcb/1.14", private=False)
+            self.requires.add("xcb-util/0.4.0", private=False)
+            self.requires.add("xcb-util-wm/0.4.1", private=False)
 
         if self.options.with_gtests:
             self.requires.add("googletest/1.8@ivanovnikita/stable", private=True)
 
         if self.options.with_debug_layers:
-            self.requires.add("Vulkan-ValidationLayers/1.1.97@ivanovnikita/stable", private=False)
+            self.requires.add("Vulkan-ValidationLayers/1.2.133", private=False)
