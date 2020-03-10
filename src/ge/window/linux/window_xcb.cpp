@@ -135,7 +135,7 @@ namespace ge
         connection_ = xcb_connect(nullptr, &screen_index);
         handle_ = xcb_generate_id(connection_);
 
-        if (connection_ == nullptr)
+        if (xcb_connection_has_error(connection_))
         {
             throw std::runtime_error("Connection to xcb failed");
         }
