@@ -27,7 +27,6 @@ class GraphicsEngineConan(ConanFile):
         self.options["Vulkan-Loader"].with_xcb = self.options.with_xcb
         self.options["Vulkan-ValidationLayers"].with_xcb = self.options.with_xcb
 
-        self.options["googletest"].lto = self.options.lto
         self.options["SPIRV-Tools"].lto = self.options.lto
         self.options["glslang"].lto = self.options.lto
         self.options["shaderc"].lto = self.options.lto
@@ -48,7 +47,7 @@ class GraphicsEngineConan(ConanFile):
             self.requires.add("xcb-util-wm/0.4.1", private=False)
 
         if self.options.with_gtests:
-            self.requires.add("googletest/1.8@ivanovnikita/stable", private=True)
+            self.requires.add("gtest/1.8.1", private=True)
 
         if self.options.with_debug_layers:
             self.requires.add("Vulkan-ValidationLayers/1.2.133", private=False)

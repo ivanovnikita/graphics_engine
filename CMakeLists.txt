@@ -307,11 +307,9 @@ if (${GE_BUILD_TESTS})
 
     include(GoogleTest)
 
-    find_package(GTest REQUIRED)
-
     sources_in_dir_recurse(tests/common common_tests_sources)
     add_executable(tests_common ${common_tests_sources})
-    target_link_libraries(tests_common GE::render GTest::Main Threads::Threads)
+    target_link_libraries(tests_common GE::render CONAN_PKG::gtest Threads::Threads)
     define_source_group(tests_common)
     gtest_discover_tests(tests_common)
     install(TARGETS tests_common DESTINATION tests/bin)
@@ -322,7 +320,7 @@ if (${GE_BUILD_TESTS})
         target_link_libraries(tests_graphics
             GE::window
             GE::render
-            GTest::Main
+            CONAN_PKG::gtest
             CONAN_PKG::Vulkan-Headers
         )
         target_include_directories(tests_graphics
