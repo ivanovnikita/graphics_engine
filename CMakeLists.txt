@@ -137,6 +137,12 @@ function(sources_in_dir_recurse directory result)
     set(${result} ${output} PARENT_SCOPE)
 endfunction()
 
+function(define_source_group target)
+    get_target_property(src ${target} SOURCES)
+    get_target_property(name ${target} NAME)
+    source_group(${name} FILES ${src})
+endfunction()
+
 find_package(Threads REQUIRED)
 
 if (WIN32)
@@ -162,6 +168,7 @@ target_include_directories(ge_window
         $<INSTALL_INTERFACE:include>
 )
 add_library(GE::window ALIAS ge_window)
+define_source_group(ge_window)
 
 sources_in_dir_recurse(src/ge/shader_compiler shader_compiler_sources)
 add_executable(ge_shader_compiler ${shader_compiler_sources})
@@ -174,6 +181,7 @@ target_link_libraries(ge_shader_compiler
         Threads::Threads
         ${std_libs}
 )
+define_source_group(ge_shader_compiler)
 
 file(GLOB shaders_sources src/ge/render/shaders/*)
 set(generated_shaders_sources
@@ -197,8 +205,10 @@ add_custom_command(
 sources_in_dir_recurse(src/ge/render render_sources)
 if (${GE_ENABLE_DEBUG_LAYERS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
-    configure_file("src/ge/render/vk_layer_path.h.in" "${CMAKE_CURRENT_BINARY_DIR}/generated_include/vk_layer_path.h")
-    list(APPEND render_sources "src/ge/render/vk_layer_path.h.in")
+    set(template "src/ge/render/vk_layer_path.h.in")
+    set(generated "${CMAKE_CURRENT_BINARY_DIR}/generated_include/vk_layer_path.h")
+    configure_file(${template} ${generated})
+    list(APPEND render_sources ${template} ${generated})
 endif()
 add_library(ge_render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
@@ -209,9 +219,10 @@ if (${GE_ENABLE_DEBUG_LAYERS})
 endif()
 
 target_link_libraries(ge_render
+    PUBLIC
+        CONAN_PKG::glm
     PRIVATE
         CONAN_PKG::Vulkan-Loader
-        CONAN_PKG::glm
         Threads::Threads
         ${std_libs}
         dl
@@ -228,6 +239,7 @@ target_include_directories(ge_render
         $<INSTALL_INTERFACE:include>
 )
 add_library(GE::render ALIAS ge_render)
+define_source_group(ge_render)
 
 sources_in_dir_recurse(src/ge/render_loop render_loop_sources)
 add_library(ge_render_loop ${render_loop_sources})
@@ -246,6 +258,7 @@ target_link_libraries(ge_render_loop
         GE::window
 )
 add_library(GE::render_loop ALIAS ge_render_loop)
+define_source_group(ge_render_loop)
 
 install(
     TARGETS
@@ -299,6 +312,7 @@ if (${GE_BUILD_TESTS})
     sources_in_dir_recurse(tests/common common_tests_sources)
     add_executable(tests_common ${common_tests_sources})
     target_link_libraries(tests_common GE::render GTest::Main Threads::Threads)
+    define_source_group(tests_common)
     gtest_discover_tests(tests_common)
     install(TARGETS tests_common DESTINATION tests/bin)
 
@@ -316,6 +330,7 @@ if (${GE_BUILD_TESTS})
                 "tests/graphics"
                 "${CMAKE_CURRENT_BINARY_DIR}/generated_include"
         )
+        define_source_group(tests_graphics)
         gtest_discover_tests(tests_graphics)
         install(TARGETS tests_graphics DESTINATION tests/bin)
     endif()
@@ -330,5 +345,6 @@ if (${GE_BUILD_EXAMPLES})
         CONAN_PKG::Vulkan-Headers
     )
     target_include_directories(example_triangle PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_triangle)
     install(TARGETS example_triangle DESTINATION examples/triangle)
 endif()
