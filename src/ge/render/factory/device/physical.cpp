@@ -144,6 +144,8 @@ namespace ge::factory
             {
                 all_required_are_available(required_layers, get_available_device_layers(device));
 
+                // TODO: get device feature and match with required features
+
                 QueueFamilyIndices indices;
 
                 if (options.graphics.enabled)
