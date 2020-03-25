@@ -51,7 +51,7 @@ class GraphicsEngineConan(ConanFile):
             self.requires.add("xcb-util-wm/0.4.1", private=False)
 
         if self.options.with_gtests:
-            self.requires.add("gtest/1.8.1", private=True)
+            self.requires.add("gtest/1.10.0 ", private=True)
 
         if self.options.with_debug_layers:
             self.requires.add("Vulkan-ValidationLayers/1.2.133", private=False)
