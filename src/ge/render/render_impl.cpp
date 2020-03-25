@@ -190,7 +190,11 @@ namespace ge
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
-    void Render::RenderImpl::set_object_to_draw(const Span<const Vertex> vertices, const Span<const uint16_t> indices)
+    void Render::RenderImpl::set_object_to_draw
+    (
+        const std::span<const Vertex> vertices
+        , const std::span<const uint16_t> indices
+    )
     {
         vertices_.clear();
         indices_.clear();
@@ -226,7 +230,7 @@ namespace ge
             , queues_.graphics
             , *transfer_finished_fence_
             , vk::BufferUsageFlagBits::eVertexBuffer
-            , Span<const Vertex>{vertices_}
+            , std::span<const Vertex>{vertices_}
         );
 
         std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
@@ -237,7 +241,7 @@ namespace ge
             , queues_.graphics
             , *transfer_finished_fence_
             , vk::BufferUsageFlagBits::eIndexBuffer
-            , Span<const uint16_t>{indices_}
+            , std::span<const uint16_t>{indices_}
         );
 
         command_buffers_ = factory::create_command_buffer

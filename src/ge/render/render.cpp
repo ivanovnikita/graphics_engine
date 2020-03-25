@@ -26,7 +26,7 @@ namespace ge
 
     Render::~Render() = default;
 
-    void Render::set_object_to_draw(const Span<const Vertex> vertices, const Span<const uint16_t> indices)
+    void Render::set_object_to_draw(const std::span<const Vertex> vertices, const std::span<const uint16_t> indices)
     {
         impl_->set_object_to_draw(vertices, indices);
     }

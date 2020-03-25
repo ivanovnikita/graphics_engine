@@ -1,9 +1,10 @@
 #pragma once
 
 #include "ge/render/vertex.h"
-#include "ge/render/utils/span.hpp"
 
 #include <vulkan/vulkan.hpp>
+
+#include <span>
 
 namespace ge::factory
 {
@@ -36,7 +37,7 @@ namespace ge::factory
         , const vk::Queue& transfer
         , const vk::Fence& transfer_finished
         , const vk::BufferUsageFlagBits
-        , const Span<const BufferElement>
+        , const std::span<const BufferElement>
     );
 }
 

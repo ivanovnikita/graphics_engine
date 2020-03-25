@@ -16,7 +16,7 @@ namespace ge
           , vk::Extent2D surface_extent
         );
         ~RenderImpl();
-        void set_object_to_draw(const Span<const Vertex>, const Span<const uint16_t> indices);
+        void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 

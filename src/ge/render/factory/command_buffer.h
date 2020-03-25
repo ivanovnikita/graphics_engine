@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ge/render/factory/command_pool.h"
-#include "ge/render/utils/span.hpp"
 #include "ge/render/vertex.h"
 
 #include <vulkan/vulkan.hpp>

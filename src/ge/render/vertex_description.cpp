@@ -12,7 +12,7 @@ namespace ge
             .setInputRate(vk::VertexInputRate::eVertex);
     }
 
-    Span<const vk::VertexInputAttributeDescription> vertex_attribute_descriptions()
+    std::span<const vk::VertexInputAttributeDescription> vertex_attribute_descriptions()
     {
         static const std::array descriptions
         {

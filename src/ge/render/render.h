@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ge/render/vertex.h"
-#include "ge/render/utils/span.hpp"
 
+#include <span>
 #include <memory>
 #include <functional>
 
@@ -33,7 +33,7 @@ namespace ge
           , const uint16_t surface_heigth
         );
         ~Render();
-        void set_object_to_draw(const Span<const Vertex>, const Span<const uint16_t> indices);
+        void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 

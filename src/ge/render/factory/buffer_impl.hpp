@@ -14,7 +14,7 @@ namespace ge::factory
         , const vk::Queue& transfer
         , const vk::Fence& transfer_finished
         , const vk::BufferUsageFlagBits usage
-        , const Span<const BufferElement> elements
+        , const std::span<const BufferElement> elements
     )
     {
         const uint32_t buffer_size = safe_cast<uint32_t>(sizeof(BufferElement) * elements.size());
