@@ -1,3 +1,3 @@
 [submodule "third_party/cmake-conan"]
 	path = third_party/cmake-conan
-	url = git@github.com:ivanovnikita/cmake-conan.git
+	url = git@github.com:conan-io/cmake-conan.git
