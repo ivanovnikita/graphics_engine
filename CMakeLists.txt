@@ -35,7 +35,7 @@ if (${GE_ENABLE_LTO})
     check_ipo_supported()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-    set(linker_flags "${linker_flags} -fuse-ld=gold -fuse-linker-plugin")
+    list(APPEND linker_flags "-fuse-ld=gold -fuse-linker-plugin")
 
     list(APPEND conan_options lto=True)
 endif()
@@ -48,6 +48,12 @@ if (${GE_BUILD_TESTS})
     list(APPEND conan_options with_gtests=True)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND conan_settings compiler.libcxx=libstdc++11)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    list(APPEND conan_settings compiler.libcxx=libc++)
+endif()
+
 conan_cmake_run(
     CONANFILE conanfile.py
     BASIC_SETUP
@@ -55,11 +61,12 @@ conan_cmake_run(
     BUILD missing
     NO_OUTPUT_DIRS
     KEEP_RPATHS
+    SETTINGS ${conan_settings}
     OPTIONS ${conan_options}
 )
 
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linker_flags}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linker_flags}")
+list(APPEND CMAKE_SHARED_LINKER_FLAGS ${linker_flags})
+list(APPEND CMAKE_EXE_LINKER_FLAGS ${linker_flags})
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX
@@ -93,8 +100,8 @@ list(APPEND warnings
     -pedantic-errors
 )
 
-set(std_libs -lstdc++fs)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.7")
         list(APPEND warnings
             -Wfloat-equal
@@ -107,12 +114,16 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             -Wredundant-decls
             )
     endif()
+
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0")
         list(APPEND warnings
             -Wduplicated-branches
             -Wduplicated-cond
             )
     endif()
+
+    set(std_libs -lstdc++fs)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND warnings
         -Weverything
@@ -122,7 +133,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-c++14-compat
         -Wno-unreachable-code
         -Wno-padded
+
+        # for gtest
+        -Wno-gnu-zero-variadic-macro-arguments
+        -Wno-global-constructors
+        -Wno-weak-vtables
         )
+
+    set(std_libs -lc++ -lc++abi -lc++experimental)
+    list(APPEND cxx_flags -stdlib=libc++)
 endif()
 
 set(compile_options ${cxx_flags} ${warnings})
@@ -260,6 +279,7 @@ target_link_libraries(ge_render_loop
     PRIVATE
         GE::render
         GE::window
+        ${std_libs}
 )
 add_library(GE::render_loop ALIAS ge_render_loop)
 define_source_group(ge_render_loop)
@@ -313,7 +333,9 @@ if (${GE_BUILD_TESTS})
 
     sources_in_dir_recurse(tests/common common_tests_sources)
     add_executable(tests_common ${common_tests_sources})
-    target_link_libraries(tests_common GE::render CONAN_PKG::gtest Threads::Threads)
+    target_link_libraries(tests_common CONAN_PKG::gtest GE::render Threads::Threads ${std_libs})
+    target_compile_options(tests_common PRIVATE ${compile_options})
+    set_target_properties(tests_common PROPERTIES ${target_properties})
     define_source_group(tests_common)
     gtest_discover_tests(tests_common)
     install(TARGETS tests_common DESTINATION tests/bin)
@@ -321,11 +343,14 @@ if (${GE_BUILD_TESTS})
     if (${GE_BUILD_GRAPHICS_TESTS})
         sources_in_dir_recurse(tests/graphics graphics_tests_sources)
         add_executable(tests_graphics ${graphics_tests_sources})
+        target_compile_options(tests_graphics PRIVATE ${compile_options})
+        set_target_properties(tests_graphics PROPERTIES ${target_properties})
         target_link_libraries(tests_graphics
             GE::window
             GE::render
             CONAN_PKG::gtest
             CONAN_PKG::Vulkan-Headers
+            ${std_libs}
         )
         target_include_directories(tests_graphics
             PRIVATE
@@ -340,11 +365,14 @@ endif()
 
 if (${GE_BUILD_EXAMPLES})
     add_executable(example_triangle examples/triangle/main.cpp)
+    target_compile_options(example_triangle PRIVATE ${compile_options})
+    set_target_properties(example_triangle PROPERTIES ${target_properties})
     target_link_libraries(example_triangle
         GE::render
         GE::window
         GE::render_loop
         CONAN_PKG::Vulkan-Headers
+        ${std_libs}
     )
     target_include_directories(example_triangle PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
     define_source_group(example_triangle)

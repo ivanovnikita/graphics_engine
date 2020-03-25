@@ -39,7 +39,7 @@ using AllPairsInt = testing::Types
     , CastPair<uint64_t, uint64_t>
 >;
 
-TYPED_TEST_CASE(safe_castInt, AllPairsInt);
+TYPED_TEST_SUITE(safe_castInt, AllPairsInt);
 
 TYPED_TEST(safe_castInt, unsignedToUnsigned)
 {

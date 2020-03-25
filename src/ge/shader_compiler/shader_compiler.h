@@ -1,10 +1,10 @@
 #pragma once
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 namespace ge
 {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
 
     struct GeneratedCppSources final
     {
