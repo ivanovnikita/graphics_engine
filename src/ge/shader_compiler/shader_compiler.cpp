@@ -7,6 +7,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 namespace ge
 {
@@ -128,6 +129,8 @@ namespace ge
                         continue;
                     }
 
+                    const auto start = std::chrono::high_resolution_clock::now();
+
                     std::ostringstream common;
 
                     common <<
@@ -147,6 +150,15 @@ namespace ge
                         source << "        , " << shader[i] << "\n";
                     }
                     source << "    };\n";
+
+                    const auto stop = std::chrono::high_resolution_clock::now();
+
+                    std::cout
+                        << "Generating cpp sources for shader: " << shader_name
+                        << " [" << to_string(shader_kind) << "] ["
+                        << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+                        << " millisec]"
+                        << std::endl;
                 }
             }
             header << "}\n";
@@ -172,6 +184,8 @@ namespace ge
         shaderc::Compiler compiler;
         for (const auto& shader : fs::directory_iterator(shaders_dir))
         {
+            const auto start = std::chrono::high_resolution_clock::now();
+
             const vk::ShaderStageFlagBits vk_shader_kind = shader_kind(shader);
             const std::string& code = read_file_content(shader);
             const auto& compilation_result = compiler.CompileGlslToSpv
@@ -187,6 +201,16 @@ namespace ge
                 vk_shader_kind
                 , std::move(spirv_code)
             );
+
+            const auto stop = std::chrono::high_resolution_clock::now();
+
+            std::cout
+                << "Compiling shader: "
+                << shader.path().filename()
+                << " ["
+                << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+                << " millisec]"
+                << std::endl;
         }
 
         return generate_cpp_sources(compiled_shaders, target_namespace, target_filename);
