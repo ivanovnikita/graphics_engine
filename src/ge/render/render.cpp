@@ -40,4 +40,14 @@ namespace ge
     {
         impl_->resize(new_surface_width, new_surface_height);
     }
+
+    void Render::set_camera_pos(const glm::vec2& pos)
+    {
+        impl_->set_camera_pos(pos);
+    }
+
+    void Render::set_camera_scale(float scale)
+    {
+        impl_->set_camera_scale(scale);
+    }
 }

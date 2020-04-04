@@ -4,6 +4,8 @@
 #include "ge/render/factory/device/logical.h"
 #include "ge/render/factory/swapchain.h"
 #include "ge/render/factory/image_view.h"
+#include "ge/render/factory/descriptor_set_layout.h"
+#include "ge/render/factory/descriptor_pool.h"
 #include "ge/render/factory/pipeline/graphics/pipeline.h"
 #include "ge/render/factory/framebuffer.h"
 #include "ge/render/factory/command_pool.h"
@@ -12,10 +14,16 @@
 #include "ge/render/factory/fence.h"
 #include "ge/render/factory/buffer.hpp"
 #include "ge/render/storage/shaders.h"
+#include "ge/render/view_proj.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
 #include "ge/render/utils/safe_cast.hpp"
 #include "ge/render/vertex.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <chrono>
 
 namespace ge
 {
@@ -24,7 +32,9 @@ namespace ge
         const std::function<SurfaceCreator>& create_surface
       , vk::Extent2D surface_extent
     )
-        : surface_extent_(std::move(surface_extent))
+        : surface_extent_{std::move(surface_extent)}
+        , camera_pos_{0.f, 0.f}
+        , camera_scale_{1.f}
     {
         using namespace factory;
         using namespace factory::options;
@@ -113,6 +123,63 @@ namespace ge
         logical_device_->waitIdle();
     }
 
+    void Render::RenderImpl::create_uniform_buffers()
+    {
+        assert(not images_.empty());
+
+        uniform_buffer_memory_.reserve(images_.size());
+        uniform_buffer_.reserve(images_.size());
+
+        constexpr vk::DeviceSize BUFFER_SIZE = sizeof(ViewProj);
+        for (size_t i = 0; i < images_.size(); ++i)
+        {
+            auto [buffer, memory] = factory::create_buffer
+            (
+                physical_device_
+                , *logical_device_
+                , BUFFER_SIZE
+                , vk::BufferUsageFlagBits::eUniformBuffer
+                , vk::MemoryPropertyFlagBits::eHostVisible
+                | vk::MemoryPropertyFlagBits::eHostCoherent
+            );
+
+            uniform_buffer_memory_.emplace_back(std::move(memory));
+            uniform_buffer_.emplace_back(std::move(buffer));
+        }
+    }
+
+    void Render::RenderImpl::create_descriptor_sets()
+    {
+        std::vector<vk::DescriptorSetLayout> layouts{images_.size(), *descriptor_set_layout_};
+
+        const auto alloc_info = vk::DescriptorSetAllocateInfo{}
+            .setDescriptorPool(*descriptor_pool_)
+            .setDescriptorSetCount(static_cast<uint32_t>(images_.size()))
+            .setPSetLayouts(layouts.data());
+
+        descriptor_sets_ = logical_device_->allocateDescriptorSets(alloc_info);
+
+        assert(descriptor_sets_.size() == uniform_buffer_.size());
+
+        for (size_t i = 0; i < descriptor_sets_.size(); ++i)
+        {
+            const auto buffer_info = vk::DescriptorBufferInfo{}
+                .setBuffer(*uniform_buffer_[i])
+                .setOffset(0)
+                .setRange(sizeof(ViewProj));
+
+            const auto descriptor_write = vk::WriteDescriptorSet{}
+                .setDstSet(descriptor_sets_[i])
+                .setDstBinding(0)
+                .setDstArrayElement(0)
+                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                .setDescriptorCount(1)
+                .setPBufferInfo(&buffer_info);
+
+            logical_device_->updateDescriptorSets(1, &descriptor_write, 0, nullptr);
+        }
+    }
+
     void Render::RenderImpl::create_graphics_pipeline()
     {
         auto[swapchain, format, extent] = factory::create_swapchain
@@ -128,12 +195,18 @@ namespace ge
         images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
         image_views_ = factory::create_image_view(images_, format, *logical_device_);
 
+        descriptor_set_layout_ = factory::create_descriptor_set_layout(*logical_device_);
+        create_uniform_buffers();
+        descriptor_pool_ = factory::create_descriptor_pool(*logical_device_, images_.size());
+        create_descriptor_sets();
+
         auto[pipeline, layout, render_pass] = factory::create_graphics_pipeline
         (
             *logical_device_
           , format
           , shaders_storage_
           , surface_extent_
+          , *descriptor_set_layout_
         );
         pipeline_ = std::move(pipeline);
         pipeline_layout_ = std::move(layout);
@@ -167,6 +240,12 @@ namespace ge
         pipeline_.reset();
         pipeline_layout_.reset();
         render_pass_.reset();
+
+        descriptor_pool_.reset();
+        uniform_buffer_.clear();
+        uniform_buffer_memory_.clear();
+        descriptor_set_layout_.reset();
+
         image_views_.clear();
         images_.clear();
         swapchain_.reset();
@@ -252,10 +331,56 @@ namespace ge
             , *render_pass_
             , surface_extent_
             , *pipeline_
+            , *pipeline_layout_
+            , descriptor_sets_
             , *vertex_buffer_
             , *index_buffer_
             , indices_.size()
         );
+    }
+
+    void Render::RenderImpl::update_uniform_buffer(const size_t current_image_index)
+    {
+        assert(current_image_index < images_.size());
+
+        ViewProj vp;
+        vp.view = glm::lookAt
+        (
+            glm::vec3(camera_pos_, 10.f) // camera pos
+          , glm::vec3(camera_pos_, 0.f) // look at
+          , glm::vec3(0.f, 1.f, 0.f) // head is up
+        );
+        vp.proj = glm::ortho
+        (
+            -(static_cast<float>(surface_extent_.width) / 2.f) * camera_scale_
+          , (static_cast<float>(surface_extent_.width) / 2.f) * camera_scale_
+          , -(static_cast<float>(surface_extent_.height) / 2.f) * camera_scale_
+          , (static_cast<float>(surface_extent_.height) / 2.f) * camera_scale_
+          , 0.f
+          , 20.f
+        );
+        vp.proj[1][1] *= -1;
+
+        constexpr uint32_t offset = 0;
+        void* data = logical_device_->mapMemory
+        (
+            *uniform_buffer_memory_[current_image_index]
+            , offset
+            , sizeof(ViewProj)
+            , vk::MemoryMapFlags{}
+        );
+        std::memcpy(data, &vp, sizeof(ViewProj));
+        logical_device_->unmapMemory(*uniform_buffer_memory_[current_image_index]);
+    }
+
+    void Render::RenderImpl::set_camera_pos(const glm::vec2& pos)
+    {
+        camera_pos_ = pos;
+    }
+
+    void Render::RenderImpl::set_camera_scale(const float scale)
+    {
+        camera_scale_ = scale;
     }
 
     void Render::RenderImpl::draw_frame()
@@ -284,6 +409,8 @@ namespace ge
         }
 
         const uint32_t image_index = image_index_result.value;
+
+        update_uniform_buffer(image_index);
 
         const std::array<vk::Semaphore, 1> wait_semaphores{*image_available_semaphore_};
         const std::array<vk::PipelineStageFlags, 1> wait_stages

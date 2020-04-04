@@ -7,15 +7,19 @@ namespace ge::factory
     (
         const vk::Device& logical_device
         , const vk::CommandPool& command_pool
-        , const std::vector<vk::UniqueFramebuffer>& framebuffes
+        , const std::span<const vk::UniqueFramebuffer>& framebuffes
         , const vk::RenderPass& render_pass
         , const vk::Extent2D& extent
         , const vk::Pipeline& pipeline
+        , const vk::PipelineLayout& pipeline_layout
+        , const std::span<const vk::DescriptorSet> descriptor_sets
         , const vk::Buffer& vertices
         , const vk::Buffer& indices
         , const size_t indices_count
     )
     {
+        assert(framebuffes.size() == descriptor_sets.size());
+
         const auto alloc_info = vk::CommandBufferAllocateInfo{}
             .setCommandPool(command_pool)
             .setLevel(vk::CommandBufferLevel::ePrimary)
@@ -68,6 +72,17 @@ namespace ge::factory
                 indices
                 , indices_offset
                 , vk::IndexType::eUint16
+            );
+
+            command_buffer.bindDescriptorSets
+            (
+                vk::PipelineBindPoint::eGraphics
+                , pipeline_layout
+                , 0 // first set
+                , 1 // descritptors count
+                , &descriptor_sets[i]
+                , 0 // dynamic offset count
+                , nullptr // dynamic offsets
             );
 
             constexpr uint32_t instance_count{1};

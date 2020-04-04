@@ -43,15 +43,18 @@ int main()
 
     const std::array vertices
     {
-        ge::Vertex{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}}
-        , ge::Vertex{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
-        , ge::Vertex{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+        ge::Vertex{{0.f, 0.5f}, {1.f, 0.f, 0.f}}
+        , ge::Vertex{{-0.5f, -0.5f}, {0.f, 1.f, 0.f}}
+        , ge::Vertex{{0.5f, -0.5f}, {0.f, 0.f, 1.f}}
     };
     const std::array<uint16_t, 3> indices
     {
         0, 1, 2
     };
     render.set_object_to_draw(vertices, indices);
+
+    render.set_camera_pos({0.f, 0.f});
+    render.set_camera_scale(1.f / 300.f);
 
     render.draw_frame();
 

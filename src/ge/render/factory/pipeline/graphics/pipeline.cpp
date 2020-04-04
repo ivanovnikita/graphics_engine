@@ -39,6 +39,7 @@ namespace ge::factory
       , const vk::Format& format
       , const storage::Shaders& shaders_storage
       , const vk::Extent2D& extent
+      , const vk::DescriptorSetLayout& descriptor_set_layout
     )
     {
         const auto shader_stage_create_info = get_shader_stage_create_info(shaders_storage);
@@ -74,8 +75,8 @@ namespace ge::factory
             .setRasterizerDiscardEnable(VK_FALSE)
             .setPolygonMode(vk::PolygonMode::eFill)
             .setLineWidth(1.0f)
-            .setCullMode(vk::CullModeFlagBits::eBack)
-            .setFrontFace(vk::FrontFace::eClockwise)
+            .setCullMode(vk::CullModeFlagBits::eNone)
+            .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE);
 
         const auto multisample_info = vk::PipelineMultisampleStateCreateInfo()
@@ -100,7 +101,8 @@ namespace ge::factory
             .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
 
         const auto layout_info = vk::PipelineLayoutCreateInfo()
-            .setSetLayoutCount(0)
+            .setSetLayoutCount(1)
+            .setPSetLayouts(&descriptor_set_layout)
             .setPushConstantRangeCount(0);
 
         vk::UniquePipelineLayout layout = logical_device.createPipelineLayoutUnique(layout_info);

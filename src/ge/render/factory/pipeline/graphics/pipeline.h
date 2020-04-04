@@ -8,5 +8,6 @@ namespace ge::factory
       , const vk::Format&
       , const storage::Shaders&
       , const vk::Extent2D&
+      , const vk::DescriptorSetLayout&
     );
 }
