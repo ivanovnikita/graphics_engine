@@ -75,7 +75,7 @@ namespace ge::factory
             .setRasterizerDiscardEnable(VK_FALSE)
             .setPolygonMode(vk::PolygonMode::eFill)
             .setLineWidth(1.0f)
-            .setCullMode(vk::CullModeFlagBits::eNone)
+            .setCullMode(vk::CullModeFlagBits::eBack)
             .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE);
 
