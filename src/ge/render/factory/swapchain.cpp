@@ -53,11 +53,12 @@ namespace ge::factory
         {
             vk::Extent2D result;
 
-            if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-            {
-                result = capabilities.currentExtent;
-            }
-            else
+            // NOTE: sometimes it leads to validation error during window resizing
+//            if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+//            {
+//                result = capabilities.currentExtent;
+//            }
+//            else
             {
                 result = vk::Extent2D
                 {
