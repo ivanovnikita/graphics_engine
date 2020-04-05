@@ -63,7 +63,7 @@ namespace ge::factory
           , VK_MAKE_VERSION(1, 0, 0)
           , "no engine"
           , VK_MAKE_VERSION(1, 0, 0)
-          , VK_MAKE_VERSION(1, 0, 0)
+          , VK_API_VERSION_1_1
         };
 
         const auto required_extensions = get_required_extensions(options.debug.debug_callback, options.window);
