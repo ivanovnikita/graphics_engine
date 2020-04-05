@@ -14,7 +14,6 @@
 #include "ge/render/factory/fence.h"
 #include "ge/render/factory/buffer.hpp"
 #include "ge/render/storage/shaders.h"
-#include "ge/render/view_proj.h"
 #include "ge/render/debug_callback.h"
 #include "ge/render/exception.h"
 #include "ge/render/utils/safe_cast.hpp"
@@ -33,8 +32,7 @@ namespace ge
       , vk::Extent2D surface_extent
     )
         : surface_extent_{std::move(surface_extent)}
-        , camera_pos_{0.f, 0.f}
-        , camera_scale_{1.f}
+        , camera_{{0.f, 0.f}, 1.f}
     {
         using namespace factory;
         using namespace factory::options;
@@ -130,7 +128,7 @@ namespace ge
         uniform_buffer_memory_.reserve(images_.size());
         uniform_buffer_.reserve(images_.size());
 
-        constexpr vk::DeviceSize BUFFER_SIZE = sizeof(ViewProj);
+        constexpr vk::DeviceSize BUFFER_SIZE = sizeof(Camera2D);
         for (size_t i = 0; i < images_.size(); ++i)
         {
             auto [buffer, memory] = factory::create_buffer
@@ -166,7 +164,7 @@ namespace ge
             const auto buffer_info = vk::DescriptorBufferInfo{}
                 .setBuffer(*uniform_buffer_[i])
                 .setOffset(0)
-                .setRange(sizeof(ViewProj));
+                .setRange(sizeof(Camera2D));
 
             const auto descriptor_write = vk::WriteDescriptorSet{}
                 .setDstSet(descriptor_sets_[i])
@@ -343,44 +341,26 @@ namespace ge
     {
         assert(current_image_index < images_.size());
 
-        ViewProj vp;
-        vp.view = glm::lookAt
-        (
-            glm::vec3(camera_pos_, 10.f) // camera pos
-          , glm::vec3(camera_pos_, 0.f) // look at
-          , glm::vec3(0.f, 1.f, 0.f) // head is up
-        );
-        vp.proj = glm::ortho
-        (
-            -(static_cast<float>(surface_extent_.width) / 2.f) * camera_scale_
-          , (static_cast<float>(surface_extent_.width) / 2.f) * camera_scale_
-          , -(static_cast<float>(surface_extent_.height) / 2.f) * camera_scale_
-          , (static_cast<float>(surface_extent_.height) / 2.f) * camera_scale_
-          , 0.f
-          , 20.f
-        );
-        vp.proj[1][1] *= -1;
-
         constexpr uint32_t offset = 0;
         void* data = logical_device_->mapMemory
         (
             *uniform_buffer_memory_[current_image_index]
             , offset
-            , sizeof(ViewProj)
+            , sizeof(Camera2D)
             , vk::MemoryMapFlags{}
         );
-        std::memcpy(data, &vp, sizeof(ViewProj));
+        std::memcpy(data, &camera_, sizeof(Camera2D));
         logical_device_->unmapMemory(*uniform_buffer_memory_[current_image_index]);
     }
 
     void Render::RenderImpl::set_camera_pos(const glm::vec2& pos)
     {
-        camera_pos_ = pos;
+        camera_.pos = pos;
     }
 
     void Render::RenderImpl::set_camera_scale(const float scale)
     {
-        camera_scale_ = scale;
+        camera_.scale = scale;
     }
 
     void Render::RenderImpl::draw_frame()

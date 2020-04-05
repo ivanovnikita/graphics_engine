@@ -4,6 +4,7 @@
 #include "ge/render/queue.h"
 #include "ge/render/storage/shaders.h"
 #include "ge/render/vertex.h"
+#include "ge/render/camera_2d.h"
 
 namespace ge
 {
@@ -73,7 +74,6 @@ namespace ge
         std::vector<Vertex>                 vertices_;
         std::vector<uint16_t>               indices_;
 
-        glm::vec2                           camera_pos_;
-        float                               camera_scale_;
+        Camera2D                            camera_;
     };
 }

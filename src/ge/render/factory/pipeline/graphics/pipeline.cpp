@@ -58,9 +58,12 @@ namespace ge::factory
 
         const auto viewport = vk::Viewport()
             .setX(0.0f)
-            .setY(0.0f)
             .setWidth(static_cast<float>(extent.width))
-            .setHeight(static_cast<float>(extent.height))
+
+            // invert Y: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+            .setY(static_cast<float>(extent.height))
+            .setHeight(-static_cast<float>(extent.height))
+
             .setMinDepth(0.0f)
             .setMaxDepth(1.0f);
         const vk::Rect2D scissor{vk::Offset2D{0, 0}, extent};
