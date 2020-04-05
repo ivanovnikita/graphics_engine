@@ -32,7 +32,7 @@ namespace ge
       , vk::Extent2D surface_extent
     )
         : surface_extent_{std::move(surface_extent)}
-        , camera_{{0.f, 0.f}, 1.f}
+        , camera_{{0.f, 0.f}, {1.f, 1.f}, 1.f}
     {
         using namespace factory;
         using namespace factory::options;
@@ -192,6 +192,9 @@ namespace ge
         swapchain_ = std::move(swapchain);
         images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
         image_views_ = factory::create_image_view(images_, format, *logical_device_);
+
+        camera_.ortho_proj.x = 1.f / surface_extent_.width;
+        camera_.ortho_proj.y = 1.f / surface_extent_.height;
 
         descriptor_set_layout_ = factory::create_descriptor_set_layout(*logical_device_);
         create_uniform_buffers();
