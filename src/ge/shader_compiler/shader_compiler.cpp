@@ -181,6 +181,10 @@ namespace ge
     {
         std::map<ShaderName, std::map<vk::ShaderStageFlagBits, CompiledShader>> compiled_shaders;
 
+        shaderc::CompileOptions options;
+//        options.SetInvertY(true); // TODO: it seems to be broken
+        options.SetWarningsAsErrors();
+
         shaderc::Compiler compiler;
         for (const auto& shader : fs::directory_iterator(shaders_dir))
         {
@@ -193,7 +197,14 @@ namespace ge
                 code
               , to_shaderc_shader_kind(vk_shader_kind)
               , shader.path().filename().c_str()
+              , options
             );
+
+            if (compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
+            {
+                throw std::runtime_error(compilation_result.GetErrorMessage());
+            }
+
             CompiledShader spirv_code{compilation_result.cbegin(), compilation_result.cend()};
 
             compiled_shaders[filename(shader)].emplace
@@ -250,29 +261,37 @@ int main(int argc, char* argv[])
 {
     using namespace ge;
 
-    if (argc < 5)
+    try
     {
-        throw std::logic_error("Invalid input options");
+        if (argc < 5)
+        {
+            throw std::logic_error("Invalid input options");
+        }
+
+        const fs::path shaders_dir{argv[1]};
+        const std::string target_namespace{argv[2]};
+        const fs::path target_dir{argv[3]};
+        const std::string target_name{argv[4]};
+
+        const GeneratedCppSources generated = compile_shaders_into_cpp_sources
+        (
+            shaders_dir
+            , target_namespace
+            , target_name
+        );
+
+        if (not fs::exists(target_dir))
+        {
+            fs::create_directory(target_dir);
+        }
+
+        save_sources(generated, target_dir, target_name);
     }
-
-    const fs::path shaders_dir{argv[1]};
-    const std::string target_namespace{argv[2]};
-    const fs::path target_dir{argv[3]};
-    const std::string target_name{argv[4]};
-
-    const GeneratedCppSources generated = compile_shaders_into_cpp_sources
-    (
-        shaders_dir
-        , target_namespace
-        , target_name
-    );
-
-    if (not fs::exists(target_dir))
+    catch (const std::exception& e)
     {
-        fs::create_directory(target_dir);
+        std::cerr << "Unexpected compilation error: " << e.what() << std::endl;
+        return 1;
     }
-
-    save_sources(generated, target_dir, target_name);
 
     return 0;
 }
