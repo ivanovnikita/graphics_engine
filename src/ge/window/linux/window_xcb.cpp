@@ -254,6 +254,11 @@ namespace ge
         {
             switch (event->response_type & 0x7f)
             {
+            case XCB_EXPOSE:
+            {
+                events.emplace_back(WindowExposed{});
+                break;
+            }
             case XCB_CLIENT_MESSAGE:
             {
                 if (reinterpret_cast<xcb_client_message_event_t*>(event)->data.data32[0] == delete_reply_->atom)

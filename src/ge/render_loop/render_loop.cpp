@@ -6,6 +6,12 @@
 namespace ge
 {
     template <>
+    void RenderLoop::handle_window_event<ge::WindowExposed>(const WindowExposed&)
+    {
+        render_.draw_frame();
+    }
+
+    template <>
     void RenderLoop::handle_window_event<ge::WindowEventClose>(const WindowEventClose&)
     {
         stopped_ = true;

@@ -7,6 +7,10 @@
 
 namespace ge
 {
+    struct WindowExposed final
+    {
+    };
+
     struct WindowEventClose final
     {
     };
@@ -29,7 +33,8 @@ namespace ge
 
     using WindowEvent = std::variant
     <
-        WindowEventClose
+        WindowExposed
+        , WindowEventClose
         , WindowEventResize
         , WheelEvent
     >;
