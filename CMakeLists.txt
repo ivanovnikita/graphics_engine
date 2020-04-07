@@ -134,6 +134,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-unreachable-code
         -Wno-padded
 
+        # remove on clang >= 10
+        -Wno-c99-extensions
+
         # for gtest
         -Wno-gnu-zero-variadic-macro-arguments
         -Wno-global-constructors

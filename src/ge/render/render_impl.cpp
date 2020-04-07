@@ -32,7 +32,7 @@ namespace ge
       , vk::Extent2D surface_extent
     )
         : surface_extent_{std::move(surface_extent)}
-        , camera_{{0.f, 0.f}, {1.f, 1.f}, 1.f}
+        , camera_{.transform = ViewProj2d{.pos = {0.f, 0.f}, .ortho_proj = {1.f, 1.f}}, .scale = 1.f}
     {
         using namespace factory;
         using namespace factory::options;
@@ -128,7 +128,7 @@ namespace ge
         uniform_buffer_memory_.reserve(images_.size());
         uniform_buffer_.reserve(images_.size());
 
-        constexpr vk::DeviceSize BUFFER_SIZE = sizeof(Camera2D);
+        constexpr vk::DeviceSize BUFFER_SIZE = sizeof(ViewProj2d);
         for (size_t i = 0; i < images_.size(); ++i)
         {
             auto [buffer, memory] = factory::create_buffer
@@ -164,7 +164,7 @@ namespace ge
             const auto buffer_info = vk::DescriptorBufferInfo{}
                 .setBuffer(*uniform_buffer_[i])
                 .setOffset(0)
-                .setRange(sizeof(Camera2D));
+                .setRange(sizeof(ViewProj2d));
 
             const auto descriptor_write = vk::WriteDescriptorSet{}
                 .setDstSet(descriptor_sets_[i])
@@ -193,8 +193,7 @@ namespace ge
         images_ = logical_device_->getSwapchainImagesKHR(*swapchain_);
         image_views_ = factory::create_image_view(images_, format, *logical_device_);
 
-        camera_.ortho_proj.x = 1.f / surface_extent_.width;
-        camera_.ortho_proj.y = 1.f / surface_extent_.height;
+        update_camera_transform();
 
         descriptor_set_layout_ = factory::create_descriptor_set_layout(*logical_device_);
         create_uniform_buffers();
@@ -349,21 +348,28 @@ namespace ge
         (
             *uniform_buffer_memory_[current_image_index]
             , offset
-            , sizeof(Camera2D)
+            , sizeof(ViewProj2d)
             , vk::MemoryMapFlags{}
         );
-        std::memcpy(data, &camera_, sizeof(Camera2D));
+        std::memcpy(data, &camera_.transform, sizeof(ViewProj2d));
         logical_device_->unmapMemory(*uniform_buffer_memory_[current_image_index]);
     }
 
     void Render::RenderImpl::set_camera_pos(const glm::vec2& pos)
     {
-        camera_.pos = pos;
+        camera_.transform.pos = pos;
     }
 
     void Render::RenderImpl::set_camera_scale(const float scale)
     {
         camera_.scale = scale;
+        update_camera_transform();
+    }
+
+    void Render::RenderImpl::update_camera_transform()
+    {
+        camera_.transform.ortho_proj.x = (1.f / surface_extent_.width) / camera_.scale;
+        camera_.transform.ortho_proj.y = (1.f / surface_extent_.height) / camera_.scale;
     }
 
     void Render::RenderImpl::draw_frame()

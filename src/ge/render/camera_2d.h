@@ -1,13 +1,18 @@
 #pragma once
 
-#include <glm/mat4x4.hpp>
+#include <glm/vec2.hpp>
 
 namespace ge
 {
-    struct Camera2D final
+    struct ViewProj2d final
     {
         glm::vec2 pos;
         glm::vec2 ortho_proj; // https://jsantell.com/3d-projection/#orthographic-projection
+    };
+
+    struct Camera2d final
+    {
+        ViewProj2d transform;
         float scale;
     };
 }

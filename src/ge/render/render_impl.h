@@ -31,6 +31,7 @@ namespace ge
         void create_graphics_pipeline();
         void create_command_buffers();
         void update_uniform_buffer(size_t current_image);
+        void update_camera_transform();
 
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
@@ -74,6 +75,6 @@ namespace ge
         std::vector<Vertex>                 vertices_;
         std::vector<uint16_t>               indices_;
 
-        Camera2D                            camera_;
+        Camera2d                            camera_;
     };
 }
