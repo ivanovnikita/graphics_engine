@@ -37,7 +37,9 @@ namespace ge
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
+        glm::vec2 camera_pos() const;
         void set_camera_pos(const glm::vec2&);
+        float camera_scale() const;
         void set_camera_scale(float scale);
 
     private:

@@ -6,19 +6,43 @@
 namespace ge
 {
     template <>
-    void RenderLoop::handle_window_event<ge::WindowEventClose>(const ge::WindowEventClose&)
+    void RenderLoop::handle_window_event<ge::WindowEventClose>(const WindowEventClose&)
     {
         stopped_ = true;
     }
 
     template <>
-    void RenderLoop::handle_window_event<ge::WindowEventResize>(const ge::WindowEventResize& event)
+    void RenderLoop::handle_window_event<ge::WindowEventResize>(const WindowEventResize& event)
     {
         render_.resize(event.new_size.width, event.new_size.height);
         render_.draw_frame();
     }
 
-    RenderLoop::RenderLoop(ge::Window& window, ge::Render& render)
+    template <>
+    void RenderLoop::handle_window_event<ge::WheelEvent>(const WheelEvent& event)
+    {
+        constexpr float SCALE_STEP = 0.25;
+        float new_scale = render_.camera_scale();
+
+        switch (event.direction)
+        {
+        case WheelEvent::Direction::UP:
+        {
+            new_scale *= (1 - SCALE_STEP);
+            break;
+        }
+        case WheelEvent::Direction::DOWN:
+        {
+            new_scale *= (1 + SCALE_STEP);
+            break;
+        }
+        }
+
+        render_.set_camera_scale(new_scale);
+        render_.draw_frame();
+    }
+
+    RenderLoop::RenderLoop(Window& window, Render& render)
         : window_(window)
         , render_(render)
         , stopped_(false)
@@ -32,8 +56,8 @@ namespace ge
 
     void RenderLoop::handle_window_events()
     {
-        const std::vector<ge::WindowEvent> events = window_.grab_events();
-        for (const auto& event : events)
+        const std::vector<WindowEvent> events = window_.grab_events();
+        for (const WindowEvent& event : events)
         {
             std::visit
             (

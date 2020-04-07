@@ -154,7 +154,7 @@ namespace ge
         {
             screen->white_pixel
             , XCB_EVENT_MASK_EXPOSURE
-            | XCB_EVENT_MASK_KEY_PRESS
+            | XCB_EVENT_MASK_BUTTON_PRESS
             | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         };
 
@@ -279,6 +279,25 @@ namespace ge
                     {
                         last_resize_event = WindowEventResize{current_size_};
                     }
+                }
+                break;
+            }
+            case XCB_BUTTON_PRESS:
+            {
+                const auto button_press_event = reinterpret_cast<const xcb_button_press_event_t*>(event);
+
+                switch (button_press_event->detail)
+                {
+                case XCB_BUTTON_INDEX_4:
+                {
+                    events.emplace_back(WheelEvent{WheelEvent::Direction::UP});
+                    break;
+                }
+                case XCB_BUTTON_INDEX_5:
+                {
+                    events.emplace_back(WheelEvent{WheelEvent::Direction::DOWN});
+                    break;
+                }
                 }
             }
             }

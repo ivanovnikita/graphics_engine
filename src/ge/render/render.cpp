@@ -41,9 +41,19 @@ namespace ge
         impl_->resize(new_surface_width, new_surface_height);
     }
 
+    glm::vec2 Render::camera_pos() const
+    {
+        return impl_->camera_pos();
+    }
+
     void Render::set_camera_pos(const glm::vec2& pos)
     {
         impl_->set_camera_pos(pos);
+    }
+
+    float Render::camera_scale() const
+    {
+        return impl_->camera_scale();
     }
 
     void Render::set_camera_scale(float scale)

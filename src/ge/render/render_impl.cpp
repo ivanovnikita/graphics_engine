@@ -355,9 +355,19 @@ namespace ge
         logical_device_->unmapMemory(*uniform_buffer_memory_[current_image_index]);
     }
 
+    glm::vec2 Render::RenderImpl::camera_pos() const
+    {
+        return camera_.transform.pos;
+    }
+
     void Render::RenderImpl::set_camera_pos(const glm::vec2& pos)
     {
         camera_.transform.pos = pos;
+    }
+
+    float Render::RenderImpl::camera_scale() const
+    {
+        return camera_.scale;
     }
 
     void Render::RenderImpl::set_camera_scale(const float scale)

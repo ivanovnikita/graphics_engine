@@ -16,9 +16,21 @@ namespace ge
         Size new_size;
     };
 
+    struct WheelEvent final
+    {
+        enum class Direction
+        {
+            UP
+            , DOWN
+        };
+
+        Direction direction;
+    };
+
     using WindowEvent = std::variant
     <
         WindowEventClose
         , WindowEventResize
+        , WheelEvent
     >;
 }
