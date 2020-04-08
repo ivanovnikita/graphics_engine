@@ -97,6 +97,151 @@ namespace ge
 
             xcb_icccm_set_wm_normal_hints(&connection, handle, &hints);
         }
+
+        ModifiersState parse_modifiers(uint16_t state)
+        {
+            const auto extract_state_to = [&state] (bool& field, uint8_t& counter)
+            {
+                bool result = false;
+                if (state & 1)
+                {
+                    field = true;
+                    ++counter;
+                }
+                state >>= 1;
+                return result;
+            };
+
+            ModifiersState result;
+
+            extract_state_to(result.shift, result.count);
+            extract_state_to(result.caps_lock, result.count);
+            extract_state_to(result.ctrl, result.count);
+            extract_state_to(result.mod_1, result.count);
+            extract_state_to(result.mod_2, result.count);
+            extract_state_to(result.mod_3, result.count);
+            extract_state_to(result.mod_4, result.count);
+            extract_state_to(result.mod_5, result.count);
+            extract_state_to(result.mouse_left, result.count);
+            extract_state_to(result.mouse_middle, result.count);
+            extract_state_to(result.mouse_right, result.count);
+            extract_state_to(result.scroll_up, result.count);
+            extract_state_to(result.scroll_down, result.count);
+
+            return result;
+        }
+
+        template <ButtonEvent button_event>
+        std::optional<WindowEvent> handle_mouse_button_event(const xcb_button_press_event_t& event)
+        {
+            const glm::vec2 pos{event.event_x, event.event_y};
+            const ModifiersState modifiers{parse_modifiers(event.state)};
+            const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
+
+            switch (event.detail)
+            {
+            case XCB_BUTTON_INDEX_1:
+            {
+                return MouseButtonEvent<MouseButton, button_event>{MouseButton::LEFT, pos, modifiers, timestamp};
+            }
+            case XCB_BUTTON_INDEX_2:
+            {
+                return MouseButtonEvent<MouseButton, button_event>{MouseButton::MIDDLE, pos, modifiers, timestamp};
+            }
+            case XCB_BUTTON_INDEX_3:
+            {
+                return MouseButtonEvent<MouseButton, button_event>{MouseButton::RIGHT, pos, modifiers, timestamp};
+            }
+            }
+
+            if constexpr (button_event == ButtonEvent::PRESS)
+            {
+                switch (event.detail)
+                {
+                    case XCB_BUTTON_INDEX_4:
+                    {
+                        return WheelEvent{ScrollButton::UP, pos, modifiers, timestamp};
+                    }
+                    case XCB_BUTTON_INDEX_5:
+                    {
+                        return WheelEvent{ScrollButton::DOWN, pos, modifiers, timestamp};
+                    }
+                }
+            }
+
+            return std::nullopt;
+        }
+
+        std::optional<WindowEvent> handle_mouse_motion_event(const xcb_motion_notify_event_t& event)
+        {
+            const glm::vec2 pos{event.event_x, event.event_y};
+            const ModifiersState modifiers{parse_modifiers(event.state)};
+            const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
+
+            if (modifiers.count == 0)
+            {
+                return MouseMovePointerEvent{pos, timestamp};
+            }
+            else if
+            (
+                modifiers.count > 1 and (modifiers.mouse_left or modifiers.mouse_right)
+            )
+            {
+                ModifiersState reduced_modifiers;
+                reduced_modifiers.mouse_left = modifiers.mouse_left;
+                reduced_modifiers.mouse_right = modifiers.mouse_right;
+                reduced_modifiers.mouse_middle = modifiers.mouse_middle;
+                reduced_modifiers.count = 3;
+                if
+                (
+                    not
+                    (
+                        reduced_modifiers.mouse_left
+                        and reduced_modifiers.mouse_right
+                        and reduced_modifiers.mouse_middle
+                    )
+                )
+                {
+                    reduced_modifiers.count = 2;
+                }
+
+                return MouseMovePressedManyEvent
+                {
+                    pos
+                    , modifiers
+                    , timestamp
+                };
+            }
+            else if (modifiers.mouse_left)
+            {
+                return MouseMovePressedLeftEvent{pos, timestamp};
+            }
+            else if (modifiers.mouse_right)
+            {
+                return MouseMovePressedRightEvent{pos, timestamp};
+            }
+            else if (modifiers.mouse_middle)
+            {
+                return MouseMovePressedMiddleEvent{pos, timestamp};
+            }
+
+            return std::nullopt;
+        }
+
+        template <CrossEvent cross_event>
+        WindowEvent handle_cross_window_border_event(const xcb_enter_notify_event_t& event)
+        {
+            const glm::vec2 pos{event.event_x, event.event_y};
+            const ModifiersState modifiers{parse_modifiers(event.state)};
+            const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
+
+            return MouseCrossWindowBorderEvent<cross_event>
+            {
+                pos
+                , modifiers
+                , timestamp
+            };
+        }
     }
 
     template <>
@@ -150,12 +295,30 @@ namespace ge
 
         const xcb_screen_t* const screen = screen_iterator.data;
 
+        // NOTE: order of values must be the same as order of values in xcb_cw_t enum
         const uint32_t value_list[] =
         {
-            screen->white_pixel
+            // TODO: configure by option
+            screen->black_pixel
+
+            , XCB_BACKING_STORE_WHEN_MAPPED
+
+            // TODO: configure by option
             , XCB_EVENT_MASK_EXPOSURE
-            | XCB_EVENT_MASK_BUTTON_PRESS
             | XCB_EVENT_MASK_STRUCTURE_NOTIFY
+
+            | XCB_EVENT_MASK_BUTTON_PRESS
+            | XCB_EVENT_MASK_BUTTON_RELEASE
+
+            | XCB_EVENT_MASK_POINTER_MOTION
+
+            | XCB_EVENT_MASK_BUTTON_MOTION
+            | XCB_EVENT_MASK_BUTTON_1_MOTION
+            | XCB_EVENT_MASK_BUTTON_2_MOTION
+            | XCB_EVENT_MASK_BUTTON_3_MOTION
+
+            | XCB_EVENT_MASK_ENTER_WINDOW
+            | XCB_EVENT_MASK_LEAVE_WINDOW
         };
 
         constexpr int16_t x = 20;
@@ -175,7 +338,9 @@ namespace ge
           , border_width
           , XCB_WINDOW_CLASS_INPUT_OUTPUT
           , screen->root_visual
-          , XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+          , XCB_CW_BACK_PIXEL
+          | XCB_CW_BACKING_STORE
+          | XCB_CW_EVENT_MASK
           , value_list
         );
 
@@ -256,6 +421,7 @@ namespace ge
             {
             case XCB_EXPOSE:
             {
+                [[ maybe_unused ]] const auto expose_event = reinterpret_cast<const xcb_expose_event_t*>(event);
                 events.emplace_back(WindowExposed{});
                 break;
             }
@@ -290,20 +456,53 @@ namespace ge
             case XCB_BUTTON_PRESS:
             {
                 const auto button_press_event = reinterpret_cast<const xcb_button_press_event_t*>(event);
-
-                switch (button_press_event->detail)
+                if
+                (
+                    auto converted_event = handle_mouse_button_event<ButtonEvent::PRESS>(*button_press_event);
+                    converted_event.has_value()
+                )
                 {
-                case XCB_BUTTON_INDEX_4:
+                    events.emplace_back(*std::move(converted_event));
+                }
+                break;
+            }
+            case XCB_BUTTON_RELEASE:
+            {
+                const auto button_release_event = reinterpret_cast<const xcb_button_release_event_t*>(event);
+                if
+                (
+                    auto converted_event = handle_mouse_button_event<ButtonEvent::RELEASE>(*button_release_event);
+                    converted_event.has_value()
+                )
                 {
-                    events.emplace_back(WheelEvent{WheelEvent::Direction::UP});
-                    break;
+                    events.emplace_back(*std::move(converted_event));
                 }
-                case XCB_BUTTON_INDEX_5:
+                break;
+            }
+            case XCB_MOTION_NOTIFY:
+            {
+                const auto motion_event = reinterpret_cast<const xcb_motion_notify_event_t*>(event);
+                if
+                (
+                    auto converted_event = handle_mouse_motion_event(*motion_event);
+                    converted_event.has_value()
+                )
                 {
-                    events.emplace_back(WheelEvent{WheelEvent::Direction::DOWN});
-                    break;
+                    events.emplace_back(*std::move(converted_event));
                 }
-                }
+                break;
+            }
+            case XCB_ENTER_NOTIFY:
+            {
+                const auto enter_event = reinterpret_cast<const xcb_enter_notify_event_t*>(event);
+                events.emplace_back(handle_cross_window_border_event<CrossEvent::ENTER>(*enter_event));
+                break;
+            }
+            case XCB_LEAVE_NOTIFY:
+            {
+                const auto leave_event = reinterpret_cast<const xcb_leave_notify_event_t*>(event);
+                events.emplace_back(handle_cross_window_border_event<CrossEvent::LEAVE>(*leave_event));
+                break;
             }
             }
 

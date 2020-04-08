@@ -6,38 +6,38 @@
 namespace ge
 {
     template <>
-    void RenderLoop::handle_window_event<ge::WindowExposed>(const WindowExposed&)
+    void RenderLoop::handle_window_event(const WindowExposed&)
     {
         render_.draw_frame();
     }
 
     template <>
-    void RenderLoop::handle_window_event<ge::WindowEventClose>(const WindowEventClose&)
+    void RenderLoop::handle_window_event(const WindowEventClose&)
     {
         stopped_ = true;
     }
 
     template <>
-    void RenderLoop::handle_window_event<ge::WindowEventResize>(const WindowEventResize& event)
+    void RenderLoop::handle_window_event(const WindowEventResize& event)
     {
         render_.resize(event.new_size.width, event.new_size.height);
         render_.draw_frame();
     }
 
     template <>
-    void RenderLoop::handle_window_event<ge::WheelEvent>(const WheelEvent& event)
+    void RenderLoop::handle_window_event(const WheelEvent& event)
     {
         constexpr float SCALE_STEP = 0.1f;
         float new_scale = render_.camera_scale();
 
         switch (event.direction)
         {
-        case WheelEvent::Direction::UP:
+        case ScrollButton::UP:
         {
             new_scale *= (1 - SCALE_STEP);
             break;
         }
-        case WheelEvent::Direction::DOWN:
+        case ScrollButton::DOWN:
         {
             new_scale *= (1 + SCALE_STEP);
             break;
@@ -47,6 +47,81 @@ namespace ge
         render_.set_camera_scale(new_scale);
 
         render_.draw_frame();
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseButtonPress& event)
+    {
+        switch (event.button)
+        {
+        case MouseButton::LEFT:
+        {
+            break;
+        }
+        case MouseButton::RIGHT:
+        {
+            break;
+        }
+        case MouseButton::MIDDLE:
+        {
+            break;
+        }
+        }
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseButtonRelease& event)
+    {
+        switch (event.button)
+        {
+        case MouseButton::LEFT:
+        {
+            break;
+        }
+        case MouseButton::RIGHT:
+        {
+            break;
+        }
+        case MouseButton::MIDDLE:
+        {
+            break;
+        }
+        }
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseMovePointerEvent&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseMovePressedLeftEvent&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseMovePressedRightEvent&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseMovePressedMiddleEvent&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseMovePressedManyEvent&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseEnterWindow&)
+    {
+    }
+
+    template <>
+    void RenderLoop::handle_window_event(const MouseLeaveWindow&)
+    {
     }
 
     RenderLoop::RenderLoop(Window& window, Render& render)
