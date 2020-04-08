@@ -382,6 +382,34 @@ namespace ge
         camera_.transform.ortho_proj.y = (1.f / surface_extent_.height) / camera_.scale;
     }
 
+    glm::vec2 Render::RenderImpl::normalize_in_proj_space(const glm::vec2& coord) const
+    {
+        glm::vec2 result{coord};
+
+        glm::vec2 surface_center{surface_extent_.width / 2, surface_extent_.height / 2};
+
+        result.x -= surface_center.x;
+        result.x /= surface_center.x;
+
+        result.y -= surface_center.y;
+        result.y /= surface_center.y;
+
+        return result;
+    }
+
+    // TODO: write tests
+    glm::vec2 Render::RenderImpl::proj_to_model_space(const glm::vec2& coord) const
+    {
+        glm::vec2 result{coord.x, -coord.y};
+
+        result.x /= camera_.transform.ortho_proj.x;
+        result.y /= camera_.transform.ortho_proj.y;
+
+        result += camera_.transform.pos;
+
+        return result;
+    }
+
     void Render::RenderImpl::draw_frame()
     {
         if (command_buffers_.empty())

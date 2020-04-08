@@ -42,6 +42,9 @@ namespace ge
         float camera_scale() const;
         void set_camera_scale(float scale);
 
+        glm::vec2 normalize_in_proj_space(const glm::vec2&) const;
+        glm::vec2 proj_to_model_space(const glm::vec2&) const;
+
     private:
         class RenderImpl;
         std::unique_ptr<RenderImpl> impl_;

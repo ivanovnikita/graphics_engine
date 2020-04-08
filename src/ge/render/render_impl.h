@@ -26,6 +26,9 @@ namespace ge
         float camera_scale() const;
         void set_camera_scale(float);
 
+        glm::vec2 normalize_in_proj_space(const glm::vec2&) const;
+        glm::vec2 proj_to_model_space(const glm::vec2&) const;
+
     private:
         vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
         void create_uniform_buffers();

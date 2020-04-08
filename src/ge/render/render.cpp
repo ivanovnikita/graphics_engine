@@ -60,4 +60,14 @@ namespace ge
     {
         impl_->set_camera_scale(scale);
     }
+
+    glm::vec2 Render::normalize_in_proj_space(const glm::vec2& coord) const
+    {
+        return impl_->normalize_in_proj_space(coord);
+    }
+
+    glm::vec2 Render::proj_to_model_space(const glm::vec2& coord) const
+    {
+        return impl_->proj_to_model_space(coord);
+    }
 }

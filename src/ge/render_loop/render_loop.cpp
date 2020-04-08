@@ -27,7 +27,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event<ge::WheelEvent>(const WheelEvent& event)
     {
-        constexpr float SCALE_STEP = 0.25;
+        constexpr float SCALE_STEP = 0.1f;
         float new_scale = render_.camera_scale();
 
         switch (event.direction)
@@ -45,6 +45,7 @@ namespace ge
         }
 
         render_.set_camera_scale(new_scale);
+
         render_.draw_frame();
     }
 
