@@ -172,60 +172,13 @@ namespace ge
             return std::nullopt;
         }
 
-        std::optional<WindowEvent> handle_mouse_motion_event(const xcb_motion_notify_event_t& event)
+        WindowEvent handle_mouse_motion_event(const xcb_motion_notify_event_t& event)
         {
             const glm::vec2 pos{event.event_x, event.event_y};
             const ModifiersState modifiers{parse_modifiers(event.state)};
             const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
 
-            if (modifiers.count == 0)
-            {
-                return MouseMovePointerEvent{pos, timestamp};
-            }
-            else if
-            (
-                modifiers.count > 1 and (modifiers.mouse_left or modifiers.mouse_right)
-            )
-            {
-                ModifiersState reduced_modifiers;
-                reduced_modifiers.mouse_left = modifiers.mouse_left;
-                reduced_modifiers.mouse_right = modifiers.mouse_right;
-                reduced_modifiers.mouse_middle = modifiers.mouse_middle;
-                reduced_modifiers.count = 3;
-                if
-                (
-                    not
-                    (
-                        reduced_modifiers.mouse_left
-                        and reduced_modifiers.mouse_right
-                        and reduced_modifiers.mouse_middle
-                    )
-                )
-                {
-                    reduced_modifiers.count = 2;
-                }
-
-                return MouseMovePressedManyEvent
-                {
-                    pos
-                    , modifiers
-                    , timestamp
-                };
-            }
-            else if (modifiers.mouse_left)
-            {
-                return MouseMovePressedLeftEvent{pos, timestamp};
-            }
-            else if (modifiers.mouse_right)
-            {
-                return MouseMovePressedRightEvent{pos, timestamp};
-            }
-            else if (modifiers.mouse_middle)
-            {
-                return MouseMovePressedMiddleEvent{pos, timestamp};
-            }
-
-            return std::nullopt;
+            return MouseMoveEvent{pos, modifiers, timestamp};
         }
 
         template <CrossEvent cross_event>
@@ -482,14 +435,7 @@ namespace ge
             case XCB_MOTION_NOTIFY:
             {
                 const auto motion_event = reinterpret_cast<const xcb_motion_notify_event_t*>(event);
-                if
-                (
-                    auto converted_event = handle_mouse_motion_event(*motion_event);
-                    converted_event.has_value()
-                )
-                {
-                    events.emplace_back(*std::move(converted_event));
-                }
+                events.emplace_back(handle_mouse_motion_event(*motion_event));
                 break;
             }
             case XCB_ENTER_NOTIFY:

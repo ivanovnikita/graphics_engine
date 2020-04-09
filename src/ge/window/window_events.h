@@ -89,38 +89,12 @@ namespace ge
     using MouseButtonRelease = MouseButtonEvent<MouseButton, ButtonEvent::RELEASE>;
     using WheelEvent = MouseButtonEvent<ScrollButton, ButtonEvent::PRESS>;
 
-    template <auto... ButtonsPressed>
     struct MouseMoveEvent final
     {
         glm::vec2 pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };
-
-    template <>
-    struct MouseMoveEvent<> final
-    {
-        glm::vec2 pos;
-        EventTimestamp timestamp;
-    };
-
-    template <auto ButtonPressed>
-    struct MouseMoveEvent<ButtonPressed> final
-    {
-        glm::vec2 pos;
-        EventTimestamp timestamp;
-    };
-
-    using MouseMovePointerEvent = MouseMoveEvent<>;
-    using MouseMovePressedLeftEvent = MouseMoveEvent<MouseButton::LEFT>;
-    using MouseMovePressedRightEvent = MouseMoveEvent<MouseButton::RIGHT>;
-    using MouseMovePressedMiddleEvent = MouseMoveEvent<MouseButton::MIDDLE>;
-    using MouseMovePressedManyEvent = MouseMoveEvent
-    <
-        MouseButton::LEFT
-      , MouseButton::RIGHT
-      , MouseButton::MIDDLE
-    >;
 
     enum class CrossEvent
     {
@@ -147,11 +121,7 @@ namespace ge
       , MouseButtonPress
       , MouseButtonRelease
       , WheelEvent
-      , MouseMovePointerEvent
-      , MouseMovePressedLeftEvent
-      , MouseMovePressedRightEvent
-      , MouseMovePressedMiddleEvent
-      , MouseMovePressedManyEvent
+      , MouseMoveEvent
       , MouseEnterWindow
       , MouseLeaveWindow
     >;

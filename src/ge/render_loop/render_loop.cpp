@@ -22,14 +22,18 @@ namespace ge
     {
         render_.resize(event.new_size.width, event.new_size.height);
         render_.draw_frame();
+
+        prev_move_mouse_pos_.reset();
     }
 
     template <>
     void RenderLoop::handle_window_event(const WheelEvent& event)
     {
+        const ProjVec2 normalized_event_pos = render_.normalize_in_proj_space(event.pos);
+        const ModelVec2 model_space_event_pos = render_.proj_to_model_space(normalized_event_pos);
+
         constexpr float SCALE_STEP = 0.1f;
         float new_scale = render_.camera_scale();
-
         switch (event.direction)
         {
         case ScrollButton::UP:
@@ -43,10 +47,17 @@ namespace ge
             break;
         }
         }
-
         render_.set_camera_scale(new_scale);
 
+        // We know that mouse cursor must save the same coords in model and projection space,
+        // so we jsut need to calculate new camera position.
+        const ModelVec2 new_camera_pos = model_space_event_pos -
+                (render_.proj_to_model_space(normalized_event_pos) - render_.camera_pos());
+        render_.set_camera_pos(new_camera_pos);
+
         render_.draw_frame();
+
+        prev_move_mouse_pos_.reset();
     }
 
     template <>
@@ -56,6 +67,7 @@ namespace ge
         {
         case MouseButton::LEFT:
         {
+            prev_move_mouse_pos_ = render_.proj_to_model_space(render_.normalize_in_proj_space(event.pos));
             break;
         }
         case MouseButton::RIGHT:
@@ -76,6 +88,7 @@ namespace ge
         {
         case MouseButton::LEFT:
         {
+            prev_move_mouse_pos_.reset();
             break;
         }
         case MouseButton::RIGHT:
@@ -90,28 +103,22 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseMovePointerEvent&)
+    void RenderLoop::handle_window_event(const MouseMoveEvent& event)
     {
-    }
+        if (not prev_move_mouse_pos_.has_value() or not event.modifiers.mouse_left)
+        {
+            prev_move_mouse_pos_.reset();
+            return;
+        }
 
-    template <>
-    void RenderLoop::handle_window_event(const MouseMovePressedLeftEvent&)
-    {
-    }
+        const ProjVec2 normalized_mouse_pos = render_.normalize_in_proj_space(event.pos);
+        const ModelVec2 mouse_pos = render_.proj_to_model_space(normalized_mouse_pos);
+        const ModelVec2 mouse_pos_delta = mouse_pos - *prev_move_mouse_pos_;
 
-    template <>
-    void RenderLoop::handle_window_event(const MouseMovePressedRightEvent&)
-    {
-    }
+        render_.set_camera_pos(render_.camera_pos() - mouse_pos_delta);
+        render_.draw_frame();
 
-    template <>
-    void RenderLoop::handle_window_event(const MouseMovePressedMiddleEvent&)
-    {
-    }
-
-    template <>
-    void RenderLoop::handle_window_event(const MouseMovePressedManyEvent&)
-    {
+        prev_move_mouse_pos_ = render_.proj_to_model_space(normalized_mouse_pos);
     }
 
     template <>
@@ -122,6 +129,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseLeaveWindow&)
     {
+        prev_move_mouse_pos_.reset();
     }
 
     RenderLoop::RenderLoop(Window& window, Render& render)

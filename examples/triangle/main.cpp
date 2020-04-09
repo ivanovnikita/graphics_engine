@@ -23,9 +23,9 @@ int main()
     constexpr uint16_t height = 500;
     constexpr ge::DynamicSize size
     {
-        ge::Size{width, height}
-        , ge::Size{100, 100}
-        , ge::Size{700, 700}
+        .default_size = ge::Size{width, height}
+        , .min_size = ge::Size{100, 100}
+        , .max_size = std::nullopt
     };
     auto window = ge::Window::create(size);
 
@@ -62,7 +62,7 @@ int main()
     while (not render_loop.stopped())
     {
         render_loop.handle_window_events();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return 0;
