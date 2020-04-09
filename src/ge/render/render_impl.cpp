@@ -418,24 +418,29 @@ namespace ge
         }
 
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-        const vk::ResultValue<uint32_t> image_index_result = logical_device_->acquireNextImageKHR
-        (
-            *swapchain_
-            , timeout
-            , *image_available_semaphore_
-            , vk::Fence{nullptr}
-        );
 
-        if
-        (
-            image_index_result.result == vk::Result::eErrorOutOfDateKHR
-            or image_index_result.result == vk::Result::eSuboptimalKHR
-        )
+        uint32_t image_index = 0;
+        try
+        {
+            const vk::ResultValue<uint32_t> image_index_result = logical_device_->acquireNextImageKHR
+            (
+                *swapchain_
+                , timeout
+                , *image_available_semaphore_
+                , vk::Fence{nullptr}
+            );
+
+            if (image_index_result.result != vk::Result::eSuccess)
+            {
+                return;
+            }
+
+            image_index = image_index_result.value;
+        }
+        catch (const vk::OutOfDateKHRError&)
         {
             return;
         }
-
-        const uint32_t image_index = image_index_result.value;
 
         update_uniform_buffer(image_index);
 
