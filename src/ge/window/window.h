@@ -27,7 +27,11 @@ namespace ge
     public:
         virtual ~Window();
 
-        static std::unique_ptr<Window> create(const WindowSize&);
+        static std::unique_ptr<Window> create
+        (
+            const WindowSize&
+            , const std::array<uint8_t, 4> background_color
+        );
 
         virtual vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) = 0;
 

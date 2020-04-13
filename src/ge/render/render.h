@@ -23,14 +23,20 @@ namespace ge
 {
     using SurfaceCreator = vk::UniqueSurfaceKHR(const vk::Instance&);
 
+    struct SurfaceParams final
+    {
+        std::function<SurfaceCreator> surface_creator;
+        uint32_t width;
+        uint32_t height;
+        std::array<uint8_t, 4> background_color;
+    };
+
     class Render final
     {
     public:
         Render
         (
-            const std::function<SurfaceCreator>&
-          , const uint16_t surface_width
-          , const uint16_t surface_heigth
+            const SurfaceParams&
         );
         ~Render();
         void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);

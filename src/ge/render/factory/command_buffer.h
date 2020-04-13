@@ -16,6 +16,7 @@ namespace ge::factory
         , const std::span<const vk::UniqueFramebuffer>&
         , const vk::RenderPass&
         , const vk::Extent2D&
+        , const vk::ClearColorValue& background_color
         , const vk::Pipeline&
         , const vk::PipelineLayout& pipeline_layout
         , const std::span<const vk::DescriptorSet> descriptor_sets

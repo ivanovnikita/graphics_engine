@@ -7,18 +7,13 @@ namespace ge
 {
     Render::Render
     (
-        const std::function<SurfaceCreator>& create_surface
-      , const uint16_t surface_width
-      , const uint16_t surface_heigth
+        const SurfaceParams& surface_params
     )
         : impl_
         (
             new RenderImpl
             (
-                create_surface
-              , vk::Extent2D{}
-                  .setWidth(surface_width)
-                  .setHeight(surface_heigth)
+                surface_params
             )
         )
     {

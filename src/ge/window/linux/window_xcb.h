@@ -11,7 +11,11 @@ namespace ge
     class WindowXCB final : public Window
     {
     public:
-        WindowXCB(const WindowSize&);
+        WindowXCB
+        (
+            const WindowSize&
+            , const std::array<uint8_t, 4> background_color
+        );
         ~WindowXCB() override;
 
         vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) override;

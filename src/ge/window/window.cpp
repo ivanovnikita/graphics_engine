@@ -11,12 +11,16 @@ namespace ge
     Window::Window() = default;
     Window::~Window() = default;
 
-    std::unique_ptr<Window> Window::create(const WindowSize& size)
+    std::unique_ptr<Window> Window::create
+    (
+        const WindowSize& size
+        , const std::array<uint8_t, 4> background_color
+    )
     {
 #if defined VK_USE_PLATFORM_WIN32_KHR
         return std::make_unique<WindowWin32>();
 #elif defined VK_USE_PLATFORM_XCB_KHR
-        return std::make_unique<WindowXCB>(size);
+        return std::make_unique<WindowXCB>(size, background_color);
 #else
         throw std::runtime_error("There is no available window system");
 #endif        

@@ -10,6 +10,7 @@ namespace ge::factory
         , const std::span<const vk::UniqueFramebuffer>& framebuffes
         , const vk::RenderPass& render_pass
         , const vk::Extent2D& extent
+        , const vk::ClearColorValue& background_color
         , const vk::Pipeline& pipeline
         , const vk::PipelineLayout& pipeline_layout
         , const std::span<const vk::DescriptorSet> descriptor_sets
@@ -29,10 +30,7 @@ namespace ge::factory
 
         const auto begin_info = vk::CommandBufferBeginInfo{}
             .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
-        const vk::ClearValue clear_color
-        {
-            vk::ClearColorValue{std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f}}
-        };
+        const vk::ClearValue clear_color{background_color};
         auto render_pass_info = vk::RenderPassBeginInfo{}
             .setRenderPass(render_pass)
             .setRenderArea

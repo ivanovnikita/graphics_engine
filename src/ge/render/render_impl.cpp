@@ -28,10 +28,19 @@ namespace ge
 {
     Render::RenderImpl::RenderImpl
     (
-        const std::function<SurfaceCreator>& create_surface
-      , vk::Extent2D surface_extent
+        const SurfaceParams& surface_params
     )
-        : surface_extent_{std::move(surface_extent)}
+        : surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
+        , surface_background_color_
+        {
+            std::array<float, 4>
+            {
+                surface_params.background_color[0] / 255.f
+              , surface_params.background_color[1] / 255.f
+              , surface_params.background_color[2] / 255.f
+              , surface_params.background_color[3] / 255.f
+            }
+        }
         , camera_{.transform = ViewProj2d{.pos = {0.f, 0.f}, .ortho_proj = {1.f, 1.f}}, .scale = 1.f}
     {
         using namespace factory;
@@ -52,7 +61,7 @@ namespace ge
 #ifndef NDEBUG
         debug_callback_ = create_debug_callback();
 #endif
-        surface_ = vk::UniqueSurfaceKHR(create_surface(*instance_));
+        surface_ = vk::UniqueSurfaceKHR(surface_params.surface_creator(*instance_));
 
         constexpr factory::options::Graphics option_graphics{ENABLED};
 
@@ -330,6 +339,7 @@ namespace ge
             , framebuffers_
             , *render_pass_
             , surface_extent_
+            , surface_background_color_
             , *pipeline_
             , *pipeline_layout_
             , descriptor_sets_

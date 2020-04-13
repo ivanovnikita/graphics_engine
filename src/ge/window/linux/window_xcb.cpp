@@ -210,13 +210,13 @@ namespace ge
     }
 
     template <>
-    void WindowXCB::init_window_size_constraints<StaticSize>(const StaticSize& size)
+    void WindowXCB::init_window_size_constraints(const StaticSize& size)
     {
         set_min_max_sizes(*connection_, handle_, size, size, size);
     }
 
     template <>
-    void WindowXCB::init_window_size_constraints<DynamicSize>(const DynamicSize& size)
+    void WindowXCB::init_window_size_constraints(const DynamicSize& size)
     {
         if (size.min_size.has_value() or size.max_size.has_value())
         {
@@ -224,7 +224,11 @@ namespace ge
         }
     }
 
-    WindowXCB::WindowXCB(const WindowSize& size)
+    WindowXCB::WindowXCB
+    (
+        const WindowSize& size
+        , const std::array<uint8_t, 4> background_color
+    )
         : delete_reply_(nullptr)
     {
         std::visit([this] (const auto& s) { this->init_window_size(s); }, size);
@@ -251,8 +255,7 @@ namespace ge
         // NOTE: order of values must be the same as order of values in xcb_cw_t enum
         const uint32_t value_list[] =
         {
-            // TODO: configure by option
-            screen->black_pixel
+            *reinterpret_cast<const uint32_t*>(background_color.data())
 
             , XCB_BACKING_STORE_WHEN_MAPPED
 

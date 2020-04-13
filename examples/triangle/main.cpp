@@ -27,16 +27,22 @@ int main()
         , .min_size = ge::Size{100, 100}
         , .max_size = std::nullopt
     };
-    auto window = ge::Window::create(size);
+    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
+
+    auto window = ge::Window::create(size, background_color);
 
     ge::Render render
     (
-        [&window] (const vk::Instance& instance)
+        ge::SurfaceParams
         {
-            return window->create_surface(instance);
+            .surface_creator = [&window] (const vk::Instance& instance)
+            {
+                return window->create_surface(instance);
+            }
+            , .width = width
+            , .height = height
+            , .background_color = background_color
         }
-        , width
-        , height
     );
 
     window->start_display();

@@ -13,10 +13,10 @@ namespace ge
     public:
         RenderImpl
         (
-            const std::function<SurfaceCreator>&
-          , vk::Extent2D surface_extent
+            const SurfaceParams&
         );
         ~RenderImpl();
+
         void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
@@ -42,6 +42,7 @@ namespace ge
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
         vk::Extent2D                        surface_extent_;
         vk::UniqueSurfaceKHR                surface_;
+        vk::ClearColorValue                 surface_background_color_;
         vk::PhysicalDevice                  physical_device_;
         QueueFamilyIndices                  queue_family_indices_;
         vk::UniqueDevice                    logical_device_;
