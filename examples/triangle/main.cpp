@@ -50,15 +50,23 @@ int main()
 
     const std::array vertices
     {
-        ge::Vertex{{0.f, 0.5f}, {1.f, 0.f, 0.f}}
-        , ge::Vertex{{-0.5f, -0.5f}, {0.f, 1.f, 0.f}}
-        , ge::Vertex{{0.5f, -0.5f}, {0.f, 1.f, 0.f}}
+        ge::Vertex{{0.f, 0.5f}}
+        , ge::Vertex{{-0.5f, -0.5f}}
+        , ge::Vertex{{0.5f, -0.5f}}
     };
-    const std::array<uint16_t, 3> indices
+    const std::array colors
     {
-        0, 1, 2
+        ge::Color{{1.f, 0.f, 0.f}}
+        , ge::Color{{0.f, 1.f, 0.f}}
+        , ge::Color{{0.f, 1.f, 0.f}}
     };
-    render.set_object_to_draw(vertices, indices);
+    const std::array<uint16_t, 6> indices
+    {
+        0, 1
+        , 1, 2
+        , 2, 0
+    };
+    render.set_object_to_draw(vertices, colors, indices);
 
     render.set_camera_pos({0.f, 0.f});
     render.set_camera_scale(1.f / 300.f);

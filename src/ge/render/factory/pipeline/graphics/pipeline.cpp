@@ -51,17 +51,17 @@ namespace ge::factory
             , ShaderName::line_2d_camera_Vertex
         );
 
-        const vk::VertexInputBindingDescription binding_description = vertex_binding_description();
+        const std::span<const vk::VertexInputBindingDescription> binding_description = vertex_binding_description();
         const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
         // TODO: use several bindings for coords and colors
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
-            .setVertexBindingDescriptionCount(1)
-            .setPVertexBindingDescriptions(&binding_description)
+            .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_description.size()))
+            .setPVertexBindingDescriptions(binding_description.data())
             .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_description.size()))
             .setPVertexAttributeDescriptions(attribute_description.data());
 
         const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eTriangleList) // TODO: use line list
+            .setTopology(vk::PrimitiveTopology::eLineList) // TODO: use line list
             .setPrimitiveRestartEnable(VK_FALSE);
 
         const auto viewport = vk::Viewport()

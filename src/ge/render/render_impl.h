@@ -18,7 +18,12 @@ namespace ge
         );
         ~RenderImpl();
 
-        void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);
+        void set_object_to_draw
+        (
+            const std::span<const Vertex>
+            , const std::span<const Color>
+            , const std::span<const uint16_t> indices
+        );
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
@@ -68,6 +73,8 @@ namespace ge
 
         vk::UniqueDeviceMemory              vertex_buffer_memory_;
         vk::UniqueBuffer                    vertex_buffer_;
+        vk::UniqueDeviceMemory              color_buffer_memory_;
+        vk::UniqueBuffer                    color_buffer_;
         vk::UniqueDeviceMemory              index_buffer_memory_;
         vk::UniqueBuffer                    index_buffer_;
 
@@ -80,6 +87,7 @@ namespace ge
         vk::UniqueFence                     transfer_finished_fence_;
 
         std::vector<Vertex>                 vertices_;
+        std::vector<Color>                  colors_;
         std::vector<uint16_t>               indices_;
 
         Camera2d                            camera_;

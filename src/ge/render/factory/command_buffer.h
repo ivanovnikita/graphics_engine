@@ -21,6 +21,7 @@ namespace ge::factory
         , const vk::PipelineLayout& pipeline_layout
         , const std::span<const vk::DescriptorSet> descriptor_sets
         , const vk::Buffer& vertices
+        , const vk::Buffer& colors
         , const vk::Buffer& indices
         , const size_t indices_count
     );

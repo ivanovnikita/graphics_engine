@@ -15,6 +15,7 @@ namespace ge::factory
         , const vk::PipelineLayout& pipeline_layout
         , const std::span<const vk::DescriptorSet> descriptor_sets
         , const vk::Buffer& vertices
+        , const vk::Buffer& colors
         , const vk::Buffer& indices
         , const size_t indices_count
     )
@@ -51,15 +52,16 @@ namespace ge::factory
             render_pass_info.setFramebuffer(*framebuffes[i]);
             command_buffer.beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
-            constexpr vk::DeviceSize vertices_offsets[]{0};
+            const std::array<vk::Buffer, 2> vertex_buffers{vertices, colors};
+            const std::array<vk::DeviceSize, 2> vertices_offsets{0, 0};
             constexpr uint32_t first_binding{0};
-            constexpr uint32_t binding_count{1};
+            constexpr uint32_t binding_count{vertex_buffers.size()};
             command_buffer.bindVertexBuffers
             (
                 first_binding
                 , binding_count
-                , &vertices // TODO: one array with coords and colors
-                , vertices_offsets // TODO: different offsets for coords and colors? [all coords] [all line colors] [all point colors]
+                , vertex_buffers.data() // TODO: one array with coords and colors
+                , vertices_offsets.data() // TODO: different offsets for coords and colors? [all coords] [all line colors] [all point colors]
             );
 
             // TODO: and bind later another index buffer (by another offset in the same buffer) with indices for points

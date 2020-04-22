@@ -9,6 +9,10 @@ namespace ge
     struct Vertex final
     {
         glm::vec2 pos;
+    };
+
+    struct Color final
+    {
         glm::vec3 color;
     };
 

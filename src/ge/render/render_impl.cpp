@@ -283,14 +283,21 @@ namespace ge
     void Render::RenderImpl::set_object_to_draw
     (
         const std::span<const Vertex> vertices
+        , const std::span<const Color> colors
         , const std::span<const uint16_t> indices
     )
     {
+        assert(vertices.size() == colors.size());
+
         vertices_.clear();
+        colors_.clear();
         indices_.clear();
 
         vertices_.reserve(vertices.size());
         std::copy(vertices.begin(), vertices.end(), std::back_inserter(vertices_));
+
+        colors_.reserve(colors.size());
+        std::copy(colors.begin(), colors.end(), std::back_inserter(colors_));
 
         indices_.reserve(indices.size());
         std::copy(indices.begin(), indices.end(), std::back_inserter(indices_));
@@ -323,6 +330,17 @@ namespace ge
             , std::span<const Vertex>{vertices_}
         );
 
+        std::tie(color_buffer_, color_buffer_memory_) = factory::create_and_fill_buffer
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics
+            , *transfer_finished_fence_
+            , vk::BufferUsageFlagBits::eVertexBuffer
+            , std::span<const Color>{colors_}
+        );
+
         std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
         (
             physical_device_
@@ -346,6 +364,7 @@ namespace ge
             , *pipeline_layout_
             , descriptor_sets_
             , *vertex_buffer_
+            , *color_buffer_
             , *index_buffer_
             , indices_.size()
         );
