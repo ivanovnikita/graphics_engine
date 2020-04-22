@@ -1,34 +1,22 @@
 #include "ge/render/storage/shaders.h"
 #include "ge/render/factory/shader/module.h"
 
-#include "generated_shaders.h"
-
 namespace ge::storage
 {
     Shaders::Shaders(const vk::Device& device)
     {
-        shaders_.emplace_back
-        (
-            vk::ShaderStageFlagBits::eVertex
-          , factory::create_shader_module(device, triangle_Vertex)
-        );
-        shaders_.emplace_back
-        (
-            vk::ShaderStageFlagBits::eFragment
-          , factory::create_shader_module(device, triangle_Fragment)
-        );
+        const auto create_module = [this, &device] (const ShaderName shader_name)
+        {
+            shaders_.emplace(shader_name, factory::create_shader_module(device, get_shader(shader_name)));
+        };
+
+        create_module(ShaderName::point_2d_camera_Vertex);
+        create_module(ShaderName::line_2d_camera_Vertex);
+        create_module(ShaderName::simple_color_Fragment);
     }
 
-    std::vector<Shaders::Shader> Shaders::shaders() const
+    const vk::ShaderModule& Shaders::get(const ShaderName shader_name) const
     {
-        std::vector<Shaders::Shader> result;
-        result.reserve(shaders_.size());
-
-        for (const auto& [shader_kind, shader_module] : shaders_)
-        {
-            result.emplace_back(shader_kind, *shader_module);
-        }
-
-        return result;
+        return *shaders_.at(shader_name);
     }
 }

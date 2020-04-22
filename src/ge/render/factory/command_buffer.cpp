@@ -51,8 +51,6 @@ namespace ge::factory
             render_pass_info.setFramebuffer(*framebuffes[i]);
             command_buffer.beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
-            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
-
             constexpr vk::DeviceSize vertices_offsets[]{0};
             constexpr uint32_t first_binding{0};
             constexpr uint32_t binding_count{1};
@@ -60,10 +58,11 @@ namespace ge::factory
             (
                 first_binding
                 , binding_count
-                , &vertices
-                , vertices_offsets
+                , &vertices // TODO: one array with coords and colors
+                , vertices_offsets // TODO: different offsets for coords and colors? [all coords] [all line colors] [all point colors]
             );
 
+            // TODO: and bind later another index buffer (by another offset in the same buffer) with indices for points
             constexpr vk::DeviceSize indices_offset{0};
             command_buffer.bindIndexBuffer
             (
@@ -83,6 +82,8 @@ namespace ge::factory
                 , nullptr // dynamic offsets
             );
 
+            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+
             constexpr uint32_t instance_count{1};
             constexpr uint32_t first_index{0};
             constexpr uint32_t vertex_offset{0};
@@ -95,6 +96,10 @@ namespace ge::factory
                 , vertex_offset
                 , first_instance
             );
+
+            // TODO: bind another pipeline with other draw primitives
+
+            // TODO: draw ui here
 
             command_buffer.endRenderPass();
 

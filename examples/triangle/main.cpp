@@ -43,6 +43,7 @@ int main()
             , .height = height
             , .background_color = background_color
         }
+        , ge::VerticesArePolygons{}
     );
 
     window->start_display();
@@ -51,7 +52,7 @@ int main()
     {
         ge::Vertex{{0.f, 0.5f}, {1.f, 0.f, 0.f}}
         , ge::Vertex{{-0.5f, -0.5f}, {0.f, 1.f, 0.f}}
-        , ge::Vertex{{0.5f, -0.5f}, {0.f, 0.f, 1.f}}
+        , ge::Vertex{{0.5f, -0.5f}, {0.f, 1.f, 0.f}}
     };
     const std::array<uint16_t, 3> indices
     {

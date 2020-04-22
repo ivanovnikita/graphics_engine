@@ -108,16 +108,59 @@ namespace ge
             {
                 std::ostringstream common;
                 common <<
-                    "#include <array>\n"
-                    "\n"
                     "namespace " << target_namespace << "\n"
                     "{\n";
 
-                header << "#pragma once\n\n" << common.str();
+                header
+                    << "#pragma once\n\n"
+                       "#include <span>\n\n"
+                       "namespace vk\n"
+                       "{\n"
+                       "    enum class ShaderStageFlagBits;\n"
+                       "}\n\n"
+                    << common.str();
                 source
                     << R"(#include ")" << target_filename << R"(.h")"
-                    << "\n\n"
+                    << "\n"
+                       "#include <vulkan/vulkan.hpp>\n\n"
+                       "#include <array>\n\n"
                     << common.str();
+            }
+
+            const auto create_shader_name = []
+            (
+                const ShaderName& shader_name
+                , const vk::ShaderStageFlagBits& shader_kind
+            ) -> std::string
+            {
+                return shader_name + "_" + to_string(shader_kind);
+            };
+
+            {
+                header << "    enum class ShaderName\n"
+                          "    {\n";
+
+                std::string comma{""};
+                for (const auto& [shader_name, shaders] : compiled_shaders)
+                {
+                    for (const auto& [shader_kind, shader] : shaders)
+                    {
+                        if (shader.empty())
+                        {
+                            continue;
+                        }
+
+                        header << "        " << comma << create_shader_name(shader_name, shader_kind) << "\n";
+
+                        comma = ", ";
+                    }
+                }
+
+                header
+                    << "    };\n\n"
+                    << "    std::span<const uint32_t> get_shader(ShaderName);\n"
+                    << "    vk::ShaderStageFlagBits get_shader_kind(ShaderName);\n";
+                header << "}\n";
             }
 
             for (const auto& [shader_name, shaders] : compiled_shaders)
@@ -131,25 +174,25 @@ namespace ge
 
                     const auto start = std::chrono::high_resolution_clock::now();
 
-                    std::ostringstream common;
 
-                    common <<
-                        "    extern const std::array<uint32_t, "
+                    source <<
+                        "    static constexpr std::array<uint32_t, "
                         << shader.size()
                         << "> "
-                        << shader_name
-                        << "_"
-                        << to_string(shader_kind);
+                        << create_shader_name(shader_name, shader_kind)
+                        << "\n" << "    {\n";
 
-                    header << common.str() << ";\n";
-
-                    source << common.str() << "\n" << "    {\n";
-                    source << "         " << shader.front() << "\n";
+                    source << "        " << shader.front();
                     for (size_t i = 1; i < shader.size(); ++i)
                     {
-                        source << "        , " << shader[i] << "\n";
+                        source << ", " << shader[i] << "";
+
+                        if (i % 10 == 0)
+                        {
+                            source << "\n      ";
+                        }
                     }
-                    source << "    };\n";
+                    source << "\n    };\n\n";
 
                     const auto stop = std::chrono::high_resolution_clock::now();
 
@@ -161,7 +204,74 @@ namespace ge
                         << std::endl;
                 }
             }
-            header << "}\n";
+
+            {
+                source << "    std::span<const uint32_t> get_shader(const ShaderName shader_name)\n"
+                          "    {\n";
+
+                source << "        switch(shader_name)\n"
+                          "        {\n";
+
+                for (const auto& [shader_name, shaders] : compiled_shaders)
+                {
+                    for (const auto& [shader_kind, shader] : shaders)
+                    {
+                        if (shader.empty())
+                        {
+                            continue;
+                        }
+
+                        const std::string name = create_shader_name(shader_name, shader_kind);
+                        source
+                            << "        case ShaderName::"
+                            << name
+                            << ": return "
+                            << name
+                            << ";\n";
+                    }
+                }
+
+                source
+                    << "        }\n"
+                       "        __builtin_unreachable();\n";
+
+                source << "    }\n\n";
+            }
+
+            {
+                source << "    vk::ShaderStageFlagBits get_shader_kind(const ShaderName shader_name)\n"
+                          "    {\n";
+
+                source << "        switch(shader_name)\n"
+                          "        {\n";
+
+                for (const auto& [shader_name, shaders] : compiled_shaders)
+                {
+                    for (const auto& [shader_kind, shader] : shaders)
+                    {
+                        if (shader.empty())
+                        {
+                            continue;
+                        }
+
+                        const std::string name = create_shader_name(shader_name, shader_kind);
+                        source
+                            << "        case ShaderName::"
+                            << name
+                            << ": return "
+                            << "vk::ShaderStageFlagBits::e"
+                            << to_string(shader_kind)
+                            << ";\n";
+                    }
+                }
+
+                source
+                    << "        }\n"
+                       "        __builtin_unreachable();\n";
+
+                source << "    }\n\n";
+            }
+
             source << "}\n";
 
             GeneratedCppSources result;

@@ -7,7 +7,7 @@ namespace ge
     vk::VertexInputBindingDescription vertex_binding_description()
     {
         return vk::VertexInputBindingDescription{}
-            .setBinding(0)
+            .setBinding(0) // TODO: split into several bindings: points, line colors, points colors
             .setStride(sizeof(Vertex))
             .setInputRate(vk::VertexInputRate::eVertex);
     }

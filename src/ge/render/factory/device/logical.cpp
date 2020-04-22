@@ -71,6 +71,9 @@ namespace ge::factory
         vk::PhysicalDeviceFeatures device_features;
         device_features.setSamplerAnisotropy(VK_TRUE);
 
+        device_features.setFillModeNonSolid(VK_TRUE);
+        device_features.setWideLines(VK_TRUE);
+
         vk::DeviceCreateInfo device_create_info
         (
             {}

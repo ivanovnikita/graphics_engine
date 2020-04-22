@@ -29,10 +29,12 @@ namespace ge
     Render::RenderImpl::RenderImpl
     (
         const SurfaceParams& surface_params
+      , const VerticesInterpretation& //vertices_interpretation
     )
         : surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
         , surface_background_color_
         {
+            // TODO: this conversion may be incorrect, use linear to sRGB colorspace conversion
             std::array<float, 4>
             {
                 surface_params.background_color[0] / 255.f

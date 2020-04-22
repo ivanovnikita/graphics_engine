@@ -8,12 +8,14 @@ namespace ge
     Render::Render
     (
         const SurfaceParams& surface_params
+      , const VerticesInterpretation& vertices_interpretation
     )
         : impl_
         (
             new RenderImpl
             (
                 surface_params
+              , vertices_interpretation
             )
         )
     {

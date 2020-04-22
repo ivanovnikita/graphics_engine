@@ -37,8 +37,10 @@ namespace ge
         Render
         (
             const SurfaceParams&
+          , const VerticesInterpretation&
         );
         ~Render();
+
         void set_object_to_draw(const std::span<const Vertex>, const std::span<const uint16_t> indices);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);

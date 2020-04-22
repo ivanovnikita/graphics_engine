@@ -14,6 +14,7 @@ namespace ge
         RenderImpl
         (
             const SurfaceParams&
+          , const VerticesInterpretation&
         );
         ~RenderImpl();
 

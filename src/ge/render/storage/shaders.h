@@ -1,21 +1,22 @@
 #pragma once
 
+#include "generated_shaders.h"
+
 #include <vulkan/vulkan.hpp>
+
+#include <unordered_map>
 
 namespace ge::storage
 {
     class Shaders final
     {
     public:
-        using ShaderModuleRef = std::reference_wrapper<const vk::ShaderModule>;
-        using Shader = std::pair<vk::ShaderStageFlagBits, ShaderModuleRef>;
-
         Shaders() = default;
         explicit Shaders(const vk::Device& device);
 
-        std::vector<Shader> shaders() const;
+        const vk::ShaderModule& get(ShaderName) const;
 
     private:
-        std::vector<std::pair<vk::ShaderStageFlagBits, vk::UniqueShaderModule>> shaders_;
+        std::unordered_map<ShaderName, vk::UniqueShaderModule> shaders_;
     };
 }

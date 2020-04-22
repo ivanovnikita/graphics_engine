@@ -8,26 +8,29 @@ namespace ge::factory
 {
     namespace
     {
-        std::vector<vk::PipelineShaderStageCreateInfo> get_shader_stage_create_info(const storage::Shaders& shaders_storage)
+        std::vector<vk::PipelineShaderStageCreateInfo> get_shader_stage_create_info
+        (
+            const storage::Shaders& shaders_storage
+            , const ShaderName vertex_shader_name
+        )
         {
-            const auto shaders = shaders_storage.shaders();
-
             std::vector<vk::PipelineShaderStageCreateInfo> result;
-            result.reserve(shaders.size());
+            result.reserve(2);
 
-            for (const auto& [shader_kind, shader_module] : shaders)
+            const auto shader_create_info = [&shaders_storage] (const ShaderName shader_name)
             {
-                result.emplace_back
-                (
-                    vk::PipelineShaderStageCreateInfo
-                    {
-                        vk::PipelineShaderStageCreateFlags()
-                      , shader_kind
-                      , shader_module
-                      , "main"
-                    }
-                );
-            }
+                const vk::ShaderModule& shader_module = shaders_storage.get(shader_name);
+                return vk::PipelineShaderStageCreateInfo
+                {
+                    vk::PipelineShaderStageCreateFlags()
+                  , get_shader_kind(shader_name)
+                  , shader_module
+                  , "main"
+                };
+            };
+
+            result.emplace_back(shader_create_info(ShaderName::simple_color_Fragment));
+            result.emplace_back(shader_create_info(vertex_shader_name));
 
             return result;
         }
@@ -42,10 +45,15 @@ namespace ge::factory
       , const vk::DescriptorSetLayout& descriptor_set_layout
     )
     {
-        const auto shader_stage_create_info = get_shader_stage_create_info(shaders_storage);
+        const std::vector<vk::PipelineShaderStageCreateInfo> shader_stage_create_info = get_shader_stage_create_info
+        (
+            shaders_storage
+            , ShaderName::line_2d_camera_Vertex
+        );
 
-        const auto binding_description = vertex_binding_description();
-        const auto attribute_description = vertex_attribute_descriptions();
+        const vk::VertexInputBindingDescription binding_description = vertex_binding_description();
+        const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
+        // TODO: use several bindings for coords and colors
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(1)
             .setPVertexBindingDescriptions(&binding_description)
@@ -53,7 +61,7 @@ namespace ge::factory
             .setPVertexAttributeDescriptions(attribute_description.data());
 
         const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eTriangleList)
+            .setTopology(vk::PrimitiveTopology::eTriangleList) // TODO: use line list
             .setPrimitiveRestartEnable(VK_FALSE);
 
         const auto viewport = vk::Viewport()
@@ -76,8 +84,11 @@ namespace ge::factory
         const auto raster_info = vk::PipelineRasterizationStateCreateInfo()
             .setDepthClampEnable(VK_FALSE)
             .setRasterizerDiscardEnable(VK_FALSE)
-            .setPolygonMode(vk::PolygonMode::eFill)
-            .setLineWidth(1.0f)
+
+            // TODO: only for line-pipeline
+            .setPolygonMode(vk::PolygonMode::eLine)
+            .setLineWidth(3.0f)
+
             .setCullMode(vk::CullModeFlagBits::eBack)
             .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE);
