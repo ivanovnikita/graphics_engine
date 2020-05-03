@@ -43,30 +43,35 @@ int main()
             , .height = height
             , .background_color = background_color
         }
-        , ge::VerticesArePolygons{}
     );
 
     window->start_display();
 
-    const std::array vertices
+    const std::array points
     {
         ge::Vertex{{0.f, 0.5f}}
         , ge::Vertex{{-0.5f, -0.5f}}
         , ge::Vertex{{0.5f, -0.5f}}
     };
-    const std::array colors
+    const std::array vertices
     {
-        ge::Color{{1.f, 0.f, 0.f}}
-        , ge::Color{{0.f, 1.f, 0.f}}
-        , ge::Color{{0.f, 1.f, 0.f}}
+        ge::Graph::Vertice{.index = 0, .color = ge::Color{{1.f, 0.f, 0.f}}}
+      , ge::Graph::Vertice{.index = 1, .color = ge::Color{{0.f, 1.f, 0.f}}}
+      , ge::Graph::Vertice{.index = 2, .color = ge::Color{{0.f, 0.f, 1.f}}}
     };
-    const std::array<uint16_t, 6> indices
+    const std::array arcs
     {
-        0, 1
-        , 1, 2
-        , 2, 0
+        ge::Graph::Arc{.index_from = 0, .index_to = 1, .color = ge::Color{{1.f, 0.f, 0.f}}}
+      , ge::Graph::Arc{.index_from = 1, .index_to = 2, .color = ge::Color{{0.f, 1.f, 0.f}}}
+      , ge::Graph::Arc{.index_from = 2, .index_to = 0, .color = ge::Color{{0.f, 0.f, 1.f}}}
     };
-    render.set_object_to_draw(vertices, colors, indices);
+    const ge::Graph graph
+    {
+        points
+      , vertices
+      , arcs
+    };
+    render.set_object_to_draw(graph);
 
     render.set_camera_pos({0.f, 0.f});
     render.set_camera_scale(1.f / 300.f);

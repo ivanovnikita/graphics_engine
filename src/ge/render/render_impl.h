@@ -5,6 +5,7 @@
 #include "ge/render/storage/shaders.h"
 #include "ge/render/vertex.h"
 #include "ge/render/camera_2d.h"
+#include "ge/render/factory/buffer.hpp"
 
 namespace ge
 {
@@ -14,16 +15,10 @@ namespace ge
         RenderImpl
         (
             const SurfaceParams&
-          , const VerticesInterpretation&
         );
         ~RenderImpl();
 
-        void set_object_to_draw
-        (
-            const std::span<const Vertex>
-            , const std::span<const Color>
-            , const std::span<const uint16_t> indices
-        );
+        void set_object_to_draw(const Graph&);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
@@ -71,12 +66,7 @@ namespace ge
         vk::UniquePipeline                  pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
 
-        vk::UniqueDeviceMemory              vertex_buffer_memory_;
-        vk::UniqueBuffer                    vertex_buffer_;
-        vk::UniqueDeviceMemory              color_buffer_memory_;
-        vk::UniqueBuffer                    color_buffer_;
-        vk::UniqueDeviceMemory              index_buffer_memory_;
-        vk::UniqueBuffer                    index_buffer_;
+        factory::GraphInDeviceMemory        graph_in_device_mem_;
 
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;

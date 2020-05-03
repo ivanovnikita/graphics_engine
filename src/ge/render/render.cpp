@@ -8,14 +8,12 @@ namespace ge
     Render::Render
     (
         const SurfaceParams& surface_params
-      , const VerticesInterpretation& vertices_interpretation
     )
         : impl_
         (
             new RenderImpl
             (
                 surface_params
-              , vertices_interpretation
             )
         )
     {
@@ -23,14 +21,9 @@ namespace ge
 
     Render::~Render() = default;
 
-    void Render::set_object_to_draw
-    (
-        const std::span<const Vertex> vertices
-        , const std::span<const Color> colors
-        , const std::span<const uint16_t> indices
-    )
+    void Render::set_object_to_draw(const Graph& graph)
     {
-        impl_->set_object_to_draw(vertices, colors, indices);
+        impl_->set_object_to_draw(graph);
     }
 
     void Render::draw_frame()

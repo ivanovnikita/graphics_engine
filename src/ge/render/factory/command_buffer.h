@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ge/render/factory/command_pool.h"
+#include "ge/render/factory/buffer.hpp"
 #include "ge/render/vertex.h"
 
 #include <vulkan/vulkan.hpp>
@@ -24,5 +25,19 @@ namespace ge::factory
         , const vk::Buffer& colors
         , const vk::Buffer& indices
         , const size_t indices_count
+    );
+
+    std::vector<vk::CommandBuffer> draw_graph_commands
+    (
+        const vk::Device&
+        , const vk::CommandPool&
+        , const std::span<const vk::UniqueFramebuffer>&
+        , const vk::RenderPass&
+        , const vk::Extent2D&
+        , const vk::ClearColorValue& background_color
+        , const vk::Pipeline&
+        , const vk::PipelineLayout& pipeline_layout
+        , const std::span<const vk::DescriptorSet> descriptor_sets
+        , const GraphInDeviceMemory&
     );
 }

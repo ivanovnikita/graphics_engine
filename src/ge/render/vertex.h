@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <variant>
+#include <span>
 
 namespace ge
 {
@@ -16,8 +17,25 @@ namespace ge
         glm::vec3 color;
     };
 
-    struct VerticesArePolygons final
+    struct Graph final
     {
+        struct Vertice final
+        {
+            size_t index;
+            Color color;
+        };
+
+        struct Arc final
+        {
+            size_t index_from;
+            size_t index_to;
+            Color color;
+        };
+
+        std::span<const Vertex> points;
+
+        std::span<const Vertice> vertices;
+        std::span<const Arc> arcs;
     };
 
     template <typename T>
@@ -34,15 +52,4 @@ namespace ge
 
     template <typename T>
     using Param = std::variant<Required<T>, Optional<T>>;
-
-    struct VerticesAreLines final
-    {
-        Param<uint8_t> line_width;
-    };
-
-    using VerticesInterpretation = std::variant
-    <
-        VerticesArePolygons
-        , VerticesAreLines
-    >;
 }

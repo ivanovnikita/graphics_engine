@@ -28,6 +28,7 @@ namespace ge::factory
         }        
     }
 
+    // TODO: report allocation failure
     std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> create_buffer
     (
         const vk::PhysicalDevice& physical_device
@@ -106,5 +107,118 @@ namespace ge::factory
 
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
         logical_device.waitForFences(1, &transfer_finished, VK_TRUE, timeout);
+    }
+
+    GraphInDeviceMemory load_graph_to_device
+    (
+        const vk::PhysicalDevice& physical_device
+        , const vk::Device& logical_device
+        , const vk::CommandPool& command_pool
+        , const vk::Queue& transfer
+        , const vk::Fence& transfer_finished
+        , const Graph& graph
+    )
+    {
+        static_assert(sizeof(Vertex) == 2 * sizeof(float));
+        static_assert(sizeof(Color) == 3 * sizeof(float));
+
+        const size_t arc_points_memory_usage = sizeof(Vertex) * graph.arcs.size() * 2;
+        const size_t vertice_points_memory_usage = sizeof(Vertex) * graph.vertices.size();
+        const size_t arc_colors_memory_usage = sizeof(Color) * graph.arcs.size() * 2;
+        const size_t vertice_colors_memory_usage = sizeof(Color) * graph.vertices.size();
+
+        const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
+        (
+            arc_points_memory_usage
+            + vertice_points_memory_usage
+            + arc_colors_memory_usage
+            + vertice_colors_memory_usage
+        );
+
+        auto [staging_buffer, staging_memory] = factory::create_buffer
+        (
+            physical_device
+            , logical_device
+            , buffer_size
+            , vk::BufferUsageFlagBits::eTransferSrc
+            , vk::MemoryPropertyFlagBits::eHostVisible
+            | vk::MemoryPropertyFlagBits::eHostCoherent
+        );
+
+        constexpr vk::DeviceSize offset = 0;
+        [[maybe_unused]] void* memory_start = logical_device.mapMemory
+        (
+            *staging_memory
+            , offset
+            , buffer_size
+            , vk::MemoryMapFlags{}
+        );
+
+        uint8_t* current_offset = static_cast<uint8_t*>(memory_start);
+
+        for (const Graph::Arc& arc : graph.arcs)
+        {
+            std::memcpy(current_offset, &graph.points[arc.index_from], sizeof(Vertex));
+            current_offset += sizeof(Vertex);
+
+            std::memcpy(current_offset, &graph.points[arc.index_to], sizeof(Vertex));
+            current_offset += sizeof(Vertex);
+        }
+
+        for (const Graph::Vertice& vertice : graph.vertices)
+        {
+            std::memcpy(current_offset, &graph.points[vertice.index], sizeof(Vertex));
+            current_offset += sizeof(Vertex);
+        }
+
+        for (const Graph::Arc& arc : graph.arcs)
+        {
+            std::memcpy(current_offset, &arc.color, sizeof(Color));
+            current_offset += sizeof(Color);
+            std::memcpy(current_offset, &arc.color, sizeof(Color));
+            current_offset += sizeof(Color);
+        }
+
+        for (const Graph::Vertice& vertice : graph.vertices)
+        {
+            std::memcpy(current_offset, &vertice.color, sizeof(Color));
+            current_offset += sizeof(Color);
+        }
+
+        assert(current_offset == static_cast<uint8_t*>(memory_start) + buffer_size);
+
+        logical_device.unmapMemory(*staging_memory);
+
+        auto [buffer, memory] = factory::create_buffer
+        (
+            physical_device
+          , logical_device
+          , buffer_size
+          , vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer
+          , vk::MemoryPropertyFlagBits::eDeviceLocal
+        );
+
+        copy_buffer
+        (
+            logical_device
+            , command_pool
+            , transfer
+            , transfer_finished
+            , *staging_buffer
+            , *buffer
+            , buffer_size
+        );
+
+        GraphInDeviceMemory result;
+        result.memory = std::move(memory);
+        result.buffer = std::move(buffer);
+        result.arc_points_offset = 0;
+        result.vertice_points_offset = result.arc_points_offset + arc_points_memory_usage;
+        result.arc_colors_offset = result.vertice_points_offset + vertice_points_memory_usage;
+        result.vertice_colors_offset = result.arc_colors_offset + arc_colors_memory_usage;
+        result.arc_points_count = graph.arcs.size() * 2;
+        result.vertice_points_count = graph.vertices.size();
+
+        return result;
     }
 }

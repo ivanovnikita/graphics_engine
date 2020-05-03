@@ -29,7 +29,6 @@ namespace ge
     Render::RenderImpl::RenderImpl
     (
         const SurfaceParams& surface_params
-      , const VerticesInterpretation& //vertices_interpretation
     )
         : surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
         , surface_background_color_
@@ -211,7 +210,7 @@ namespace ge
         descriptor_pool_ = factory::create_descriptor_pool(*logical_device_, images_.size());
         create_descriptor_sets();
 
-        auto[pipeline, layout, render_pass] = factory::create_graphics_pipeline
+        auto[pipeline, layout, render_pass] = factory::graph_lines_pipeline
         (
             *logical_device_
           , format
@@ -280,27 +279,17 @@ namespace ge
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
-    void Render::RenderImpl::set_object_to_draw
-    (
-        const std::span<const Vertex> vertices
-        , const std::span<const Color> colors
-        , const std::span<const uint16_t> indices
-    )
+    void Render::RenderImpl::set_object_to_draw(const Graph& graph)
     {
-        assert(vertices.size() == colors.size());
-
-        vertices_.clear();
-        colors_.clear();
-        indices_.clear();
-
-        vertices_.reserve(vertices.size());
-        std::copy(vertices.begin(), vertices.end(), std::back_inserter(vertices_));
-
-        colors_.reserve(colors.size());
-        std::copy(colors.begin(), colors.end(), std::back_inserter(colors_));
-
-        indices_.reserve(indices.size());
-        std::copy(indices.begin(), indices.end(), std::back_inserter(indices_));
+        graph_in_device_mem_ = factory::load_graph_to_device
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics // TODO: transfer queue?
+            , *transfer_finished_fence_
+            , graph
+        );
 
         create_command_buffers();
     }
@@ -319,40 +308,7 @@ namespace ge
             command_buffers_.clear();
         }
 
-        std::tie(vertex_buffer_, vertex_buffer_memory_) = factory::create_and_fill_buffer
-        (
-            physical_device_
-            , *logical_device_
-            , *command_pool_
-            , queues_.graphics
-            , *transfer_finished_fence_
-            , vk::BufferUsageFlagBits::eVertexBuffer
-            , std::span<const Vertex>{vertices_}
-        );
-
-        std::tie(color_buffer_, color_buffer_memory_) = factory::create_and_fill_buffer
-        (
-            physical_device_
-            , *logical_device_
-            , *command_pool_
-            , queues_.graphics
-            , *transfer_finished_fence_
-            , vk::BufferUsageFlagBits::eVertexBuffer
-            , std::span<const Color>{colors_}
-        );
-
-        std::tie(index_buffer_, index_buffer_memory_) = factory::create_and_fill_buffer
-        (
-            physical_device_
-            , *logical_device_
-            , *command_pool_
-            , queues_.graphics
-            , *transfer_finished_fence_
-            , vk::BufferUsageFlagBits::eIndexBuffer
-            , std::span<const uint16_t>{indices_}
-        );
-
-        command_buffers_ = factory::create_command_buffer
+        command_buffers_ = factory::draw_graph_commands
         (
             *logical_device_
             , *command_pool_
@@ -363,10 +319,7 @@ namespace ge
             , *pipeline_
             , *pipeline_layout_
             , descriptor_sets_
-            , *vertex_buffer_
-            , *color_buffer_
-            , *index_buffer_
-            , indices_.size()
+            , graph_in_device_mem_
         );
     }
 
@@ -409,8 +362,8 @@ namespace ge
 
     void Render::RenderImpl::update_camera_transform()
     {
-        camera_.transform.ortho_proj.x = (1.f / surface_extent_.width) / camera_.scale;
-        camera_.transform.ortho_proj.y = (1.f / surface_extent_.height) / camera_.scale;
+        camera_.transform.ortho_proj.x = (1.f / static_cast<float>(surface_extent_.width)) / camera_.scale;
+        camera_.transform.ortho_proj.y = (1.f / static_cast<float>(surface_extent_.height)) / camera_.scale;
     }
 
     glm::vec2 Render::RenderImpl::normalize_in_proj_space(const glm::vec2& coord) const

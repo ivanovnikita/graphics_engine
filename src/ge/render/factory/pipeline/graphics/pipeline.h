@@ -10,4 +10,13 @@ namespace ge::factory
       , const vk::Extent2D&
       , const vk::DescriptorSetLayout&
     );
+
+    std::tuple<vk::UniquePipeline, vk::UniquePipelineLayout, vk::UniqueRenderPass> graph_lines_pipeline
+    (
+        const vk::Device&
+      , const vk::Format&
+      , const storage::Shaders&
+      , const vk::Extent2D&
+      , const vk::DescriptorSetLayout&
+    );
 }

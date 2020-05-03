@@ -24,6 +24,7 @@ namespace ge
 
     std::span<const vk::VertexInputAttributeDescription> vertex_attribute_descriptions()
     {
+        // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/chap39.html#_identification_of_formats
         static const std::array descriptions
         {
             vk::VertexInputAttributeDescription{}
