@@ -34,15 +34,97 @@ namespace ge::factory
 
             return result;
         }
+
+        vk::Viewport default_viewport
+        (
+            const vk::Extent2D& extent
+        )
+        {
+            return vk::Viewport()
+                .setX(0.0f)
+                .setWidth(static_cast<float>(extent.width))
+
+                // invert Y: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+                .setY(static_cast<float>(extent.height))
+                .setHeight(-static_cast<float>(extent.height))
+
+                .setMinDepth(0.0f)
+                .setMaxDepth(1.0f);
+        }
+
+        vk::Rect2D default_scissor(const vk::Extent2D& extent)
+        {
+            return vk::Rect2D{vk::Offset2D{0, 0}, extent};
+        }
+
+        vk::PipelineViewportStateCreateInfo viewport_create_info
+        (
+            const vk::Viewport& viewport
+          , const vk::Rect2D& scissor
+        )
+        {
+            return vk::PipelineViewportStateCreateInfo()
+                .setViewportCount(1)
+                .setPViewports(&viewport)
+                .setScissorCount(1)
+                .setPScissors(&scissor);
+        }
+
+        vk::PipelineMultisampleStateCreateInfo multisample_create_info()
+        {
+            return vk::PipelineMultisampleStateCreateInfo()
+                .setSampleShadingEnable(VK_FALSE)
+                .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+        }
+
+        vk::PipelineColorBlendAttachmentState default_blend_attachment()
+        {
+            return vk::PipelineColorBlendAttachmentState()
+                .setColorWriteMask
+                (
+                    vk::ColorComponentFlagBits::eR
+                    | vk::ColorComponentFlagBits::eG
+                    | vk::ColorComponentFlagBits::eB
+                    | vk::ColorComponentFlagBits::eA
+                )
+                .setBlendEnable(VK_FALSE);
+        }
+
+        vk::PipelineColorBlendStateCreateInfo blend_create_info
+        (
+            const vk::PipelineColorBlendAttachmentState& blend_attachment
+        )
+        {
+            return vk::PipelineColorBlendStateCreateInfo()
+                .setLogicOpEnable(VK_FALSE)
+                .setLogicOp(vk::LogicOp::eCopy)
+                .setAttachmentCount(1)
+                .setPAttachments(&blend_attachment)
+                .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
+        }
     }
 
-    std::tuple<vk::UniquePipeline, vk::UniquePipelineLayout, vk::UniqueRenderPass> create_graphics_pipeline
+    vk::UniquePipelineLayout camera_2d_pipeline_layout
     (
         const vk::Device& logical_device
-      , const vk::Format& format
+      , const vk::DescriptorSetLayout& descriptor_set_layout
+    )
+    {
+        const auto layout_info = vk::PipelineLayoutCreateInfo()
+            .setSetLayoutCount(1)
+            .setPSetLayouts(&descriptor_set_layout)
+            .setPushConstantRangeCount(0);
+
+        return logical_device.createPipelineLayoutUnique(layout_info);
+    }
+
+    vk::UniquePipeline graph_arcs_pipeline
+    (
+        const vk::Device& logical_device
+      , const vk::RenderPass& render_pass
       , const storage::Shaders& shaders_storage
       , const vk::Extent2D& extent
-      , const vk::DescriptorSetLayout& descriptor_set_layout
+      , const vk::PipelineLayout& pipeline_layout
     )
     {
         const std::vector<vk::PipelineShaderStageCreateInfo> shader_stage_create_info = get_shader_stage_create_info
@@ -53,7 +135,6 @@ namespace ge::factory
 
         const std::span<const vk::VertexInputBindingDescription> binding_description = vertex_binding_description();
         const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
-        // TODO: use several bindings for coords and colors
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_description.size()))
             .setPVertexBindingDescriptions(binding_description.data())
@@ -61,25 +142,12 @@ namespace ge::factory
             .setPVertexAttributeDescriptions(attribute_description.data());
 
         const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eLineList) // TODO: use line list
+            .setTopology(vk::PrimitiveTopology::eLineList)
             .setPrimitiveRestartEnable(VK_FALSE);
 
-        const auto viewport = vk::Viewport()
-            .setX(0.0f)
-            .setWidth(static_cast<float>(extent.width))
-
-            // invert Y: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
-            .setY(static_cast<float>(extent.height))
-            .setHeight(-static_cast<float>(extent.height))
-
-            .setMinDepth(0.0f)
-            .setMaxDepth(1.0f);
-        const vk::Rect2D scissor{vk::Offset2D{0, 0}, extent};
-        const auto viewport_info = vk::PipelineViewportStateCreateInfo()
-            .setViewportCount(1)
-            .setPViewports(&viewport)
-            .setScissorCount(1)
-            .setPScissors(&scissor);
+        const vk::Viewport viewport = default_viewport(extent);
+        const vk::Rect2D scissor = default_scissor(extent);
+        const vk::PipelineViewportStateCreateInfo viewport_info = viewport_create_info(viewport, scissor);
 
         const auto raster_info = vk::PipelineRasterizationStateCreateInfo()
             .setDepthClampEnable(VK_FALSE)
@@ -93,35 +161,10 @@ namespace ge::factory
             .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE);
 
-        const auto multisample_info = vk::PipelineMultisampleStateCreateInfo()
-            .setSampleShadingEnable(VK_FALSE)
-            .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+        const vk::PipelineMultisampleStateCreateInfo multisample_info = multisample_create_info();
 
-        const auto blend_attachment = vk::PipelineColorBlendAttachmentState()
-            .setColorWriteMask
-            (
-                vk::ColorComponentFlagBits::eR
-                | vk::ColorComponentFlagBits::eG
-                | vk::ColorComponentFlagBits::eB
-                | vk::ColorComponentFlagBits::eA
-            )
-            .setBlendEnable(VK_FALSE);
-
-        const auto blend_state_info = vk::PipelineColorBlendStateCreateInfo()
-            .setLogicOpEnable(VK_FALSE)
-            .setLogicOp(vk::LogicOp::eCopy)
-            .setAttachmentCount(1)
-            .setPAttachments(&blend_attachment)
-            .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
-
-        const auto layout_info = vk::PipelineLayoutCreateInfo()
-            .setSetLayoutCount(1)
-            .setPSetLayouts(&descriptor_set_layout)
-            .setPushConstantRangeCount(0);
-
-        vk::UniquePipelineLayout layout = logical_device.createPipelineLayoutUnique(layout_info);
-
-        vk::UniqueRenderPass render_pass = create_render_pass(logical_device, format);
+        const vk::PipelineColorBlendAttachmentState blend_attachment = default_blend_attachment();
+        const vk::PipelineColorBlendStateCreateInfo blend_state_info = blend_create_info(blend_attachment);
 
         const auto pipeline_create_info = vk::GraphicsPipelineCreateInfo()
             .setStageCount(safe_cast<uint32_t>(shader_stage_create_info.size()))
@@ -132,8 +175,8 @@ namespace ge::factory
             .setPRasterizationState(&raster_info)
             .setPMultisampleState(&multisample_info)
             .setPColorBlendState(&blend_state_info)
-            .setLayout(*layout)
-            .setRenderPass(*render_pass)
+            .setLayout(pipeline_layout)
+            .setRenderPass(render_pass)
             .setSubpass(0);
 
         vk::UniquePipeline pipeline = logical_device.createGraphicsPipelineUnique
@@ -142,27 +185,26 @@ namespace ge::factory
           , pipeline_create_info
         );
 
-        return {std::move(pipeline), std::move(layout), std::move(render_pass)};
+        return pipeline;
     }
 
-    std::tuple<vk::UniquePipeline, vk::UniquePipelineLayout, vk::UniqueRenderPass> graph_lines_pipeline
+    vk::UniquePipeline graph_vertices_pipeline
     (
         const vk::Device& logical_device
-      , const vk::Format& format
+      , const vk::RenderPass& render_pass
       , const storage::Shaders& shaders_storage
       , const vk::Extent2D& extent
-      , const vk::DescriptorSetLayout& descriptor_set_layout
+      , const vk::PipelineLayout& pipeline_layout
     )
     {
         const std::vector<vk::PipelineShaderStageCreateInfo> shader_stage_create_info = get_shader_stage_create_info
         (
             shaders_storage
-            , ShaderName::line_2d_camera_Vertex
+            , ShaderName::point_2d_camera_Vertex
         );
 
         const std::span<const vk::VertexInputBindingDescription> binding_description = vertex_binding_description();
         const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
-        // TODO: use several bindings for coords and colors
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_description.size()))
             .setPVertexBindingDescriptions(binding_description.data())
@@ -170,67 +212,27 @@ namespace ge::factory
             .setPVertexAttributeDescriptions(attribute_description.data());
 
         const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
-            .setTopology(vk::PrimitiveTopology::eLineList) // TODO: use line list
+            .setTopology(vk::PrimitiveTopology::ePointList)
             .setPrimitiveRestartEnable(VK_FALSE);
 
-        const auto viewport = vk::Viewport()
-            .setX(0.0f)
-            .setWidth(static_cast<float>(extent.width))
-
-            // invert Y: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
-            .setY(static_cast<float>(extent.height))
-            .setHeight(-static_cast<float>(extent.height))
-
-            .setMinDepth(0.0f)
-            .setMaxDepth(1.0f);
-        const vk::Rect2D scissor{vk::Offset2D{0, 0}, extent};
-        const auto viewport_info = vk::PipelineViewportStateCreateInfo()
-            .setViewportCount(1)
-            .setPViewports(&viewport)
-            .setScissorCount(1)
-            .setPScissors(&scissor);
+        const vk::Viewport viewport = default_viewport(extent);
+        const vk::Rect2D scissor = default_scissor(extent);
+        const vk::PipelineViewportStateCreateInfo viewport_info = viewport_create_info(viewport, scissor);
 
         const auto raster_info = vk::PipelineRasterizationStateCreateInfo()
             .setDepthClampEnable(VK_FALSE)
             .setRasterizerDiscardEnable(VK_FALSE)
 
-            // TODO: only for line-pipeline
-            .setPolygonMode(vk::PolygonMode::eLine)
-            .setLineWidth(3.0f)
+            .setPolygonMode(vk::PolygonMode::ePoint)
 
             .setCullMode(vk::CullModeFlagBits::eBack)
             .setFrontFace(vk::FrontFace::eCounterClockwise)
             .setDepthBiasEnable(VK_FALSE);
 
-        const auto multisample_info = vk::PipelineMultisampleStateCreateInfo()
-            .setSampleShadingEnable(VK_FALSE)
-            .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+        const vk::PipelineMultisampleStateCreateInfo multisample_info = multisample_create_info();
 
-        const auto blend_attachment = vk::PipelineColorBlendAttachmentState()
-            .setColorWriteMask
-            (
-                vk::ColorComponentFlagBits::eR
-                | vk::ColorComponentFlagBits::eG
-                | vk::ColorComponentFlagBits::eB
-                | vk::ColorComponentFlagBits::eA
-            )
-            .setBlendEnable(VK_FALSE);
-
-        const auto blend_state_info = vk::PipelineColorBlendStateCreateInfo()
-            .setLogicOpEnable(VK_FALSE)
-            .setLogicOp(vk::LogicOp::eCopy)
-            .setAttachmentCount(1)
-            .setPAttachments(&blend_attachment)
-            .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
-
-        const auto layout_info = vk::PipelineLayoutCreateInfo()
-            .setSetLayoutCount(1)
-            .setPSetLayouts(&descriptor_set_layout)
-            .setPushConstantRangeCount(0);
-
-        vk::UniquePipelineLayout layout = logical_device.createPipelineLayoutUnique(layout_info);
-
-        vk::UniqueRenderPass render_pass = create_render_pass(logical_device, format);
+        const vk::PipelineColorBlendAttachmentState blend_attachment = default_blend_attachment();
+        const vk::PipelineColorBlendStateCreateInfo blend_state_info = blend_create_info(blend_attachment);
 
         const auto pipeline_create_info = vk::GraphicsPipelineCreateInfo()
             .setStageCount(safe_cast<uint32_t>(shader_stage_create_info.size()))
@@ -241,8 +243,8 @@ namespace ge::factory
             .setPRasterizationState(&raster_info)
             .setPMultisampleState(&multisample_info)
             .setPColorBlendState(&blend_state_info)
-            .setLayout(*layout)
-            .setRenderPass(*render_pass)
+            .setLayout(pipeline_layout)
+            .setRenderPass(render_pass)
             .setSubpass(0);
 
         vk::UniquePipeline pipeline = logical_device.createGraphicsPipelineUnique
@@ -251,6 +253,6 @@ namespace ge::factory
           , pipeline_create_info
         );
 
-        return {std::move(pipeline), std::move(layout), std::move(render_pass)};
+        return pipeline;
     }
 }

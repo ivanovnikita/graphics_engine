@@ -2,7 +2,7 @@
 
 namespace ge::factory
 {
-    vk::UniqueDescriptorSetLayout create_descriptor_set_layout
+    vk::UniqueDescriptorSetLayout camera_2d_descriptor_set_layout
     (
         const vk::Device& logical_device
     )

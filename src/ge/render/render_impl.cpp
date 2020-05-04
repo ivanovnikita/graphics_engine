@@ -6,6 +6,7 @@
 #include "ge/render/factory/image_view.h"
 #include "ge/render/factory/descriptor_set_layout.h"
 #include "ge/render/factory/descriptor_pool.h"
+#include "ge/render/factory/pipeline/graphics/render_pass.h"
 #include "ge/render/factory/pipeline/graphics/pipeline.h"
 #include "ge/render/factory/framebuffer.h"
 #include "ge/render/factory/command_pool.h"
@@ -131,12 +132,13 @@ namespace ge
         logical_device_->waitIdle();
     }
 
+    // TODO: use one buffer and split it in parts for each image
     void Render::RenderImpl::create_uniform_buffers()
     {
         assert(not images_.empty());
 
-        uniform_buffer_memory_.reserve(images_.size());
-        uniform_buffer_.reserve(images_.size());
+        camera_2d_uniform_buffers_memory_.reserve(images_.size());
+        camera_2d_uniform_buffers_.reserve(images_.size());
 
         constexpr vk::DeviceSize BUFFER_SIZE = sizeof(ViewProj2d);
         for (size_t i = 0; i < images_.size(); ++i)
@@ -151,14 +153,14 @@ namespace ge
                 | vk::MemoryPropertyFlagBits::eHostCoherent
             );
 
-            uniform_buffer_memory_.emplace_back(std::move(memory));
-            uniform_buffer_.emplace_back(std::move(buffer));
+            camera_2d_uniform_buffers_memory_.emplace_back(std::move(memory));
+            camera_2d_uniform_buffers_.emplace_back(std::move(buffer));
         }
     }
 
     void Render::RenderImpl::create_descriptor_sets()
     {
-        std::vector<vk::DescriptorSetLayout> layouts{images_.size(), *descriptor_set_layout_};
+        std::vector<vk::DescriptorSetLayout> layouts{images_.size(), *camera_2d_descriptor_set_layout_};
 
         const auto alloc_info = vk::DescriptorSetAllocateInfo{}
             .setDescriptorPool(*descriptor_pool_)
@@ -167,12 +169,12 @@ namespace ge
 
         descriptor_sets_ = logical_device_->allocateDescriptorSets(alloc_info);
 
-        assert(descriptor_sets_.size() == uniform_buffer_.size());
+        assert(descriptor_sets_.size() == camera_2d_uniform_buffers_.size());
 
         for (size_t i = 0; i < descriptor_sets_.size(); ++i)
         {
             const auto buffer_info = vk::DescriptorBufferInfo{}
-                .setBuffer(*uniform_buffer_[i])
+                .setBuffer(*camera_2d_uniform_buffers_[i])
                 .setOffset(0)
                 .setRange(sizeof(ViewProj2d));
 
@@ -205,22 +207,38 @@ namespace ge
 
         update_camera_transform();
 
-        descriptor_set_layout_ = factory::create_descriptor_set_layout(*logical_device_);
+        camera_2d_descriptor_set_layout_ = factory::camera_2d_descriptor_set_layout(*logical_device_);
+        camera_2d_pipeline_layout_ = factory::camera_2d_pipeline_layout
+        (
+            *logical_device_
+            , *camera_2d_descriptor_set_layout_
+        );
         create_uniform_buffers();
         descriptor_pool_ = factory::create_descriptor_pool(*logical_device_, images_.size());
         create_descriptor_sets();
 
-        auto[pipeline, layout, render_pass] = factory::graph_lines_pipeline
+        render_pass_ = factory::create_render_pass(*logical_device_, format);
+        camera_2d_pipeline_layout_ = factory::camera_2d_pipeline_layout
         (
             *logical_device_
-          , format
+            , *camera_2d_descriptor_set_layout_
+        );
+        graph_acrs_pipeline_ = factory::graph_arcs_pipeline
+        (
+            *logical_device_
+          , *render_pass_
           , shaders_storage_
           , surface_extent_
-          , *descriptor_set_layout_
+          , *camera_2d_pipeline_layout_
         );
-        pipeline_ = std::move(pipeline);
-        pipeline_layout_ = std::move(layout);
-        render_pass_ = std::move(render_pass);
+        graph_vertices_pipeline_ = factory::graph_vertices_pipeline
+        (
+            *logical_device_
+          , *render_pass_
+          , shaders_storage_
+          , surface_extent_
+          , *camera_2d_pipeline_layout_
+        );
 
         framebuffers_.reserve(image_views_.size());
         for (const auto& image_view : image_views_)
@@ -247,14 +265,15 @@ namespace ge
         );
         command_buffers_.clear();
         framebuffers_.clear();
-        pipeline_.reset();
-        pipeline_layout_.reset();
+        graph_acrs_pipeline_.reset();
+        graph_vertices_pipeline_.reset();
+        camera_2d_pipeline_layout_.reset();
         render_pass_.reset();
 
         descriptor_pool_.reset();
-        uniform_buffer_.clear();
-        uniform_buffer_memory_.clear();
-        descriptor_set_layout_.reset();
+        camera_2d_uniform_buffers_.clear();
+        camera_2d_uniform_buffers_memory_.clear();
+        camera_2d_descriptor_set_layout_.reset();
 
         image_views_.clear();
         images_.clear();
@@ -316,8 +335,9 @@ namespace ge
             , *render_pass_
             , surface_extent_
             , surface_background_color_
-            , *pipeline_
-            , *pipeline_layout_
+            , *graph_acrs_pipeline_
+            , *graph_vertices_pipeline_
+            , *camera_2d_pipeline_layout_
             , descriptor_sets_
             , graph_in_device_mem_
         );
@@ -330,13 +350,13 @@ namespace ge
         constexpr uint32_t offset = 0;
         void* data = logical_device_->mapMemory
         (
-            *uniform_buffer_memory_[current_image_index]
+            *camera_2d_uniform_buffers_memory_[current_image_index]
             , offset
             , sizeof(ViewProj2d)
             , vk::MemoryMapFlags{}
         );
         std::memcpy(data, &camera_.transform, sizeof(ViewProj2d));
-        logical_device_->unmapMemory(*uniform_buffer_memory_[current_image_index]);
+        logical_device_->unmapMemory(*camera_2d_uniform_buffers_memory_[current_image_index]);
     }
 
     glm::vec2 Render::RenderImpl::camera_pos() const

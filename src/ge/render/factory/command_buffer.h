@@ -10,23 +10,6 @@
 
 namespace ge::factory
 {
-    std::vector<vk::CommandBuffer> create_command_buffer
-    (
-        const vk::Device&
-        , const vk::CommandPool&
-        , const std::span<const vk::UniqueFramebuffer>&
-        , const vk::RenderPass&
-        , const vk::Extent2D&
-        , const vk::ClearColorValue& background_color
-        , const vk::Pipeline&
-        , const vk::PipelineLayout& pipeline_layout
-        , const std::span<const vk::DescriptorSet> descriptor_sets
-        , const vk::Buffer& vertices
-        , const vk::Buffer& colors
-        , const vk::Buffer& indices
-        , const size_t indices_count
-    );
-
     std::vector<vk::CommandBuffer> draw_graph_commands
     (
         const vk::Device&
@@ -35,7 +18,8 @@ namespace ge::factory
         , const vk::RenderPass&
         , const vk::Extent2D&
         , const vk::ClearColorValue& background_color
-        , const vk::Pipeline&
+        , const vk::Pipeline& arcs_pipeline
+        , const vk::Pipeline& vertices_pipeline
         , const vk::PipelineLayout& pipeline_layout
         , const std::span<const vk::DescriptorSet> descriptor_sets
         , const GraphInDeviceMemory&

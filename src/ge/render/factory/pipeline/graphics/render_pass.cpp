@@ -7,7 +7,7 @@ namespace ge::factory
         const auto color_attachment = vk::AttachmentDescription()
             .setFormat(format)
             .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear) // TODO: do not clear when there are several pipelines
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eStore)
             .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
             .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)

@@ -55,15 +55,16 @@ namespace ge
         std::vector<vk::Image>              images_;
         std::vector<vk::UniqueImageView>    image_views_;
 
-        vk::UniqueDescriptorSetLayout       descriptor_set_layout_;
-        std::vector<vk::UniqueDeviceMemory> uniform_buffer_memory_;
-        std::vector<vk::UniqueBuffer>       uniform_buffer_;
+        vk::UniqueDescriptorSetLayout       camera_2d_descriptor_set_layout_;
+        vk::UniquePipelineLayout            camera_2d_pipeline_layout_;
+        std::vector<vk::UniqueDeviceMemory> camera_2d_uniform_buffers_memory_;
+        std::vector<vk::UniqueBuffer>       camera_2d_uniform_buffers_;
         vk::UniqueDescriptorPool            descriptor_pool_;
         std::vector<vk::DescriptorSet>      descriptor_sets_;
 
         vk::UniqueRenderPass                render_pass_;
-        vk::UniquePipelineLayout            pipeline_layout_;
-        vk::UniquePipeline                  pipeline_;
+        vk::UniquePipeline                  graph_acrs_pipeline_;
+        vk::UniquePipeline                  graph_vertices_pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
 
         factory::GraphInDeviceMemory        graph_in_device_mem_;

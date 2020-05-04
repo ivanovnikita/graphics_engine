@@ -17,5 +17,5 @@ void main()
     gl_Position = vec4((inPosition - camera.pos) * camera.ortho_proj, 0.0, 1.0);
     fragColor = inColor;
 
-    gl_PointSize = 10;
+    gl_PointSize = 3;
 }

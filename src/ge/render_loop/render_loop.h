@@ -29,5 +29,6 @@ namespace ge
         bool stopped_;
 
         std::optional<ProjVec2> prev_move_mouse_pos_;
+        bool need_draw_;
     };
 }

@@ -8,7 +8,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const WindowExposed&)
     {
-        render_.draw_frame();
+        need_draw_ = true;
     }
 
     template <>
@@ -21,7 +21,7 @@ namespace ge
     void RenderLoop::handle_window_event(const WindowEventResize& event)
     {
         render_.resize(event.new_size.width, event.new_size.height);
-        render_.draw_frame();
+        need_draw_ = true;
 
         prev_move_mouse_pos_.reset();
     }
@@ -55,7 +55,7 @@ namespace ge
                 (render_.proj_to_model_space(normalized_event_pos) - render_.camera_pos());
         render_.set_camera_pos(new_camera_pos);
 
-        render_.draw_frame();
+        need_draw_ = true;
 
         prev_move_mouse_pos_.reset();
     }
@@ -116,7 +116,7 @@ namespace ge
         const ModelVec2 mouse_pos_delta = mouse_pos - *prev_move_mouse_pos_;
 
         render_.set_camera_pos(render_.camera_pos() - mouse_pos_delta);
-        render_.draw_frame();
+        need_draw_ = true;
 
         prev_move_mouse_pos_ = render_.proj_to_model_space(normalized_mouse_pos);
     }
@@ -136,6 +136,7 @@ namespace ge
         : window_(window)
         , render_(render)
         , stopped_(false)
+        , need_draw_(false)
     {
     }
 
@@ -157,6 +158,12 @@ namespace ge
                 }
                 , event
             );
+        }
+
+        if (need_draw_)
+        {
+            render_.draw_frame();
+            need_draw_ = false;
         }
     }
 }
