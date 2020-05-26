@@ -3,6 +3,8 @@
 #include <variant>
 #include <optional>
 
+#include <cstdint>
+
 namespace ge
 {
     struct Size final

@@ -48,7 +48,7 @@ TEST(PhysicalDeviceFactory, create_graphicsQueue_withWindow)
       , Transfer{DISABLED}
     };
     const auto instance = create_instance_with_window(options.validation_layers.enabled);
-    const auto window = Window::create(StaticSize{500, 500});
+    const auto window = Window::create(StaticSize{500, 500}, {38, 38, 38, 1});
     const auto surface = window->create_surface(instance.get());
 
     const auto[physical_device, queue_family_indices] = factory::create_physical_device
@@ -152,7 +152,7 @@ TEST(PhysicalDeviceFactory, create_allQueues)
       , Transfer{ENABLED}
     };
     const auto instance = create_instance_with_window(options.validation_layers.enabled);
-    const auto window = Window::create(StaticSize{500, 500});
+    const auto window = Window::create(StaticSize{500, 500}, {38, 38, 38, 1});
     const auto surface = window->create_surface(instance.get());
 
     const auto[physical_device, queue_family_indices] = factory::create_physical_device

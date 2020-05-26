@@ -108,7 +108,7 @@ namespace ge
                     field = true;
                     ++counter;
                 }
-                state >>= 1;
+                state >>= static_cast<uint16_t>(1);
                 return result;
             };
 

@@ -183,6 +183,7 @@ set_target_properties(ge_window PROPERTIES ${target_properties})
 target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_window
     PRIVATE
+        CONAN_PKG::glm
         CONAN_PKG::Vulkan-Loader
         ${window_libs}
 )

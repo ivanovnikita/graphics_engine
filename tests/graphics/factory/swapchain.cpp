@@ -24,7 +24,7 @@ TEST(Swapchain, create)
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
     constexpr StaticSize size{width, height};
-    const auto window = ge::Window::create(size);
+    const auto window = ge::Window::create(size, {38, 38, 38, 1});
     const auto surface = window->create_surface(instance.get());
 
     const auto[physical_device, queue_family_indices] = factory::create_physical_device
