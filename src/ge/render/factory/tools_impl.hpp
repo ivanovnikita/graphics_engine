@@ -10,71 +10,79 @@
 
 namespace ge::factory
 {
-    inline bool operator==(const char* lhs, const std::string& rhs)
-    {
-        return strcmp(lhs, rhs.c_str()) == 0;
-    }
-
-    template<typename ContainerT, typename ContainerU>
-    auto not_contained_in
+    template
+    <
+        std::ranges::input_range What
+        , std::ranges::input_range Where
+    >
+        requires std::equality_comparable_with
+        <
+            std::ranges::range_value_t<What>
+          , std::ranges::range_value_t<Where>
+        >
+    constexpr RangeView<std::ranges::range_value_t<What>> auto not_contained_in
     (
-        const ContainerT& what
-      , const ContainerU& where
-    )
+        const What& what
+      , const Where& where
+    ) noexcept
     {
-        using T = std::remove_const_t<std::remove_pointer_t<decltype(std::data(what))>>;
-
-        std::vector<T> absent;
-        std::for_each
+        return what | std::views::filter
         (
-            std::begin(what)
-          , std::end(what)
-          , [&where, &absent] (const auto& required)
-          {
-              if (std::none_of
-              (
-                  std::begin(where)
-                , std::end(where)
-                , [&required](const auto& available)
-                {
-                    return required == available;
-                }
-              ))
-              {
-                  absent.emplace_back(required);
-              }
-          }
+            [&where] (const std::ranges::range_value_t<What>& required) noexcept
+            {
+                return std::ranges::none_of
+                (
+                    where
+                    , [&required] (const std::ranges::range_value_t<Where>& available) noexcept
+                    {
+                        return required == available;
+                    }
+                );
+            }
         );
-        return absent;
     }
 
-    template<typename ContainerT, typename ContainerU>
+    template
+    <
+        std::ranges::input_range Required
+      , std::ranges::input_range Available
+    >
+        requires std::equality_comparable_with
+        <
+            std::ranges::range_value_t<Required>
+          , std::ranges::range_value_t<Available>
+        >
     void all_required_are_available
     (
-        const ContainerT& required
-      , const ContainerU& available
+        const Required& required
+      , const Available& available
     )
     {
-        if (std::empty(required))
-        {
-            return;
-        }
+        using RequiredValueType = std::ranges::range_value_t<Required>;
 
-        const auto absent = not_contained_in
+        RangeView<RequiredValueType> auto absent_values = not_contained_in
         (
             required
           , available
         );
 
-        if (!absent.empty())
+        std::string error_message;
+        bool any_absent = false;
+        for (const RequiredValueType& name : absent_values)
         {
-            std::string message("These features are not available: \n");
-            for (const auto& name : absent)
+            if (not any_absent)
             {
-                message.append(name);
-                message.append("\n");
+                any_absent = true;
+                error_message = "These features are not available: \n";
             }
-            GE_THROW(device_capabilities_error, message);
+
+            error_message.append(name);
+            error_message.append("\n");
+        }
+
+        if (any_absent)
+        {
+            GE_THROW(device_capabilities_error, error_message); // TODO: return tl::expected
         }
     }
 
