@@ -114,14 +114,15 @@ namespace ge
                 header
                     << "#pragma once\n\n"
                        "#include <span>\n\n"
+                       "#include <cstdint>\n\n"
                        "namespace vk\n"
                        "{\n"
-                       "    enum class ShaderStageFlagBits;\n"
+                       "    enum class ShaderStageFlagBits : uint32_t;\n"
                        "}\n\n"
                     << common.str();
                 source
                     << R"(#include ")" << target_filename << R"(.h")"
-                    << "\n"
+                    << "\n\n"
                        "#include <vulkan/vulkan.hpp>\n\n"
                        "#include <array>\n\n"
                     << common.str();

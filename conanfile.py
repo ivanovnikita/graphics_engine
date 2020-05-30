@@ -1,22 +1,22 @@
-from conans import ConanFile, CMake
-import os
+from conans import ConanFile
+from conans.errors import ConanInvalidConfiguration
 
 
 class GraphicsEngineConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False]
-        , "lto": [True, False]
-        , "with_xcb": [True, False]
-        , "with_debug_layers": [True, False]
-        , "with_gtests": [True, False]
+        "shared": [True, False],
+        "lto": [True, False],
+        "with_xcb": [True, False],
+        "with_debug_layers": [True, False],
+        "with_gtests": [True, False]
     }
     default_options = {
-        "shared": False
-        , "lto": False
-        , "with_xcb": False
-        , "with_debug_layers": False
-        , "with_gtests": False
+        "shared": False,
+        "lto": False,
+        "with_xcb": False,
+        "with_debug_layers": False,
+        "with_gtests": False
     }
     generators = "cmake"
 
@@ -41,8 +41,8 @@ class GraphicsEngineConan(ConanFile):
         self.options["xdmcp"].shared = True
 
     def requirements(self):
-        self.requires.add("shaderc/f537926", private=False)
-        self.requires.add("Vulkan-Loader/1.2.133", private=False)
+        self.requires.add("shaderc/b4a735cc", private=False)
+        self.requires.add("Vulkan-Loader/1.2.141", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
         if self.options.with_xcb:
@@ -54,7 +54,7 @@ class GraphicsEngineConan(ConanFile):
             self.requires.add("gtest/1.10.0 ", private=True)
 
         if self.options.with_debug_layers:
-            self.requires.add("Vulkan-ValidationLayers/1.2.133", private=False)
+            self.requires.add("Vulkan-ValidationLayers/1.2.141", private=False)
 
     def imports(self):
         self.copy("*xcb.so*", "lib", "lib")
