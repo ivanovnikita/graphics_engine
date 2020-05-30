@@ -3,3 +3,4 @@
 .directory
 .idea
 .cmake
+examples/graph/data/*

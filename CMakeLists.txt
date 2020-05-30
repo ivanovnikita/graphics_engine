@@ -368,17 +368,17 @@ if (${GE_BUILD_TESTS})
 endif()
 
 if (${GE_BUILD_EXAMPLES})
-    add_executable(example_triangle examples/triangle/main.cpp)
-    target_compile_options(example_triangle PRIVATE ${compile_options})
-    set_target_properties(example_triangle PROPERTIES ${target_properties})
-    target_link_libraries(example_triangle
+    add_executable(example_graph examples/graph/main.cpp)
+    target_compile_options(example_graph PRIVATE ${compile_options})
+    set_target_properties(example_graph PROPERTIES ${target_properties})
+    target_link_libraries(example_graph
         GE::render
         GE::window
         GE::render_loop
         CONAN_PKG::Vulkan-Headers
         ${std_libs}
     )
-    target_include_directories(example_triangle PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
-    define_source_group(example_triangle)
-    install(TARGETS example_triangle DESTINATION examples/triangle)
+    target_include_directories(example_graph PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_graph)
+    install(TARGETS example_graph DESTINATION examples/graph)
 endif()
