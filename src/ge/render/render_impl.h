@@ -77,10 +77,6 @@ namespace ge
         vk::UniqueFence                     render_finished_fence_;
         vk::UniqueFence                     transfer_finished_fence_;
 
-        std::vector<Vertex>                 vertices_;
-        std::vector<Color>                  colors_;
-        std::vector<uint16_t>               indices_;
-
         Camera2d                            camera_;
     };
 }
