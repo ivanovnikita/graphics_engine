@@ -171,6 +171,24 @@ endfunction()
 
 find_package(Threads REQUIRED)
 
+sources_in_dir_recurse(src/ge/common common_sources)
+add_library(ge_common ${common_sources})
+target_compile_options(ge_common PRIVATE ${compile_options})
+set_target_properties(ge_common PROPERTIES ${target_properties})
+target_link_libraries(ge_common
+    PUBLIC
+        CONAN_PKG::tl-expected
+)
+target_include_directories(ge_common
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+)
+add_library(GE::common ALIAS ge_common)
+define_source_group(ge_common)
+
 if (WIN32)
 elseif(UNIX)
     set(window_libs CONAN_PKG::xcb CONAN_PKG::xcb-util CONAN_PKG::xcb-util-wm)
@@ -337,7 +355,13 @@ if (${GE_BUILD_TESTS})
 
     sources_in_dir_recurse(tests/common common_tests_sources)
     add_executable(tests_common ${common_tests_sources})
-    target_link_libraries(tests_common CONAN_PKG::gtest GE::render Threads::Threads ${std_libs})
+    target_link_libraries(tests_common
+        CONAN_PKG::gtest
+        GE::common
+        GE::render
+        Threads::Threads
+        ${std_libs}
+    )
     target_compile_options(tests_common PRIVATE ${compile_options})
     set_target_properties(tests_common PROPERTIES ${target_properties})
     define_source_group(tests_common)
