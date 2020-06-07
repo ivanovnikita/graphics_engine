@@ -46,7 +46,7 @@ namespace ge::factory
     (
         const Required& required
       , const Available& available
-    ) noexcept;
+    );
 
     template<typename Container>
     std::vector<std::string> extensions_names(const Container& extensions);
