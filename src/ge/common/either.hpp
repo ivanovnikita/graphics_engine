@@ -19,29 +19,32 @@ namespace ge
     class Either final
     {
     public:
-        explicit Either(T v) noexcept;
-        explicit Either(U v) noexcept;
-        ~Either() noexcept;
+        explicit constexpr Either(T v) noexcept;
+        explicit constexpr Either(U v) noexcept;
+        constexpr virtual ~Either() noexcept;
 
-        Either(Either&&) noexcept;
-        Either& operator=(Either&&) noexcept;
+        constexpr Either(Either&&) noexcept;
+        constexpr Either& operator=(Either&&) noexcept;
 
-        Either(const Either&) = delete;
-        Either& operator=(const Either&) = delete;
+        constexpr Either(const Either&) = delete;
+        constexpr Either& operator=(const Either&) = delete;
 
-        void swap(Either&) noexcept;
+        constexpr void swap(Either&) noexcept;
 
         template <typename FirstF, typename SecondF>
             requires
                 std::is_nothrow_invocable_v<FirstF, T&> &&
                 std::is_nothrow_invocable_v<SecondF, U&>
-        void match(FirstF&& first_func, SecondF&& second_func) noexcept;
+        constexpr void match(FirstF&& first_func, SecondF&& second_func) noexcept;
 
         template <typename FirstF, typename SecondF>
             requires
                 std::is_nothrow_invocable_v<FirstF, const T&> &&
                 std::is_nothrow_invocable_v<SecondF, const U&>
-        void match(FirstF&& first_func, SecondF&& second_func) const noexcept;
+        constexpr void match(FirstF&& first_func, SecondF&& second_func) const noexcept;
+
+        constexpr bool is_first() const noexcept;
+        constexpr bool is_second() const noexcept;
 
     private:
         enum class either_tag
@@ -50,13 +53,20 @@ namespace ge
             second
         };
 
+        struct first_tag final {};
+        struct second_tag final {};
+
         either_tag tag;
 
-        union
+        union Storage
         {
+            constexpr Storage(first_tag, T v) noexcept;
+            constexpr Storage(second_tag, U v) noexcept;
+            constexpr ~Storage() noexcept;
+
             T first;
             U second;
-        };
+        } storage;
     };
 }
 

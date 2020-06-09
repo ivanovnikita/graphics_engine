@@ -3,62 +3,84 @@
 #include "either.hpp"
 
 #include <utility>
+#include <memory>
 
 namespace ge
 {
     template <typename T, typename U>
-    Either<T, U>::Either(T v) noexcept
+    constexpr Either<T, U>::Storage::Storage(first_tag, T v) noexcept
+        : first{std::move(v)}
+    {
+    }
+
+    template <typename T, typename U>
+    constexpr Either<T, U>::Storage::Storage(second_tag, U v) noexcept
+        : second{std::move(v)}
+    {
+    }
+
+    template <typename T, typename U>
+    constexpr Either<T, U>::Storage::~Storage() noexcept
+    {
+    }
+
+    template <typename T, typename U>
+    constexpr Either<T, U>::Either(T v) noexcept
         : tag{either_tag::first}
-        , first{std::move(v)}
+        , storage{first_tag{}, std::move(v)}
     {
     }
 
     template <typename T, typename U>
-    Either<T, U>::Either(U v) noexcept
+    constexpr Either<T, U>::Either(U v) noexcept
         : tag{either_tag::second}
-        , second{std::move(v)}
+        , storage{second_tag{}, std::move(v)}
     {
     }
 
     template <typename T, typename U>
-    Either<T, U>::~Either() noexcept
+    constexpr Either<T, U>::~Either() noexcept
     {
         switch (tag)
         {
         case either_tag::first:
         {
-            first.~T();
+            std::destroy_at(&storage.first);
             break;
         }
         case either_tag::second:
         {
-            second.~U();
+            std::destroy_at(&storage.second);
             break;
         }
         }
     }
 
     template <typename T, typename U>
-    Either<T, U>::Either(Either&& other) noexcept
+    constexpr Either<T, U>::Either(Either&& other) noexcept
         : tag{other.tag}
+        , storage
+        {
+            [this, &other] () mutable
+            {
+                switch (tag)
+                {
+                case either_tag::first:
+                {
+                    return Storage{first_tag{}, std::move(other.storage.first)};
+                }
+                case either_tag::second:
+                {
+                    return Storage{second_tag{}, std::move(other.storage.second)};
+                }
+                }
+            }()
+        }
     {
-        switch (tag)
-        {
-        case either_tag::first:
-        {
-            new (&first) T(std::move(other.first));
-            break;
-        }
-        case either_tag::second:
-        {
-            new (&second) U(std::move(other.second));
-            break;
-        }
-        }
     }
 
     template <typename T, typename U>
-    Either<T, U>& Either<T, U>::operator=(Either&& other) noexcept
+    constexpr Either<T, U>& Either<T, U>::operator=(Either&& other) noexcept
     {
         if (this != &other)
         {
@@ -69,7 +91,7 @@ namespace ge
     }
 
     template <typename T, typename U>
-    void Either<T, U>::swap(Either& other) noexcept
+    constexpr void Either<T, U>::swap(Either& other) noexcept
     {
         if (tag == other.tag)
         {
@@ -77,12 +99,12 @@ namespace ge
             {
             case either_tag::first:
             {
-                std::swap(first, other.first);
+                std::swap(storage.first, other.storage.first);
                 break;
             }
             case either_tag::second:
             {
-                std::swap(second, other.second);
+                std::swap(storage.second, other.storage.second);
                 break;
             }
             }
@@ -93,20 +115,23 @@ namespace ge
             {
             case either_tag::first:
             {
-                T tmp{std::move(first)};
-                first.~T();
-                new (&second) U(std::move(other.second));
-                other.second.~U();
-                new (&other.first) T(std::move(tmp));
+                T tmp{std::move(storage.first)};
+                std::destroy_at(&storage.first);
+
+                // this line doesn't compile in constexpr context, I don't know why
+                std::construct_at(&storage.second, std::move(other.storage.second));
+
+                std::destroy_at(&other.storage.second);
+                std::construct_at(&other.storage.first, std::move(tmp));
                 break;
             }
             case either_tag::second:
             {
-                U tmp{std::move(second)};
-                second.~U();
-                new (&first) T(std::move(other.first));
-                other.first.~T();
-                new (&other.second) U(std::move(tmp));
+                U tmp{std::move(storage.second)};
+                std::destroy_at(&storage.second);
+                std::construct_at(&storage.first, std::move(other.storage.first));
+                std::destroy_at(&other.storage.first);
+                std::construct_at(&other.storage.second, std::move(tmp));
                 break;
             }
             }
@@ -120,18 +145,18 @@ namespace ge
         requires
             std::is_nothrow_invocable_v<FirstF, T&> &&
             std::is_nothrow_invocable_v<SecondF, U&>
-    void Either<T, U>::match(FirstF&& first_func, SecondF&& second_func) noexcept
+    constexpr void Either<T, U>::match(FirstF&& first_func, SecondF&& second_func) noexcept
     {
         switch (tag)
         {
         case either_tag::first:
         {
-            first_func(first);
+            first_func(storage.first);
             break;
         }
         case either_tag::second:
         {
-            second_func(second);
+            second_func(storage.second);
             break;
         }
         }
@@ -142,20 +167,32 @@ namespace ge
         requires
             std::is_nothrow_invocable_v<FirstF, const T&> &&
             std::is_nothrow_invocable_v<SecondF, const U&>
-    void Either<T, U>::match(FirstF&& first_func, SecondF&& second_func) const noexcept
+    constexpr void Either<T, U>::match(FirstF&& first_func, SecondF&& second_func) const noexcept
     {
         switch (tag)
         {
         case either_tag::first:
         {
-            first_func(first);
+            first_func(storage.first);
             break;
         }
         case either_tag::second:
         {
-            second_func(second);
+            second_func(storage.second);
             break;
         }
         }
+    }
+
+    template <typename T, typename U>
+    constexpr bool Either<T, U>::is_first() const noexcept
+    {
+        return tag == either_tag::first;
+    }
+
+    template <typename T, typename U>
+    constexpr bool Either<T, U>::is_second() const noexcept
+    {
+        return tag == either_tag::second;
     }
 }

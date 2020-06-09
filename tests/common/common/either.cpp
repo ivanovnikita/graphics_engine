@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <optional>
+#include <utility>
 
 namespace
 {
@@ -94,8 +95,10 @@ TEST(either, construct_and_destruct)
 {
     using namespace ge;
 
-    Either<int, float> either_int(1);
-    Either<int, float> either_float(1.f);
+    constexpr Either<int, float> either_int(1);
+    constexpr Either<int, float> either_float(1.f);
+
+    // TODO: check in constexpr context
 
     first_counter = 0;
     second_counter = 0;
@@ -151,6 +154,20 @@ TEST(either, match)
         {
             ASSERT_TRUE(value.value.has_value());
             EXPECT_EQ(2.f, *value.value);
+        }
+    );
+
+    constexpr Either<int, float> either_int(1);
+    // TODO: check in constexpr context
+    either_int.match
+    (
+        [] (const int& value) noexcept
+        {
+            EXPECT_EQ(1, value);
+        },
+        [] (const float&) noexcept
+        {
+            FAIL();
         }
     );
 }
@@ -277,4 +294,19 @@ TEST(either, move_assign)
             EXPECT_FALSE(value.value.has_value());
         }
     );
+
+    // TODO: check in constexpr context
+}
+
+TEST(either, is)
+{
+    using namespace ge;
+
+    constexpr Either<int, float> either_int(1);
+    static_assert(either_int.is_first());
+    static_assert(not either_int.is_second());
+
+    constexpr Either<int, float> either_float(2.f);
+    static_assert(not either_float.is_first());
+    static_assert(either_float.is_second());
 }
