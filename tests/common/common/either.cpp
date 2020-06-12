@@ -389,3 +389,114 @@ TEST(either, is)
     static_assert(not either_float.is_first());
     static_assert(either_float.is_second());
 }
+
+template <typename T>
+using Ref = std::reference_wrapper<T>;
+
+TEST(either, reference)
+{
+    using namespace ge;
+
+    int i = 1;
+    float f = 2.f;
+
+    {
+        Either<Ref<int>, Ref<float>> either_int(i);
+        Either<Ref<int>, Ref<float>> either_float(f);
+
+        either_int.match
+        (
+            [] (int& v) noexcept
+            {
+                EXPECT_EQ(1, v);
+            },
+            [] (float&) noexcept
+            {
+                FAIL();
+            }
+        );
+
+        {
+            bool result = false;
+            either_int.match_first
+            (
+                [&result] (int& v) noexcept
+                {
+                    EXPECT_EQ(1, v);
+                    result = true;
+                }
+            );
+            EXPECT_TRUE(result);
+        }
+        {
+            bool result = false;
+            either_float.match_second
+            (
+                [&result] (float& v) noexcept
+                {
+                    EXPECT_EQ(2.f, v);
+                    result = true;
+                }
+            );
+            EXPECT_TRUE(result);
+        }
+        {
+            const bool result = either_int.match
+            (
+                [] (int&) noexcept
+                {
+                    return true;
+                },
+                [] (float&) noexcept
+                {
+                    return false;
+                }
+            );
+            EXPECT_TRUE(result);
+        }
+
+        std::swap(either_int, either_float);
+        either_int = std::move(either_float);
+        Either<Ref<int>, Ref<float>> either_new(std::move(either_int));
+        EXPECT_TRUE(either_new.is_second());
+        either_new.match_second
+        (
+            [] (float& v) noexcept
+            {
+                EXPECT_EQ(2.f, v);
+            }
+        );
+    }
+    {
+        Either<Ref<const int>, Ref<const float>> either_int(i);
+        Either<Ref<const int>, Ref<const float>> either_float(f);
+
+        either_int.match
+        (
+            [] (const int& v) noexcept
+            {
+                EXPECT_EQ(1, v);
+            },
+            [] (const float&) noexcept
+            {
+                FAIL();
+            }
+        );
+    }
+    {
+        const Either<Ref<int>, Ref<float>> either_int(i);
+        const Either<Ref<int>, Ref<float>> either_float(f);
+
+        either_int.match
+        (
+            [] (int& v) noexcept
+            {
+                EXPECT_EQ(1, v);
+            },
+            [] (float&) noexcept
+            {
+                FAIL();
+            }
+        );
+    }
+}

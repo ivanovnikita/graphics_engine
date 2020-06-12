@@ -164,3 +164,56 @@ TEST(option, reset)
 
     EXPECT_TRUE(one.is_none());
 }
+
+template <typename T>
+using Ref = std::reference_wrapper<T>;
+
+TEST(option, reference)
+{
+    using namespace ge;
+
+    int i = 1;
+    Option<Ref<int>> one(i);
+    EXPECT_TRUE(one.is_some());
+
+    one.match
+    (
+        [] (int& v) noexcept
+        {
+            EXPECT_EQ(1, v);
+        },
+        [] () noexcept
+        {
+            FAIL();
+        }
+    );
+
+    {
+        const bool result = one.match
+        (
+            [] (int&) noexcept
+            {
+                return true;
+            },
+            [] () noexcept
+            {
+                return false;
+            }
+        );
+        EXPECT_TRUE(result);
+    }
+    {
+        bool result = false;
+        one.match_some
+        (
+            [&result] (int&) noexcept
+            {
+                result = true;
+            }
+        );
+        EXPECT_TRUE(result);
+    }
+
+    one = none;
+    EXPECT_TRUE(one.is_none());
+}
