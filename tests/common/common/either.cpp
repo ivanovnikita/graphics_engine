@@ -215,6 +215,42 @@ TEST(either, match_with_return)
     EXPECT_TRUE(second_result);
 }
 
+TEST(either, match_part)
+{
+    using namespace ge;
+
+    Either<First, Second> first{First{1}};
+
+    bool first_result = false;
+    first.match_first
+    (
+        [&first_result] (const First& value) noexcept
+        {
+            EXPECT_TRUE(value.value.has_value());
+            EXPECT_EQ(1, *value.value);
+            first_result = true;
+        }
+    );
+
+    EXPECT_TRUE(first_result);
+
+    const Either<First, Second> second{Second{2.f}};
+
+    bool second_result = false;
+    second.match_second
+    (
+        [&second_result] (const Second& value) noexcept
+        {
+            EXPECT_TRUE(value.value.has_value());
+            EXPECT_EQ(2.f, *value.value);
+            second_result = true;
+            return;
+        }
+    );
+
+    EXPECT_TRUE(second_result);
+}
+
 TEST(either, swap_diff_types)
 {
     using namespace ge;

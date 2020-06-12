@@ -235,6 +235,58 @@ namespace ge
     }
 
     template <typename T, typename U>
+    template <typename FirstF>
+        requires
+            std::is_nothrow_invocable_v<FirstF, T&> &&
+            std::is_same_v<std::invoke_result_t<FirstF, T&>, void>
+    constexpr void Either<T, U>::match_first(FirstF&& first_func) noexcept
+    {
+        if (tag == either_tag::first)
+        {
+            first_func(storage.first);
+        }
+    }
+
+    template <typename T, typename U>
+    template <typename FirstF>
+        requires
+            std::is_nothrow_invocable_v<FirstF, const T&> &&
+            std::is_same_v<std::invoke_result_t<FirstF, const T&>, void>
+    constexpr void Either<T, U>::match_first(FirstF&& first_func) const noexcept
+    {
+        if (tag == either_tag::first)
+        {
+            first_func(storage.first);
+        }
+    }
+
+    template <typename T, typename U>
+    template <typename SecondF>
+        requires
+            std::is_nothrow_invocable_v<SecondF, U&> &&
+            std::is_same_v<std::invoke_result_t<SecondF, U&>, void>
+    constexpr void Either<T, U>::match_second(SecondF&& second_func) noexcept
+    {
+        if (tag == either_tag::second)
+        {
+            second_func(storage.second);
+        }
+    }
+
+    template <typename T, typename U>
+    template <typename SecondF>
+        requires
+            std::is_nothrow_invocable_v<SecondF, const U&> &&
+            std::is_same_v<std::invoke_result_t<SecondF, const U&>, void>
+    constexpr void Either<T, U>::match_second(SecondF&& second_func) const noexcept
+    {
+        if (tag == either_tag::second)
+        {
+            second_func(storage.second);
+        }
+    }
+
+    template <typename T, typename U>
     constexpr bool Either<T, U>::is_first() const noexcept
     {
         return tag == either_tag::first;
