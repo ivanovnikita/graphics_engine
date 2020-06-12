@@ -42,7 +42,7 @@ TEST(option, match_no_return)
         {
             EXPECT_EQ(1, v);
         },
-        [] (None) noexcept
+        [] () noexcept
         {
             FAIL();
         }
@@ -62,9 +62,46 @@ TEST(option, match_with_return)
             EXPECT_EQ(1, v);
             return true;
         },
-        [] (None) noexcept
+        [] () noexcept
         {
             return false;
+        }
+    );
+
+    EXPECT_TRUE(result);
+}
+
+TEST(option, match_some)
+{
+    using namespace ge;
+
+    Option<int> option(1);
+
+    bool result = false;
+    option.match_some
+    (
+        [&result] (int v) noexcept
+        {
+            EXPECT_EQ(1, v);
+            result = true;
+        }
+    );
+
+    EXPECT_TRUE(result);
+}
+
+TEST(option, match_none)
+{
+    using namespace ge;
+
+    Option<int> option(none);
+
+    bool result = false;
+    option.match_none
+    (
+        [&result] () noexcept
+        {
+            result = true;
         }
     );
 
@@ -87,7 +124,7 @@ TEST(option, move_construct)
         {
             EXPECT_EQ(1, v);
         },
-        [] (None) noexcept
+        [] () noexcept
         {
             FAIL();
         }
@@ -111,7 +148,7 @@ TEST(option, move_assign)
         {
             EXPECT_EQ(1, v);
         },
-        [] (None) noexcept
+        [] () noexcept
         {
             FAIL();
         }
