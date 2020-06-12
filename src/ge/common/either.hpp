@@ -16,7 +16,7 @@ namespace ge
             std::is_nothrow_destructible_v<U> &&
             std::is_nothrow_swappable_v<T> &&
             std::is_nothrow_swappable_v<U>
-    class Either final
+    class Either
     {
     public:
         explicit constexpr Either(T v) noexcept;
