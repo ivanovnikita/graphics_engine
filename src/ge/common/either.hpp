@@ -34,14 +34,36 @@ namespace ge
         template <typename FirstF, typename SecondF>
             requires
                 std::is_nothrow_invocable_v<FirstF, T&> &&
-                std::is_nothrow_invocable_v<SecondF, U&>
+                std::is_nothrow_invocable_v<SecondF, U&> &&
+                std::is_same_v<std::invoke_result_t<FirstF, T&>, void> &&
+                std::is_same_v<std::invoke_result_t<SecondF, U&>, void>
         constexpr void match(FirstF&& first_func, SecondF&& second_func) noexcept;
 
         template <typename FirstF, typename SecondF>
             requires
                 std::is_nothrow_invocable_v<FirstF, const T&> &&
-                std::is_nothrow_invocable_v<SecondF, const U&>
+                std::is_nothrow_invocable_v<SecondF, const U&> &&
+                std::is_same_v<std::invoke_result_t<FirstF, const T&>, void> &&
+                std::is_same_v<std::invoke_result_t<SecondF, const U&>, void>
         constexpr void match(FirstF&& first_func, SecondF&& second_func) const noexcept;
+
+        template <typename FirstF, typename SecondF>
+            requires
+                std::is_nothrow_invocable_v<FirstF, T&> &&
+                std::is_nothrow_invocable_v<SecondF, U&> &&
+                (not std::is_same_v<std::invoke_result_t<FirstF, T&>, void>) &&
+                (not std::is_same_v<std::invoke_result_t<SecondF, U&>, void>)
+        constexpr auto match(FirstF&& first_func, SecondF&& second_func) noexcept
+            -> std::common_type_t<std::invoke_result_t<FirstF, T&>, std::invoke_result_t<SecondF, U&>>;
+
+        template <typename FirstF, typename SecondF>
+            requires
+                std::is_nothrow_invocable_v<FirstF, T&> &&
+                std::is_nothrow_invocable_v<SecondF, U&> &&
+                (not std::is_same_v<std::invoke_result_t<FirstF, const T&>, void>) &&
+                (not std::is_same_v<std::invoke_result_t<SecondF, const U&>, void>)
+        constexpr auto match(FirstF&& first_func, SecondF&& second_func) const noexcept
+            -> std::common_type_t<std::invoke_result_t<FirstF, const T&>, std::invoke_result_t<SecondF, const U&>>;
 
         constexpr bool is_first() const noexcept;
         constexpr bool is_second() const noexcept;

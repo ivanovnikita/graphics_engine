@@ -121,7 +121,7 @@ TEST(either, construct_and_destruct)
     EXPECT_EQ(0, second_counter);
 }
 
-TEST(either, match)
+TEST(either, match_no_return)
 {
     using namespace ge;
 
@@ -141,7 +141,7 @@ TEST(either, match)
         }
     );
 
-    Either<First, Second> second{Second{2.f}};
+    const Either<First, Second> second{Second{2.f}};
 
     second.match
     (
@@ -170,6 +170,49 @@ TEST(either, match)
             FAIL();
         }
     );
+}
+
+TEST(either, match_with_return)
+{
+    using namespace ge;
+
+    Either<First, Second> first{First{1}};
+
+    const bool first_result = first.match
+    (
+        [] (const First& value) noexcept
+        {
+            EXPECT_TRUE(value.value.has_value());
+            EXPECT_EQ(1, *value.value);
+            return true;
+        },
+        [] (const Second& value) noexcept
+        {
+            EXPECT_FALSE(value.value.has_value());
+            return false;
+        }
+    );
+
+    EXPECT_TRUE(first_result);
+
+    const Either<First, Second> second{Second{2.f}};
+
+    const bool second_result = second.match
+    (
+        [] (const First& value) noexcept
+        {
+            EXPECT_FALSE(value.value.has_value());
+            return false;
+        },
+        [] (const Second& value) noexcept
+        {
+            EXPECT_TRUE(value.value.has_value());
+            EXPECT_EQ(2.f, *value.value);
+            return true;
+        }
+    );
+
+    EXPECT_TRUE(second_result);
 }
 
 TEST(either, swap_diff_types)

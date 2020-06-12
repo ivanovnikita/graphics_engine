@@ -30,7 +30,7 @@ TEST(option, none)
     EXPECT_TRUE(result.is_none());
 }
 
-TEST(option, match)
+TEST(option, match_no_return)
 {
     using namespace ge;
 
@@ -47,6 +47,28 @@ TEST(option, match)
             FAIL();
         }
     );
+}
+
+TEST(option, match_with_return)
+{
+    using namespace ge;
+
+    Option<int> option(1);
+
+    const bool result = option.match
+    (
+        [] (int v) noexcept
+        {
+            EXPECT_EQ(1, v);
+            return true;
+        },
+        [] (None) noexcept
+        {
+            return false;
+        }
+    );
+
+    EXPECT_TRUE(result);
 }
 
 TEST(option, move_construct)
