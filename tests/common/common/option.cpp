@@ -165,9 +165,6 @@ TEST(option, reset)
     EXPECT_TRUE(one.is_none());
 }
 
-template <typename T>
-using Ref = std::reference_wrapper<T>;
-
 TEST(option, reference)
 {
     using namespace ge;

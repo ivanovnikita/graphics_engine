@@ -390,9 +390,6 @@ TEST(either, is)
     static_assert(either_float.is_second());
 }
 
-template <typename T>
-using Ref = std::reference_wrapper<T>;
-
 TEST(either, reference)
 {
     using namespace ge;
