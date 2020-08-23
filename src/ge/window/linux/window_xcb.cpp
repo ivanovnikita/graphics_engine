@@ -2,6 +2,14 @@
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_aux.h>
+#include <xcb/xinput.h>
+
+#include <xcb/xcb_keysyms.h>
+
+#include <X11/keysymdef.h>
+
+#include <iostream>
+#include <sstream>
 
 namespace ge
 {
@@ -131,6 +139,46 @@ namespace ge
             return result;
         }
 
+        std::string error_event_to_string
+        (
+            xcb_errors_context_t* errors_ctx,
+            const xcb_generic_error_t& e
+        )
+        {
+            std::string result{"X error: request="};
+
+            const char* major = xcb_errors_get_name_for_major_code(errors_ctx, e.major_code);
+            const char* minor = xcb_errors_get_name_for_minor_code(errors_ctx, e.major_code, e.minor_code);
+            const char* extension = nullptr;
+            const char* error = xcb_errors_get_name_for_error(errors_ctx, e.error_code, &extension);
+
+            assert(major != nullptr);
+            result += major;
+
+            if (minor != nullptr)
+            {
+                result += "-";
+                result += minor;
+            }
+
+            result += " (major ";
+            result += e.major_code;
+            result += ", minor ";
+            result += e.minor_code;
+            result += "), error=";
+
+            if (extension != nullptr)
+            {
+                result += extension;
+                result += "-";
+            }
+
+            assert(error != nullptr);
+            result += error;
+
+            return result;
+        }
+
         template <ButtonEvent button_event>
         std::optional<WindowEvent> handle_mouse_button_event(const xcb_button_press_event_t& event)
         {
@@ -195,6 +243,11 @@ namespace ge
                 , timestamp
             };
         }
+
+        void handle_key_press_event(const xcb_key_press_event_t& event)
+        {
+            std::cout << event.detail << std::endl;
+        }
     }
 
     template <>
@@ -242,6 +295,11 @@ namespace ge
             throw std::runtime_error("Connection to xcb failed");
         }
 
+        if (xcb_errors_context_new(connection_, &errors_ctx_) != 0)
+        {
+            throw std::runtime_error("Failed to initialize xcb-errors");
+        }
+
         const xcb_setup_t* const setup = xcb_get_setup(connection_);
         xcb_screen_iterator_t screen_iterator = xcb_setup_roots_iterator(setup);
 
@@ -272,6 +330,9 @@ namespace ge
             | XCB_EVENT_MASK_BUTTON_1_MOTION
             | XCB_EVENT_MASK_BUTTON_2_MOTION
             | XCB_EVENT_MASK_BUTTON_3_MOTION
+
+            | XCB_EVENT_MASK_KEY_PRESS
+            | XCB_EVENT_MASK_KEY_RELEASE
 
             | XCB_EVENT_MASK_ENTER_WINDOW
             | XCB_EVENT_MASK_LEAVE_WINDOW
@@ -330,6 +391,7 @@ namespace ge
         }
 
         xcb_destroy_window(connection_, handle_);
+        xcb_errors_context_free(errors_ctx_);
         xcb_disconnect(connection_);
     }
 
@@ -369,12 +431,19 @@ namespace ge
         std::vector<WindowEvent> events;
 
         std::optional<WindowEventResize> last_resize_event;
+        std::optional<std::string> error_message;
 
         xcb_generic_event_t* event = xcb_poll_for_event(connection_);
         while (event != nullptr)
         {
             switch (event->response_type & 0x7f)
             {
+            case 0:
+            {
+                const auto error_event = reinterpret_cast<const xcb_generic_error_t*>(event);
+                error_message.emplace(error_event_to_string(errors_ctx_, *error_event));
+                break;
+            }
             case XCB_EXPOSE:
             {
                 [[ maybe_unused ]] const auto expose_event = reinterpret_cast<const xcb_expose_event_t*>(event);
@@ -453,9 +522,25 @@ namespace ge
                 events.emplace_back(handle_cross_window_border_event<CrossEvent::LEAVE>(*leave_event));
                 break;
             }
+            case XCB_KEY_PRESS:
+            {
+                const auto key_release_event = reinterpret_cast<const xcb_key_release_event_t*>(event);
+                handle_key_press_event(*key_release_event);
+                break;
+            }
+            case XCB_KEY_RELEASE:
+            {
+                break;
+            }
             }
 
             free(event);
+
+            if (error_message.has_value())
+            {
+                throw std::runtime_error(*error_message);
+            }
+
             event = xcb_poll_for_event(connection_);
         }
 

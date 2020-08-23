@@ -4,6 +4,8 @@
 
 #include <xcb/xcb.h>
 
+#include <xcb/xcb_errors.h> // TODO: get by conan package
+
 #include <vulkan/vulkan.hpp>
 
 namespace ge
@@ -32,6 +34,7 @@ namespace ge
         void init_window_size_constraints(const T&);
 
         xcb_connection_t* connection_;
+        xcb_errors_context_t* errors_ctx_;
         xcb_window_t handle_;
         Size current_size_;
         xcb_intern_atom_reply_t* delete_reply_;
