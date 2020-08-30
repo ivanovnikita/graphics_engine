@@ -4,7 +4,8 @@
 
 #include <xcb/xcb.h>
 
-#include <xcb/xcb_errors.h> // TODO: get by conan package
+#include <xcb/xcb_errors.h>
+#include <xcb/xcb_keysyms.h>
 
 #include <vulkan/vulkan.hpp>
 
@@ -33,8 +34,11 @@ namespace ge
         template <typename T>
         void init_window_size_constraints(const T&);
 
+        void init_key_mapping(const xcb_setup_t&);
+
         xcb_connection_t* connection_;
         xcb_errors_context_t* errors_ctx_;
+        xcb_key_symbols_t* key_syms_;
         xcb_window_t handle_;
         Size current_size_;
         xcb_intern_atom_reply_t* delete_reply_;

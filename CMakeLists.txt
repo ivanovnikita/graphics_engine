@@ -187,7 +187,14 @@ define_source_group(ge_common)
 
 if (WIN32)
 elseif(UNIX)
-    set(window_libs CONAN_PKG::xcb CONAN_PKG::xcb-util CONAN_PKG::xcb-util-wm)
+    set(window_libs
+        CONAN_PKG::xcb
+        CONAN_PKG::xcb-util
+        CONAN_PKG::xcb-util-wm
+        CONAN_PKG::xcb-util-errors
+        CONAN_PKG::xcb-util-keysyms
+        CONAN_PKG::xorgproto
+    )
 endif()
 
 sources_in_dir_recurse(src/ge/window window_sources)

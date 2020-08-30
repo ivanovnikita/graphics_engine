@@ -5,6 +5,11 @@
 
 namespace ge
 {
+    template <typename T>
+    void RenderLoop::handle_window_event(const T&)
+    {
+    }
+
     template <>
     void RenderLoop::handle_window_event(const WindowExposed&)
     {

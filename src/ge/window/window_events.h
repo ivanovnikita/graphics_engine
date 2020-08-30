@@ -59,7 +59,7 @@ namespace ge
         bool caps_lock = false;
         bool ctrl = false;
         bool mod_1 = false; // alt?
-        bool mod_2 = false;
+        bool mod_2 = false; // num lock?
         bool mod_3 = false;
         bool mod_4 = false;
         bool mod_5 = false;
@@ -113,16 +113,203 @@ namespace ge
     using MouseEnterWindow = MouseCrossWindowBorderEvent<CrossEvent::ENTER>;
     using MouseLeaveWindow = MouseCrossWindowBorderEvent<CrossEvent::LEAVE>;
 
+    enum class KeyType
+    {
+        Service,
+        Latin,
+        KeypadService,
+        KeypadLatin,
+        Unknown
+    };
+
+    enum class ServiceKey
+    {
+        // TODO: interpret as ascii?
+        Enter,
+        Tab,
+
+        BackSpace,
+        Linefeed,
+        Clear,
+        Pause,
+        ScrollLock,
+        SysReq,
+        Escape,
+        Delete,
+
+        Home,
+        Left,
+        Up,
+        Right,
+        Down,
+        PageUp,
+        PageDown,
+        End,
+        Begin,
+
+        Select,
+        Print,
+        Execute,
+        Insert,
+        Undo,
+        Redo,
+        Menu,
+        Find,
+        Cancel,
+        Help,
+        Break,
+        ModeSwitch,
+        NumLock,
+
+        F1,
+        F2,
+        F3,
+        F4,
+        F5,
+        F6,
+        F7,
+        F8,
+        F9,
+        F10,
+        F11,
+        F12,
+
+        ShiftL,
+        ShiftR,
+        ControlL,
+        ControlR,
+        AltL,
+        AltR,
+        CapsLock,
+        ShiftLock,
+        MetaL,
+        MetaR,
+        SuperL,
+        SuperR,
+        HyperL,
+        HyperR
+    };
+
+    enum class KeypadServiceKey
+    {
+        Space,
+        Tab,
+        Enter,
+        F1,
+        F2,
+        F3,
+        F4,
+        Home,
+        Left,
+        Up,
+        Right,
+        Down,
+        PageUp,
+        PageDown,
+        End,
+        Begin,
+        Insert,
+        Delete,
+        Decimal
+    };
+
+    enum class KeypadLatinKey
+    {
+        Equal,
+        Multiply,
+        Add,
+        Separator,
+        Subtract,
+        Divide,
+
+        KP_0,
+        KP_1,
+        KP_2,
+        KP_3,
+        KP_4,
+        KP_5,
+        KP_6,
+        KP_7,
+        KP_8,
+        KP_9
+    };
+
+    template <KeyType, ButtonEvent>
+    struct KeyEvent;
+
+    template <ButtonEvent button_event>
+    struct KeyEvent<KeyType::Service, button_event> final
+    {
+        ServiceKey key;
+        ModifiersState modifiers;
+        EventTimestamp timestamp;
+    };
+
+    template <ButtonEvent button_event>
+    struct KeyEvent<KeyType::Latin, button_event> final
+    {
+        char key;
+        ModifiersState modifiers;
+        EventTimestamp timestamp;
+    };
+
+    template <ButtonEvent button_event>
+    struct KeyEvent<KeyType::KeypadService, button_event> final
+    {
+        KeypadServiceKey key;
+        ModifiersState modifiers;
+        EventTimestamp timestamp;
+    };
+
+    template <ButtonEvent button_event>
+    struct KeyEvent<KeyType::KeypadLatin, button_event> final
+    {
+        char symbol;
+        KeypadLatinKey key;
+        ModifiersState modifiers;
+        EventTimestamp timestamp;
+    };
+
+    template <ButtonEvent button_event>
+    struct KeyEvent<KeyType::Unknown, button_event> final
+    {
+        uint32_t key;
+        ModifiersState modifiers;
+        EventTimestamp timestamp;
+    };
+
+    using ServiceKeyPress = KeyEvent<KeyType::Service, ButtonEvent::PRESS>;
+    using ServiceKeyRelease = KeyEvent<KeyType::Service, ButtonEvent::RELEASE>;
+    using LatinKeyPress = KeyEvent<KeyType::Latin, ButtonEvent::PRESS>;
+    using LatinKeyRelease = KeyEvent<KeyType::Latin, ButtonEvent::RELEASE>;
+    using KeypadServiceKeyPress = KeyEvent<KeyType::KeypadService, ButtonEvent::PRESS>;
+    using KeypadServiceKeyRelease = KeyEvent<KeyType::KeypadService, ButtonEvent::RELEASE>;
+    using KeypadLatinKeyPress = KeyEvent<KeyType::KeypadLatin, ButtonEvent::PRESS>;
+    using KeypadLatinKeyRelease = KeyEvent<KeyType::KeypadLatin, ButtonEvent::RELEASE>;
+    using UnknownKeyPress = KeyEvent<KeyType::Unknown, ButtonEvent::PRESS>;
+    using UnknownKeyRelease = KeyEvent<KeyType::Unknown, ButtonEvent::RELEASE>;
+
     using WindowEvent = std::variant
     <
-        WindowExposed
-      , WindowEventClose
-      , WindowEventResize
-      , MouseButtonPress
-      , MouseButtonRelease
-      , WheelEvent
-      , MouseMoveEvent
-      , MouseEnterWindow
-      , MouseLeaveWindow
+        WindowExposed,
+        WindowEventClose,
+        WindowEventResize,
+        MouseButtonPress,
+        MouseButtonRelease,
+        WheelEvent,
+        MouseMoveEvent,
+        MouseEnterWindow,
+        MouseLeaveWindow,
+
+        ServiceKeyPress,
+        ServiceKeyRelease,
+        LatinKeyPress,
+        LatinKeyRelease,
+        KeypadServiceKeyPress,
+        KeypadServiceKeyRelease,
+        KeypadLatinKeyPress,
+        KeypadLatinKeyRelease,
+        UnknownKeyPress,
+        UnknownKeyRelease
     >;
 }

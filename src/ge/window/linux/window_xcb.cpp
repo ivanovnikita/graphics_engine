@@ -1,11 +1,12 @@
 #include "ge/window/linux/window_xcb.h"
+#include "ge/common/overloaded.hpp"
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xinput.h>
 
-#include <xcb/xcb_keysyms.h>
-
+#define XK_MISCELLANY
+#define XK_LATIN1
 #include <X11/keysymdef.h>
 
 #include <iostream>
@@ -162,9 +163,9 @@ namespace ge
             }
 
             result += " (major ";
-            result += e.major_code;
+            result += static_cast<char>(e.major_code);
             result += ", minor ";
-            result += e.minor_code;
+            result += static_cast<char>(e.minor_code);
             result += "), error=";
 
             if (extension != nullptr)
@@ -244,9 +245,344 @@ namespace ge
             };
         }
 
-        void handle_key_press_event(const xcb_key_press_event_t& event)
+        std::variant
+        <
+            ServiceKey,
+            char,
+            KeypadServiceKey,
+            KeypadLatinKey,
+            uint32_t
+        > match_key(const xcb_keysym_t sym)
         {
-            std::cout << event.detail << std::endl;
+            switch (sym)
+            {
+            case XK_Return: return ServiceKey::Enter;
+            case XK_Tab: return ServiceKey::Tab;
+
+            case XK_BackSpace: return ServiceKey::BackSpace;
+            case XK_Linefeed: return ServiceKey::Linefeed;
+            case XK_Clear: return ServiceKey::Clear;
+            case XK_Pause: return ServiceKey::Pause;
+            case XK_Scroll_Lock: return ServiceKey::ScrollLock;
+            case XK_Sys_Req: return ServiceKey::SysReq;
+            case XK_Escape: return ServiceKey::Escape;
+            case XK_Delete: return ServiceKey::Delete;
+
+            case XK_Home: return ServiceKey::Home;
+            case XK_Left: return ServiceKey::Left;
+            case XK_Up: return ServiceKey::Up;
+            case XK_Right: return ServiceKey::Right;
+            case XK_Down: return ServiceKey::Down;
+            case XK_Page_Up: return ServiceKey::PageUp;
+            case XK_Page_Down: return ServiceKey::PageDown;
+            case XK_End: return ServiceKey::End;
+            case XK_Begin: return ServiceKey::Begin;
+
+            case XK_Select: return ServiceKey::Select;
+            case XK_Print: return ServiceKey::Print;
+            case XK_Execute: return ServiceKey::Execute;
+            case XK_Insert: return ServiceKey::Insert;
+            case XK_Undo: return ServiceKey::Undo;
+            case XK_Redo: return ServiceKey::Redo;
+            case XK_Menu: return ServiceKey::Menu;
+            case XK_Find: return ServiceKey::Find;
+            case XK_Cancel: return ServiceKey::Cancel;
+            case XK_Help: return ServiceKey::Help;
+            case XK_Break: return ServiceKey::Break;
+            case XK_Mode_switch: return ServiceKey::ModeSwitch;
+            case XK_Num_Lock: return ServiceKey::NumLock;
+
+            case XK_F1: return ServiceKey::F1;
+            case XK_F2: return ServiceKey::F2;
+            case XK_F3: return ServiceKey::F3;
+            case XK_F4: return ServiceKey::F4;
+            case XK_F5: return ServiceKey::F5;
+            case XK_F6: return ServiceKey::F6;
+            case XK_F7: return ServiceKey::F7;
+            case XK_F8: return ServiceKey::F8;
+            case XK_F9: return ServiceKey::F9;
+            case XK_F10: return ServiceKey::F10;
+            case XK_F11: return ServiceKey::F11;
+            case XK_F12: return ServiceKey::F12;
+
+            case XK_Shift_L: return ServiceKey::ShiftL;
+            case XK_Shift_R: return ServiceKey::ShiftR;
+            case XK_Control_L: return ServiceKey::ControlL;
+            case XK_Control_R: return ServiceKey::ControlR;
+            case XK_Alt_L: return ServiceKey::AltL;
+            case XK_Alt_R: return ServiceKey::AltR;
+            case XK_Caps_Lock: return ServiceKey::CapsLock;
+            case XK_Shift_Lock: return ServiceKey::ShiftLock;
+            case XK_Meta_L: return ServiceKey::MetaL;
+            case XK_Meta_R: return ServiceKey::MetaR;
+            case XK_Super_L: return ServiceKey::SuperL;
+            case XK_Super_R: return ServiceKey::SuperR;
+            case XK_Hyper_L: return ServiceKey::HyperL;
+            case XK_Hyper_R: return ServiceKey::HyperR;
+
+            case XK_space:
+            case XK_exclam:
+            case XK_quotedbl:
+            case XK_numbersign:
+            case XK_dollar:
+            case XK_percent:
+            case XK_ampersand:
+            case XK_apostrophe:
+            case XK_parenleft:
+            case XK_parenright:
+            case XK_asterisk:
+            case XK_plus:
+            case XK_comma:
+            case XK_minus:
+            case XK_period:
+            case XK_slash:
+            case XK_0:
+            case XK_1:
+            case XK_2:
+            case XK_3:
+            case XK_4:
+            case XK_5:
+            case XK_6:
+            case XK_7:
+            case XK_8:
+            case XK_9:
+            case XK_colon:
+            case XK_semicolon:
+            case XK_less:
+            case XK_equal:
+            case XK_greater:
+            case XK_question:
+            case XK_at:
+            case XK_A:
+            case XK_B:
+            case XK_C:
+            case XK_D:
+            case XK_E:
+            case XK_F:
+            case XK_G:
+            case XK_H:
+            case XK_I:
+            case XK_J:
+            case XK_K:
+            case XK_L:
+            case XK_M:
+            case XK_N:
+            case XK_O:
+            case XK_P:
+            case XK_Q:
+            case XK_R:
+            case XK_S:
+            case XK_T:
+            case XK_U:
+            case XK_V:
+            case XK_W:
+            case XK_X:
+            case XK_Y:
+            case XK_Z:
+            case XK_bracketleft:
+            case XK_backslash:
+            case XK_bracketright:
+            case XK_asciicircum:
+            case XK_underscore:
+            case XK_quoteleft:
+            case XK_a:
+            case XK_b:
+            case XK_c:
+            case XK_d:
+            case XK_e:
+            case XK_f:
+            case XK_g:
+            case XK_h:
+            case XK_i:
+            case XK_j:
+            case XK_k:
+            case XK_l:
+            case XK_m:
+            case XK_n:
+            case XK_o:
+            case XK_p:
+            case XK_q:
+            case XK_r:
+            case XK_s:
+            case XK_t:
+            case XK_u:
+            case XK_v:
+            case XK_w:
+            case XK_x:
+            case XK_y:
+            case XK_z:
+            case XK_braceleft:
+            case XK_bar:
+            case XK_braceright:
+            case XK_asciitilde:
+            {
+                return *reinterpret_cast<const char*>(&sym);
+            }
+
+            case XK_KP_Space: return KeypadServiceKey::Space;
+            case XK_KP_Tab: return KeypadServiceKey::Tab;
+            case XK_KP_Enter: return KeypadServiceKey::Enter;
+            case XK_KP_F1: return KeypadServiceKey::F1;
+            case XK_KP_F2: return KeypadServiceKey::F2;
+            case XK_KP_F3: return KeypadServiceKey::F3;
+            case XK_KP_F4: return KeypadServiceKey::F4;
+            case XK_KP_Home: return KeypadServiceKey::Home;
+            case XK_KP_Left: return KeypadServiceKey::Left;
+            case XK_KP_Up: return KeypadServiceKey::Up;
+            case XK_KP_Right: return KeypadServiceKey::Right;
+            case XK_KP_Down: return KeypadServiceKey::Down;
+            case XK_KP_Page_Up: return KeypadServiceKey::PageUp;
+            case XK_KP_Page_Down: return KeypadServiceKey::PageDown;
+            case XK_KP_End: return KeypadServiceKey::End;
+            case XK_KP_Begin: return KeypadServiceKey::Begin;
+            case XK_KP_Insert: return KeypadServiceKey::Insert;
+            case XK_KP_Delete: return KeypadServiceKey::Delete;
+            case XK_KP_Decimal: return KeypadServiceKey::Decimal;
+
+            case XK_KP_Equal: return KeypadLatinKey::Equal;
+            case XK_KP_Multiply: return KeypadLatinKey::Multiply;
+            case XK_KP_Add: return KeypadLatinKey::Add;
+            case XK_KP_Separator: return KeypadLatinKey::Separator;
+            case XK_KP_Subtract: return KeypadLatinKey::Subtract;
+            case XK_KP_Divide: return KeypadLatinKey::Divide;
+            case XK_KP_0: return KeypadLatinKey::KP_0;
+            case XK_KP_1: return KeypadLatinKey::KP_1;
+            case XK_KP_2: return KeypadLatinKey::KP_2;
+            case XK_KP_3: return KeypadLatinKey::KP_3;
+            case XK_KP_4: return KeypadLatinKey::KP_4;
+            case XK_KP_5: return KeypadLatinKey::KP_5;
+            case XK_KP_6: return KeypadLatinKey::KP_6;
+            case XK_KP_7: return KeypadLatinKey::KP_7;
+            case XK_KP_8: return KeypadLatinKey::KP_8;
+            case XK_KP_9: return KeypadLatinKey::KP_9;
+            }
+
+            return sym;
+        }
+
+        [[ maybe_unused ]] std::string_view get_name(const ServiceKey k)
+        {
+            switch (k)
+            {
+            case ServiceKey::Enter: return "Enter";
+            case ServiceKey::Tab: return "Tab";
+
+            case ServiceKey::BackSpace: return "Backspace";
+            case ServiceKey::Linefeed: return "Linefeed";
+            case ServiceKey::Clear: return "Clear";
+            case ServiceKey::Pause: return "Pause";
+            case ServiceKey::ScrollLock: return "ScrollLock";
+            case ServiceKey::SysReq: return "SysReq";
+            case ServiceKey::Escape: return "Escape";
+            case ServiceKey::Delete: return "Delete";
+
+            case ServiceKey::Home: return "Home";
+            case ServiceKey::Left: return "Left";
+            case ServiceKey::Up: return "Up";
+            case ServiceKey::Right: return "Right";
+            case ServiceKey::Down: return "Down";
+            case ServiceKey::PageUp: return "PageUp";
+            case ServiceKey::PageDown: return "PageDown";
+            case ServiceKey::End: return "End";
+            case ServiceKey::Begin: return "Begin";
+
+            case ServiceKey::Select: return "Select";
+            case ServiceKey::Print: return "Print";
+            case ServiceKey::Execute: return "Execute";
+            case ServiceKey::Insert: return "Insert";
+            case ServiceKey::Undo: return "Undo";
+            case ServiceKey::Redo: return "Redo";
+            case ServiceKey::Menu: return "Menu";
+            case ServiceKey::Find: return "Find";
+            case ServiceKey::Cancel: return "Cancel";
+            case ServiceKey::Help: return "Help";
+            case ServiceKey::Break: return "Break";
+            case ServiceKey::ModeSwitch: return "ModeSwitch";
+            case ServiceKey::NumLock: return "NumLock";
+
+            case ServiceKey::F1: return "F1";
+            case ServiceKey::F2: return "F2";
+            case ServiceKey::F3: return "F3";
+            case ServiceKey::F4: return "F4";
+            case ServiceKey::F5: return "F5";
+            case ServiceKey::F6: return "F6";
+            case ServiceKey::F7: return "F7";
+            case ServiceKey::F8: return "F8";
+            case ServiceKey::F9: return "F9";
+            case ServiceKey::F10: return "F10";
+            case ServiceKey::F11: return "F11";
+            case ServiceKey::F12: return "F12";
+
+            case ServiceKey::ShiftL: return "ShiftL";
+            case ServiceKey::ShiftR: return "ShiftR";
+            case ServiceKey::ControlL: return "ControlL";
+            case ServiceKey::ControlR: return "ControlR";
+            case ServiceKey::AltL: return "AltL";
+            case ServiceKey::AltR: return "AltR";
+            case ServiceKey::CapsLock: return "CapsLock";
+            case ServiceKey::ShiftLock: return "ShiftLock";
+            case ServiceKey::MetaL: return "MetaL";
+            case ServiceKey::MetaR: return "MetaR";
+            case ServiceKey::SuperL: return "SuperL";
+            case ServiceKey::SuperR: return "SuperR";
+            case ServiceKey::HyperL: return "HyperL";
+            case ServiceKey::HyperR: return "HyperR";
+            }
+
+            __builtin_unreachable();
+        }
+
+        [[ maybe_unused ]] std::string_view get_name(const KeypadServiceKey k)
+        {
+            switch (k)
+            {
+            case KeypadServiceKey::Space: return "Space";
+            case KeypadServiceKey::Tab: return "Tab";
+            case KeypadServiceKey::Enter: return "Enter";
+            case KeypadServiceKey::F1: return "F1";
+            case KeypadServiceKey::F2: return "F2";
+            case KeypadServiceKey::F3: return "F3";
+            case KeypadServiceKey::F4: return "F4";
+            case KeypadServiceKey::Home: return "Home";
+            case KeypadServiceKey::Left: return "Left";
+            case KeypadServiceKey::Up: return "Up";
+            case KeypadServiceKey::Right: return "Right";
+            case KeypadServiceKey::Down: return "Down";
+            case KeypadServiceKey::PageUp: return "PageUp";
+            case KeypadServiceKey::PageDown: return "PageDown";
+            case KeypadServiceKey::End: return "End";
+            case KeypadServiceKey::Begin: return "Begin";
+            case KeypadServiceKey::Insert: return "Insert";
+            case KeypadServiceKey::Delete: return "Delete";
+            case KeypadServiceKey::Decimal: return "Decimal";
+            }
+
+            __builtin_unreachable();
+        }
+
+        char get_symbol(const KeypadLatinKey k)
+        {
+            switch (k)
+            {
+            case KeypadLatinKey::Equal: return '=';
+            case KeypadLatinKey::Multiply: return '*';
+            case KeypadLatinKey::Add: return '+';
+            case KeypadLatinKey::Separator: return '.';
+            case KeypadLatinKey::Subtract: return '-';
+            case KeypadLatinKey::Divide: return '/';
+            case KeypadLatinKey::KP_0: return '0';
+            case KeypadLatinKey::KP_1: return '1';
+            case KeypadLatinKey::KP_2: return '2';
+            case KeypadLatinKey::KP_3: return '3';
+            case KeypadLatinKey::KP_4: return '4';
+            case KeypadLatinKey::KP_5: return '5';
+            case KeypadLatinKey::KP_6: return '6';
+            case KeypadLatinKey::KP_7: return '7';
+            case KeypadLatinKey::KP_8: return '8';
+            case KeypadLatinKey::KP_9: return '9';
+            }
+
+            __builtin_unreachable();
         }
     }
 
@@ -277,6 +613,205 @@ namespace ge
         }
     }
 
+    void WindowXCB::init_key_mapping(const xcb_setup_t& /*setup*/)
+    {
+//        xcb_generic_error_t* error;
+
+//        std::optional<uint8_t> keyboard_id;
+//        {
+//            const xcb_input_list_input_devices_cookie_t cookie = xcb_input_list_input_devices_unchecked
+//            (
+//                connection_
+//            );
+//            xcb_input_list_input_devices_reply_t* reply = xcb_input_list_input_devices_reply
+//            (
+//                connection_,
+//                cookie,
+//                &error
+//            );
+//            if (reply == nullptr)
+//            {
+//                std::string message = error_event_to_string(errors_ctx_, *error);
+//                free(error);
+//                throw std::runtime_error(std::move(message));
+//            }
+
+//            xcb_input_device_info_iterator_t device_info_it = xcb_input_list_input_devices_devices_iterator(reply);
+//            while (device_info_it.rem != 0)
+//            {
+//                const xcb_input_device_info_t& device_info = *device_info_it.data;
+
+//                std::cout << "device type: " << device_info.device_type << "\n"
+//                    << "device id: " << int(device_info.device_id) << "\n"
+//                    << "num class info: " << int(device_info.num_class_info) << "\n"
+//                    << "device use: " << int(device_info.device_use) << "\n" <<std::endl;
+
+//                xcb_input_device_use_t device_use = static_cast<xcb_input_device_use_t>(device_info.device_use);
+//                if (device_use == XCB_INPUT_DEVICE_USE_IS_X_KEYBOARD)
+//                {
+//                    keyboard_id.emplace(device_info.device_id);
+//                    break;
+//                }
+
+//                xcb_input_device_info_next(&device_info_it);
+//            }
+
+//            free(reply);
+//        }
+
+//        if (not keyboard_id.has_value())
+//        {
+//            std::cout << "keyboard id not found" << std::endl;
+//            return;
+//        }
+
+        // TODO: try to use xcb_get_keyboard_mapping_cookie_t (without device id)
+
+//        {
+
+//            const xcb_input_get_device_key_mapping_cookie_t cookie = xcb_input_get_device_key_mapping
+//            (
+//                connection_,
+//                *keyboard_id,
+//                setup.min_keycode,
+//                setup.max_keycode - setup.min_keycode + 1
+//            );
+//            xcb_input_get_device_key_mapping_reply_t* reply = xcb_input_get_device_key_mapping_reply
+//            (
+//                connection_,
+//                cookie,
+//                &error
+//            );
+//            if (reply == nullptr)
+//            {
+//                std::string message = error_event_to_string(errors_ctx_, *error);
+//                free(error);
+//                throw std::runtime_error(std::move(message));
+//            }
+
+//            xcb_keysym_t* keysyms = xcb_input_get_device_key_mapping_keysyms(reply);
+//            assert(keysyms != nullptr);
+
+//            const xcb_get_keyboard_mapping_cookie_t cookie = xcb_get_keyboard_mapping
+//            (
+//                connection_,
+//                setup.min_keycode,
+//                setup.max_keycode - setup.min_keycode + 1
+//            );
+//            xcb_get_keyboard_mapping_reply_t* reply = xcb_get_keyboard_mapping_reply
+//            (
+//                connection_,
+//                cookie,
+//                &error
+//            );
+//            if (reply == nullptr)
+//            {
+//                std::string message = error_event_to_string(errors_ctx_, *error);
+//                free(error);
+//                throw std::runtime_error(std::move(message));
+//            }
+//            xcb_keysym_t* keysyms = xcb_get_keyboard_mapping_keysyms(reply);
+//            assert(keysyms != nullptr);
+
+//            const size_t count = setup.max_keycode - setup.min_keycode + 1;
+//            for (size_t i = 0; i < count; ++i)
+//            {
+//                std::string s{"1234"};
+//                std::memcpy(s.data(), reinterpret_cast<char*>(&(keysyms[i])), sizeof(xcb_keysym_t));
+//                std::cout << "keysym: " << s << "\n";
+////                std::cout << "keysym: " << keysyms[i] << "\n";
+//            }
+//            std::cout << std::endl;
+//        }
+
+        key_syms_ = xcb_key_symbols_alloc(connection_);
+    }
+
+    template <ButtonEvent button_event>
+    WindowEvent handle_key_event
+    (
+        xcb_key_symbols_t* key_syms,
+        xcb_key_press_event_t& event
+    )
+    {
+        const ModifiersState modifiers{parse_modifiers(event.state)};
+        const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
+
+        // TODO: for keypad latin key use col == 1 if mod_2 if active
+        int col = 0;
+        if (modifiers.shift)
+        {
+            col = 1;
+        }
+
+        xcb_keysym_t sym = xcb_key_press_lookup_keysym(key_syms, &event, col);
+
+        std::variant
+        <
+            ServiceKey,
+            char,
+            KeypadServiceKey,
+            KeypadLatinKey,
+            uint32_t
+        > parsed = match_key(sym);
+
+        WindowEvent result = std::visit
+        (
+            overloaded
+            {
+                [&] (const ServiceKey k) -> WindowEvent
+                {
+                    return KeyEvent<KeyType::Service, button_event>
+                    {
+                        .key = k,
+                        .modifiers = modifiers,
+                        .timestamp = timestamp
+                    };
+                },
+                [&] (const char c) -> WindowEvent
+                {
+                    return KeyEvent<KeyType::Latin, button_event>
+                    {
+                        .key = c,
+                        .modifiers = modifiers,
+                        .timestamp = timestamp
+                    };
+                },
+                [&] (const KeypadServiceKey k) -> WindowEvent
+                {
+                    return KeyEvent<KeyType::KeypadService, button_event>
+                    {
+                        .key = k,
+                        .modifiers = modifiers,
+                        .timestamp = timestamp
+                    };
+                },
+                [&] (const KeypadLatinKey k) -> WindowEvent
+                {
+                    return KeyEvent<KeyType::KeypadLatin, button_event>
+                    {
+                        .symbol = get_symbol(k),
+                        .key = k,
+                        .modifiers = modifiers,
+                        .timestamp = timestamp
+                    };
+                },
+                [&] (const uint32_t v) -> WindowEvent
+                {
+                    return KeyEvent<KeyType::Unknown, button_event>
+                    {
+                        .key = v,
+                        .modifiers = modifiers,
+                        .timestamp = timestamp
+                    };
+                }
+            },
+            parsed
+        );
+
+        return result;
+    }
+
     WindowXCB::WindowXCB
     (
         const WindowSize& size
@@ -301,6 +836,9 @@ namespace ge
         }
 
         const xcb_setup_t* const setup = xcb_get_setup(connection_);
+
+        init_key_mapping(*setup);
+
         xcb_screen_iterator_t screen_iterator = xcb_setup_roots_iterator(setup);
 
         while (screen_index-- > 0)
@@ -391,6 +929,7 @@ namespace ge
         }
 
         xcb_destroy_window(connection_, handle_);
+        xcb_key_symbols_free(key_syms_);
         xcb_errors_context_free(errors_ctx_);
         xcb_disconnect(connection_);
     }
@@ -524,12 +1063,14 @@ namespace ge
             }
             case XCB_KEY_PRESS:
             {
-                const auto key_release_event = reinterpret_cast<const xcb_key_release_event_t*>(event);
-                handle_key_press_event(*key_release_event);
+                auto key_press_event = reinterpret_cast<xcb_key_press_event_t*>(event);
+                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(key_syms_, *key_press_event));
                 break;
             }
             case XCB_KEY_RELEASE:
             {
+                auto key_release_event = reinterpret_cast<xcb_key_release_event_t*>(event);
+                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(key_syms_, *key_release_event));
                 break;
             }
             }
@@ -538,7 +1079,7 @@ namespace ge
 
             if (error_message.has_value())
             {
-                throw std::runtime_error(*error_message);
+                throw std::runtime_error(*std::move(error_message));
             }
 
             event = xcb_poll_for_event(connection_);

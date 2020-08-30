@@ -35,6 +35,10 @@ class GraphicsEngineConan(ConanFile):
         self.options["xdmcp"].lto = self.options.lto
         self.options["xcb"].lto = self.options.lto
         self.options["xcb-util-wm"].lto = self.options.lto
+        self.options["xcb-util-errors"].lto = self.options.lto
+        self.options["xcb-util-keysyms"].lto = self.options.lto
+
+        self.options["xcb"].with_xinput = True
 
         self.options["xcb"].shared = True
         self.options["xau"].shared = True
@@ -49,6 +53,9 @@ class GraphicsEngineConan(ConanFile):
             self.requires.add("xcb/1.14", private=False)
             self.requires.add("xcb-util/0.4.0", private=False)
             self.requires.add("xcb-util-wm/0.4.1", private=False)
+            self.requires.add("xcb-util-errors/1.0", private=False)
+            self.requires.add("xcb-util-keysyms/0.4.0", private=False)
+            self.requires.add("xorgproto/2019.2", private=False)
 
         if self.options.with_gtests:
             self.requires.add("gtest/1.10.0 ", private=True)
