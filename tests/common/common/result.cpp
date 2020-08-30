@@ -63,18 +63,18 @@ namespace
         >
     > fill_vector
     (
-        Vector<float>& vec,
-        const float value,
-        const size_t count
+        Vector<float>& /*vec*/,
+        const float /*value*/,
+        const size_t /*count*/
     )
     {
-        for (size_t i = 0; i < count; ++i)
-        {
-            if (auto errors = vec.push_back_to_reserved(value); errors.is_some())
-            {
-                return errors;
-            }
-        }
+//        for (size_t i = 0; i < count; ++i)
+//        {
+//            if (auto errors = vec.push_back_to_reserved(value); errors.is_some())
+//            {
+//                return errors;
+//            }
+//        }
 
         return none;
     }

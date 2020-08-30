@@ -43,9 +43,46 @@ namespace ge
     template <typename U>
     Result<T, Err>::Result(U u) noexcept
         requires
-            std::is_nothrow_convertible_v<U, Err>
+            std::is_nothrow_constructible_v<Err, U>
         : tag{result_tag::err}
         , storage{err_tag{}, Err{std::move(u)}}
+    {
+    }
+
+    template <typename T, typename Err>
+    template <typename... OtherErr>
+    Result<T, Err>::Result(Result<T, Errors<OtherErr...>>&& other) noexcept
+        requires
+            (... and std::is_nothrow_move_constructible_v<Err, OtherErr>)
+        : tag{other.tag}
+        , storage
+        {
+            [this, &other] () mutable
+            {
+                switch (tag)
+                {
+                case result_tag::ok:
+                {
+                    return Storage{ok_tag{}, std::move(other.storage.ok)};
+                }
+                case result_tag::err:
+                {
+                    return Storage
+                    {
+                        err_tag{},
+                        std::move(other.storage.err).
+                            match
+                            (
+                                [] (auto&& v) noexcept
+                                {
+                                    return Err{std::move(v)};
+                                }
+                            )
+                    };
+                }
+                }
+            } ()
+        }
     {
     }
 

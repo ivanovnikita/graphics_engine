@@ -7,6 +7,8 @@ namespace ge
 {
     struct Ok final {};
 
+    constexpr Ok ok;
+
     template <typename OkT, typename PossibleErrors>
     class Result final
     {
@@ -25,7 +27,12 @@ namespace ge
         template <typename U>
         Result(U u) noexcept
             requires
-                std::is_nothrow_convertible_v<U, Err>;
+                std::is_nothrow_constructible_v<Err, U>;
+
+        template <typename... OtherErr>
+        Result(Result<T, Errors<OtherErr...>>&& other) noexcept
+            requires
+                (... and std::is_nothrow_move_constructible_v<Err, OtherErr>);
 
         ~Result() noexcept
             requires

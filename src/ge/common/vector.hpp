@@ -107,8 +107,9 @@ namespace ge
             Errors<ViewError>
         > view(size_t ind_from) const noexcept;
 
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
             Errors<Allocator::AllocationError>
         > reserve
         (
@@ -118,8 +119,22 @@ namespace ge
             requires
                 std::is_nothrow_move_constructible_v<T>;
 
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
+            Errors<Allocator::AllocationError>
+        > resize
+        (
+            Allocator&,
+            size_t count
+        ) noexcept
+            requires
+                std::is_nothrow_move_constructible_v<T> and
+                std::is_nothrow_default_constructible_v<T>;
+
+        [[ nodiscard ]] Result
+        <
+            Ok,
             Errors<Allocator::AllocationError>
         > push_back
         (
@@ -130,8 +145,9 @@ namespace ge
                 std::is_nothrow_move_constructible_v<T>;
 
         template <typename... Args>
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
             Errors<Allocator::AllocationError>
         > construct_at_end
         (
@@ -149,16 +165,18 @@ namespace ge
             static constexpr std::string_view error_message{"reserved space is not so big as required"};
         };
 
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
             Errors<PushToReservedError>
         > push_back_to_reserved(T) noexcept
             requires
                 std::is_nothrow_move_constructible_v<T>;
 
         template <typename... Args>
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
             Errors<PushToReservedError>
         > construct_at_reserved_end(Args&&...) noexcept
             requires
@@ -201,8 +219,9 @@ namespace ge
             size_t capacity
         ) noexcept;
 
-        [[ nodiscard ]] Option
+        [[ nodiscard ]] Result
         <
+            Ok,
             Errors<Allocator::AllocationError>
         > reserve_for_new_one(Allocator&) noexcept
             requires

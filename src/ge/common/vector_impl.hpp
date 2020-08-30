@@ -194,7 +194,7 @@ namespace ge
                 }
 
                 T* memory = reinterpret_cast<T*>(storage.get());
-                return memory[ind];
+                return std::ref(memory[ind]);
             },
             [&ind] () noexcept -> R
             {
@@ -335,7 +335,7 @@ namespace ge
     }
 
     template <typename T>
-    [[ nodiscard ]] Option<Errors<Allocator::AllocationError>> Vector<T>::reserve
+    [[ nodiscard ]] Result<Ok, Errors<Allocator::AllocationError>> Vector<T>::reserve
     (
         Allocator& allocator,
         const size_t count
@@ -345,7 +345,7 @@ namespace ge
     {
         if (capacity_ >= count)
         {
-            return none;
+            return ok;
         }
 
         return allocator.allocate(count * sizeof(T))
@@ -375,8 +375,63 @@ namespace ge
     }
 
     template <typename T>
-    [[ nodiscard ]] Option
+    [[ nodiscard ]] Result
     <
+        Ok,
+        Errors<Allocator::AllocationError>
+    > Vector<T>::resize
+    (
+        Allocator& allocator,
+        const size_t count
+    ) noexcept
+        requires
+            std::is_nothrow_move_constructible_v<T> and
+            std::is_nothrow_default_constructible_v<T>
+    {
+        if (size_ == count)
+        {
+            return ok;
+        }
+
+        if (size_ > count)
+        {
+            storage_.match
+            (
+                [this, count] (Allocator::Ptr& storage) noexcept
+                {
+                    T* memory = reinterpret_cast<T*>(storage.get());
+                    for (size_t i = count; i < size_; ++i)
+                    {
+                        std::destroy_at(&memory[i]);
+                    }
+                    size_ = count;
+                },
+                [] () noexcept
+                {
+                    assert(false);
+                }
+            );
+            return ok;
+        }
+
+        return reserve(allocator, count)
+            .then
+            (
+                [this] (Ok) noexcept
+                {
+                    while (size_ != capacity_)
+                    {
+                        [[ maybe_unused ]] auto r = construct_at_reserved_end();
+                        assert(r.is_ok());
+                    }
+                }
+            );
+    }
+
+    template <typename T>
+    [[ nodiscard ]] Result
+    <
+        Ok,
         Errors<Allocator::AllocationError>
     > Vector<T>::reserve_for_new_one(Allocator& allocator) noexcept
         requires
@@ -384,15 +439,16 @@ namespace ge
     {
         if (size_ + 1 <= capacity_)
         {
-            return none;
+            return ok;
         }
 
         return reserve(allocator, 2 * size_);
     }
 
     template <typename T>
-    [[ nodiscard ]] Option
+    [[ nodiscard ]] Result
     <
+        Ok,
         Errors<Allocator::AllocationError>
     > Vector<T>::push_back
     (
@@ -402,37 +458,34 @@ namespace ge
         requires
             std::is_nothrow_move_constructible_v<T>
     {
-        auto alloc_error = reserve_for_new_one(allocator);
-
-        alloc_error.match_none
-        (
-            [this, &v] () noexcept
-            {
-                storage_.match
-                (
-                    [this, &v] (const Allocator::Ptr& ptr) noexcept
-                    {
-                        T* memory = reinterpret_cast<T*>(ptr.get());
-                        construct_at<T>(&memory[size_], std::move(v));
-                        ++size_;
-                    },
-                    [] () noexcept
-                    {
-                        assert(false);
-                    }
-                );
-            }
-        );
-
-        assert(size_ <= capacity_);
-
-        return alloc_error;
+        return reserve_for_new_one(allocator)
+            .then
+            (
+                [this, &v] (Ok) noexcept
+                {
+                    storage_.match
+                    (
+                        [this, &v] (const Allocator::Ptr& ptr) noexcept
+                        {
+                            T* memory = reinterpret_cast<T*>(ptr.get());
+                            construct_at<T>(&memory[size_], std::move(v));
+                            ++size_;
+                            assert(size_ <= capacity_);
+                        },
+                        [] () noexcept
+                        {
+                            assert(false);
+                        }
+                    );
+                }
+            );
     }
 
     template <typename T>
     template <typename... Args>
-    [[ nodiscard ]] Option
+    [[ nodiscard ]] Result
     <
+        Ok,
         Errors<Allocator::AllocationError>
     > Vector<T>::construct_at_end
     (
@@ -442,36 +495,32 @@ namespace ge
         requires
             std::is_nothrow_constructible_v<T, Args...>
     {
-        auto alloc_error = reserve_for_new_one(allocator);
-
-        alloc_error.match_none
-        (
-            [this, &args...] () noexcept
-            {
-                storage_.match
-                (
-                    [this, &args...] (const Allocator::Ptr& ptr) noexcept
-                    {
-                        T* memory = reinterpret_cast<T*>(ptr.get());
-                        construct_at<T>(&memory[size_], std::move(args)...);
-                        ++size_;
-                    },
-                    [] () noexcept
-                    {
-                        assert(false);
-                    }
-                );
-            }
-        );
-
-        assert(size_ <= capacity_);
-
-        return alloc_error;
+        return reserve_for_new_one(allocator)
+            .then
+            (
+                [this, &args...] (Ok) noexcept
+                {
+                    storage_.match
+                    (
+                        [this, &args...] (const Allocator::Ptr& ptr) noexcept
+                        {
+                            T* memory = reinterpret_cast<T*>(ptr.get());
+                            construct_at<T>(&memory[size_], std::move(args)...);
+                            ++size_;
+                            assert(size_ <= capacity_);
+                        },
+                        [] () noexcept
+                        {
+                            assert(false);
+                        }
+                    );
+                }
+            );
     }
 
     template <typename T>
     [[ nodiscard ]] auto Vector<T>::push_back_to_reserved(T v) noexcept
-        -> Option<Errors<PushToReservedError>>
+        -> Result<Ok, Errors<PushToReservedError>>
         requires
             std::is_nothrow_move_constructible_v<T>
     {
@@ -503,13 +552,13 @@ namespace ge
 
         assert(size_ <= capacity_);
 
-        return none;
+        return ok;
     }
 
     template <typename T>
     template <typename... Args>
     [[ nodiscard ]] auto Vector<T>::construct_at_reserved_end(Args&&... args) noexcept
-        -> Option<Errors<PushToReservedError>>
+        -> Result<Ok, Errors<PushToReservedError>>
         requires
             std::is_nothrow_constructible_v<T, Args...>
     {
@@ -541,7 +590,7 @@ namespace ge
 
         assert(size_ <= capacity_);
 
-        return none;
+        return ok;
     }
 
     template <typename T>

@@ -82,7 +82,7 @@ namespace ge::factory
 
         if (any_absent)
         {
-            GE_THROW(device_capabilities_error, error_message); // TODO: return tl::expected
+            GE_THROW(device_capabilities_error, error_message);
         }
     }
 

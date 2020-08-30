@@ -2,12 +2,134 @@
 #include "ge/render/factory/tools.hpp"
 #include "ge/render/utils/safe_cast.hpp"
 
+//#include "ge/common/allocator.h"
+//#include "ge/common/vector.hpp"
+//#include "ge/common/result.hpp"
+
 #include <vector>
 
 namespace ge::factory
 {
     namespace
     {
+//        template <typename T>
+//        Result
+//        <
+//            Ref<Vector<T>>,
+//            Errors
+//            <
+//                Allocator::AllocationError
+//            >
+//        > resize(Vector<T>& vec, Allocator& allocator, const size_t count) noexcept
+//        {
+//            return vec.resize(allocator, count)
+//                .then
+//                (
+//                    [&vec] (Ok) noexcept
+//                    {
+//                        return std::ref(vec);
+//                    }
+//                );
+//        }
+
+//        template <typename T>
+//        Result
+//        <
+//            Ref<T>,
+//            Errors
+//            <
+//                Allocator::AllocationError
+//            >
+//        > resize_and_get_view(Vector<T>& vec, Allocator& allocator, const size_t count)
+//        {
+//            assert(count > 0);
+//            return resize(vec, allocator, count)
+//                .then
+//                (
+//                    [] (Vector<T>& vec) noexcept
+//                    {
+//                        return vec[0]
+//                            .on_error
+//                            (
+//                                [] (auto&&) noexcept -> Errors<Allocator::AllocationError>
+//                                {
+//                                    assert(false);
+//                                    __builtin_unreachable();
+//                                }
+//                            );
+//                    }
+//                );
+//        }
+
+//        Result
+//        <
+//            Vector<vk::ExtensionProperties>,
+//            Errors
+//            <
+//                Allocator::AllocationError,
+//                VkErrorOutOfHostMemory,
+//                VkErrorOutOfDeviceMemory,
+//                VkErrorLayerNotPresent,
+//                VkUnexpectedError
+//            >
+//        > enumerate_instance_extension_properties(Allocator& allocator)
+//        {
+//            Vector<vk::ExtensionProperties> properties;
+//            uint32_t property_count = 0;
+
+//            vk::Result vk_result;
+//            constexpr const char* layer_name = nullptr;
+
+//            do
+//            {
+//                vk_result = vk::enumerateInstanceExtensionProperties(layer_name, &property_count, nullptr);
+//                if ((vk_result == vk::Result::eSuccess) and property_count > 0)
+//                {
+//                    using AllocRes = Option<Errors<Allocator::AllocationError>>;
+
+//                    AllocRes alloc_result = resize_and_get_view(properties, allocator, property_count)
+//                        .match
+//                        (
+//                            [&] (vk::ExtensionProperties& front) noexcept -> AllocRes
+//                            {
+//                                vk_result = vk::enumerateInstanceExtensionProperties
+//                                (
+//                                    layer_name,
+//                                    &property_count,
+//                                    &front
+//                                );
+
+//                                if (vk_result == vk::Result::eSuccess)
+//                                {
+//                                    assert(property_count <= properties.size());
+//                                    [[ maybe_unused ]] auto alloc_result = properties.resize(allocator, property_count);
+//                                    assert(alloc_result.is_ok());
+//                                }
+
+//                                return none;
+//                            },
+//                            [] (auto&& e) noexcept -> AllocRes
+//                            {
+//                                return std::move(e);
+//                            }
+//                        );
+
+//                    if (result.is_error())
+//                    {
+//                        return result;
+//                    }
+//                }
+//            } while (vk_result == vk::Result::eIncomplete); // TODO: limit iterations
+
+//            switch (vk_result)
+//            {
+//            case vk::Result::eSuccess: return std::move(properties);
+//            case vk::Result::eErrorOutOfHostMemory: return VkErrorOutOfHostMemory{};
+//            case vk::Result::eErrorOutOfDeviceMemory: return VkErrorOutOfDeviceMemory{};
+//            default: return VkUnexpectedError{vk_result};
+//            }
+//        }
+
         std::vector<std::string> get_available_instance_extensions()
         {
             return extensions_names(vk::enumerateInstanceExtensionProperties());
@@ -57,6 +179,8 @@ namespace ge::factory
 
     vk::UniqueInstance create_instance(const options::Instance& options)
     {
+        // TODO: check available vulkan version by calling vkEnumerateInstanceVersion (from v1.1)
+
         const vk::ApplicationInfo application_info
         {
             "graphics engine"
