@@ -8,7 +8,7 @@ namespace ge::factory
 
         if (option_validation_layers.enabled)
         {
-            layers.emplace_back("VK_LAYER_LUNARG_standard_validation");
+            layers.emplace_back("VK_LAYER_KHRONOS_validation");
         }
 
         return layers;
