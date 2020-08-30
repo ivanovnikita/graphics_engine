@@ -175,10 +175,6 @@ sources_in_dir_recurse(src/ge/common common_sources)
 add_library(ge_common ${common_sources})
 target_compile_options(ge_common PRIVATE ${compile_options})
 set_target_properties(ge_common PROPERTIES ${target_properties})
-target_link_libraries(ge_common
-    PUBLIC
-        CONAN_PKG::tl-expected
-)
 target_include_directories(ge_common
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -405,4 +401,18 @@ if (${GE_BUILD_EXAMPLES})
     target_include_directories(example_graph PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
     define_source_group(example_graph)
     install(TARGETS example_graph DESTINATION examples/graph)
+
+    add_executable(example_2d_grid examples/grid/main.cpp)
+    target_compile_options(example_2d_grid PRIVATE ${compile_options})
+    set_target_properties(example_2d_grid PROPERTIES ${target_properties})
+    target_link_libraries(example_2d_grid
+        GE::render
+        GE::window
+        GE::render_loop
+        CONAN_PKG::Vulkan-Headers
+        ${std_libs}
+    )
+    target_include_directories(example_2d_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_2d_grid)
+    install(TARGETS example_2d_grid DESTINATION examples/2d_grid)
 endif()
