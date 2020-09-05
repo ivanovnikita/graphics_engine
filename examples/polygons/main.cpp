@@ -13,11 +13,17 @@
 #include <regex>
 #include <span>
 
-namespace polygons
-{
-    using C = ge::Vertex;
+using C = ge::Vertex;
+using T = ge::Polygons::Triangle;
+using L = ge::Polygons::Line;
+using Cl = ge::Color;
 
-    constexpr std::array points
+constexpr Cl WH{{1.f, 1.f, 1.f}};
+constexpr Cl BL{{0.f, 0.f, 0.f}};
+
+namespace square
+{
+    [[ maybe_unused ]] constexpr std::array points
     {
         C{{0.f, 0.f}},
         C{{1.f, 0.f}},
@@ -25,26 +31,50 @@ namespace polygons
         C{{0.f, 1.f}},
     };
 
-    using T = ge::Polygons::Triangle;
-    using L = ge::Polygons::Line;
-    using Cl = ge::Color;
-
-    constexpr Cl WH{{1.f, 1.f, 1.f}};
-    constexpr Cl BL{{0.f, 0.f, 0.f}};
-
-    constexpr std::array triangles
+    [[ maybe_unused ]] constexpr std::array triangles
     {
         T{{0, 1, 2}, WH},
         T{{2, 3, 0}, WH},
     };
 
-    constexpr std::array lines
+    [[ maybe_unused ]] constexpr std::array lines
     {
         L{{0, 1}, BL},
         L{{1, 2}, BL},
         L{{2, 0}, BL},
         L{{2, 3}, BL},
         L{{3, 0}, BL},
+    };
+}
+
+namespace hex
+{
+    constexpr std::array points
+    {
+        C{{0.f, 2.f}},
+        C{{1.f, 0.f}},
+        C{{3.f, 0.f}},
+        C{{4.f, 2.f}},
+        C{{3.f, 4.f}},
+        C{{1.f, 4.f}},
+    };
+
+    constexpr std::array triangles
+    {
+        T{{0, 1, 2}, WH},
+        T{{3, 4, 5}, WH},
+        T{{2, 3, 5}, WH},
+        T{{5, 0, 2}, WH},
+    };
+
+    constexpr std::array border
+    {
+        L{{0, 1}, BL},
+        L{{1, 2}, BL},
+        L{{2, 3}, BL},
+        L{{3, 4}, BL},
+        L{{4, 5}, BL},
+        L{{5, 0}, BL},
     };
 }
 
@@ -115,14 +145,14 @@ int main(int argc, char* /*argv*/[])
     {
         const ge::Polygons polygons
         {
-            polygons::points,
-            polygons::triangles,
-            polygons::lines
+            hex::points,
+            hex::triangles,
+            hex::border
         };
 
         render.set_object_to_draw(polygons);
 
-        const glm::vec2 camera_pos = camera_on_center(polygons::points);
+        const glm::vec2 camera_pos = camera_on_center(hex::points);
         render.set_camera_pos(camera_pos);
     }
 
