@@ -324,4 +324,74 @@ namespace ge::factory
 
         return pipeline;
     }
+
+    vk::UniquePipeline lines_pipeline
+    (
+        const vk::Device& logical_device,
+        const vk::RenderPass& render_pass,
+        const storage::Shaders& shaders_storage,
+        const vk::Extent2D& extent,
+        const vk::PipelineLayout& pipeline_layout
+    )
+    {
+        const std::vector<vk::PipelineShaderStageCreateInfo> shader_stage_create_info = get_shader_stage_create_info
+        (
+            shaders_storage
+            , ShaderName::line_2d_camera_Vertex
+        );
+
+        const std::span<const vk::VertexInputBindingDescription> binding_description = vertex_binding_description();
+        const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
+        const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
+            .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_description.size()))
+            .setPVertexBindingDescriptions(binding_description.data())
+            .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_description.size()))
+            .setPVertexAttributeDescriptions(attribute_description.data());
+
+        const auto input_assembly_info = vk::PipelineInputAssemblyStateCreateInfo()
+            .setTopology(vk::PrimitiveTopology::eLineList)
+            .setPrimitiveRestartEnable(VK_FALSE);
+
+        const vk::Viewport viewport = default_viewport(extent);
+        const vk::Rect2D scissor = default_scissor(extent);
+        const vk::PipelineViewportStateCreateInfo viewport_info = viewport_create_info(viewport, scissor);
+
+        const auto raster_info = vk::PipelineRasterizationStateCreateInfo()
+            .setDepthClampEnable(VK_FALSE)
+            .setRasterizerDiscardEnable(VK_FALSE)
+
+            // TODO: only for line-pipeline
+            .setPolygonMode(vk::PolygonMode::eLine)
+            .setLineWidth(2.0f)
+
+            .setCullMode(vk::CullModeFlagBits::eBack)
+            .setFrontFace(vk::FrontFace::eCounterClockwise)
+            .setDepthBiasEnable(VK_FALSE);
+
+        const vk::PipelineMultisampleStateCreateInfo multisample_info = multisample_create_info();
+
+        const vk::PipelineColorBlendAttachmentState blend_attachment = default_blend_attachment();
+        const vk::PipelineColorBlendStateCreateInfo blend_state_info = blend_create_info(blend_attachment);
+
+        const auto pipeline_create_info = vk::GraphicsPipelineCreateInfo()
+            .setStageCount(safe_cast<uint32_t>(shader_stage_create_info.size()))
+            .setPStages(shader_stage_create_info.data())
+            .setPVertexInputState(&vertex_input_info)
+            .setPInputAssemblyState(&input_assembly_info)
+            .setPViewportState(&viewport_info)
+            .setPRasterizationState(&raster_info)
+            .setPMultisampleState(&multisample_info)
+            .setPColorBlendState(&blend_state_info)
+            .setLayout(pipeline_layout)
+            .setRenderPass(render_pass)
+            .setSubpass(0);
+
+        vk::UniquePipeline pipeline = logical_device.createGraphicsPipelineUnique
+        (
+            vk::PipelineCache()
+          , pipeline_create_info
+        );
+
+        return pipeline;
+    }
 }

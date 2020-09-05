@@ -223,7 +223,15 @@ namespace ge
             *logical_device_
             , *camera_2d_descriptor_set_layout_
         );
-        polygons_pipeline_ = factory::polygon_pipeline
+        triangles_pipeline_ = factory::polygon_pipeline
+        (
+            *logical_device_
+          , *render_pass_
+          , shaders_storage_
+          , surface_extent_
+          , *camera_2d_pipeline_layout_
+        );
+        lines_pipeline_ = factory::lines_pipeline
         (
             *logical_device_
           , *render_pass_
@@ -257,7 +265,8 @@ namespace ge
         );
         command_buffers_.clear();
         framebuffers_.clear();
-        polygons_pipeline_.reset();
+        triangles_pipeline_.reset();
+        lines_pipeline_.reset();
         camera_2d_pipeline_layout_.reset();
         render_pass_.reset();
 
@@ -326,7 +335,8 @@ namespace ge
             , *render_pass_
             , surface_extent_
             , surface_background_color_
-            , *polygons_pipeline_
+            , *triangles_pipeline_
+            , *lines_pipeline_
             , *camera_2d_pipeline_layout_
             , descriptor_sets_
             , polygon_in_device_mem_

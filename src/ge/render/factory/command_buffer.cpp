@@ -131,13 +131,14 @@ namespace ge::factory
         const vk::RenderPass& render_pass,
         const vk::Extent2D& extent,
         const vk::ClearColorValue& background_color,
-        const vk::Pipeline& polygons_pipeline,
+        const vk::Pipeline& triangles_pipeline,
+        const vk::Pipeline& lines_pipeline,
         const vk::PipelineLayout& pipeline_layout,
         const std::span<const vk::DescriptorSet> descriptor_sets,
         const PolygonsInDeviceMemory& polygons
     )
     {
-assert(framebuffes.size() == descriptor_sets.size());
+        assert(framebuffes.size() == descriptor_sets.size());
 
         const auto alloc_info = vk::CommandBufferAllocateInfo{}
             .setCommandPool(command_pool)
@@ -169,7 +170,7 @@ assert(framebuffes.size() == descriptor_sets.size());
             render_pass_info.setFramebuffer(*framebuffes[i]);
             command_buffer.beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
-            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, polygons_pipeline);
+            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, triangles_pipeline);
 
             const std::array buffers{*polygons.buffer, *polygons.buffer};
 
@@ -179,17 +180,18 @@ assert(framebuffes.size() == descriptor_sets.size());
             constexpr uint32_t first_binding{0};
             constexpr uint32_t binding_count{buffers.size()};
 
-            const std::array<vk::DeviceSize, 2> vertices_offsets
+            // triangles
+            const std::array<vk::DeviceSize, 2> triangle_offsets
             {
-                polygons.vertice_points_offset
-                , polygons.vertice_colors_offset
+                polygons.triangle_points_offset
+                , polygons.triangle_colors_offset
             };
             command_buffer.bindVertexBuffers
             (
                 first_binding
                 , binding_count
                 , buffers.data()
-                , vertices_offsets.data()
+                , triangle_offsets.data()
             );
 
             command_buffer.bindDescriptorSets
@@ -203,11 +205,35 @@ assert(framebuffes.size() == descriptor_sets.size());
                 , nullptr // dynamic offsets
             );
 
-            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, polygons_pipeline);
+            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, triangles_pipeline);
 
             command_buffer.draw
             (
-                safe_cast<uint32_t>(polygons.vertice_points_count)
+                safe_cast<uint32_t>(polygons.triangle_points_count)
+                , instance_count
+                , first_vertex
+                , first_instance
+            );
+
+            // lines
+            const std::array<vk::DeviceSize, 2> line_offsets
+            {
+                polygons.line_points_offset
+                , polygons.line_colors_offset
+            };
+            command_buffer.bindVertexBuffers
+            (
+                first_binding
+                , binding_count
+                , buffers.data()
+                , line_offsets.data()
+            );
+
+            command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, lines_pipeline);
+
+            command_buffer.draw
+            (
+                safe_cast<uint32_t>(polygons.line_points_count)
                 , instance_count
                 , first_vertex
                 , first_instance

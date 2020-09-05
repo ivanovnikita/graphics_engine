@@ -235,12 +235,15 @@ namespace ge::factory
         static_assert(sizeof(Vertex) == 2 * sizeof(float));
         static_assert(sizeof(Color) == 3 * sizeof(float));
 
-        const size_t vertice_points_memory_usage = 3 * sizeof(Vertex) * polygons.triangles.size();
-        const size_t vertice_colors_memory_usage = 3 * sizeof(Color) * polygons.triangles.size();
+        const size_t triangle_points_memory_usage = 3 * sizeof(Vertex) * polygons.triangles.size();
+        const size_t triangle_colors_memory_usage = 3 * sizeof(Color) * polygons.triangles.size();
+        const size_t line_points_memory_usage = 2 * sizeof(Vertex) * polygons.lines.size();
+        const size_t line_colors_memory_usage = 2 * sizeof(Color) * polygons.lines.size();
 
         const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
         (
-            vertice_points_memory_usage + vertice_colors_memory_usage
+            triangle_points_memory_usage + triangle_colors_memory_usage +
+            line_points_memory_usage + line_colors_memory_usage
         );
 
         auto [staging_buffer, staging_memory] = factory::create_buffer
@@ -273,11 +276,29 @@ namespace ge::factory
             }
         }
 
+        for (const Polygons::Line& line : polygons.lines)
+        {
+            for (const size_t ind : line.inds)
+            {
+                std::memcpy(current_offset, &polygons.points[ind], sizeof(Vertex));
+                current_offset += sizeof(Vertex);
+            }
+        }
+
         for (const Polygons::Triangle& triangle : polygons.triangles)
         {
             for (size_t i = 0; i < 3; ++i)
             {
                 std::memcpy(current_offset, &triangle.color, sizeof(Color));
+                current_offset += sizeof(Color);
+            }
+        }
+
+        for (const Polygons::Line& line : polygons.lines)
+        {
+            for (size_t i = 0; i < 2; ++i)
+            {
+                std::memcpy(current_offset, &line.color, sizeof(Color));
                 current_offset += sizeof(Color);
             }
         }
@@ -309,9 +330,12 @@ namespace ge::factory
         PolygonsInDeviceMemory result;
         result.memory = std::move(memory);
         result.buffer = std::move(buffer);
-        result.vertice_points_offset = 0;
-        result.vertice_colors_offset = result.vertice_points_offset + vertice_points_memory_usage;
-        result.vertice_points_count = 3 * polygons.triangles.size();
+        result.triangle_points_offset = 0;
+        result.line_points_offset = result.triangle_points_offset + triangle_points_memory_usage;
+        result.triangle_colors_offset = result.line_points_offset + line_points_memory_usage;
+        result.line_colors_offset = result.triangle_colors_offset + triangle_colors_memory_usage;
+        result.triangle_points_count = 3 * polygons.triangles.size();
+        result.line_points_count = 2 * polygons.lines.size();
 
         return result;
     }

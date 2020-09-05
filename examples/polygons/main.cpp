@@ -26,15 +26,25 @@ namespace polygons
     };
 
     using T = ge::Polygons::Triangle;
+    using L = ge::Polygons::Line;
     using Cl = ge::Color;
 
-    [[ maybe_unused ]] constexpr Cl BL{{0.f, 0.f, 0.f}};
     constexpr Cl WH{{1.f, 1.f, 1.f}};
+    constexpr Cl BL{{0.f, 0.f, 0.f}};
 
-    constexpr std::array vertices
+    constexpr std::array triangles
     {
         T{{0, 1, 2}, WH},
         T{{2, 3, 0}, WH},
+    };
+
+    constexpr std::array lines
+    {
+        L{{0, 1}, BL},
+        L{{1, 2}, BL},
+        L{{2, 0}, BL},
+        L{{2, 3}, BL},
+        L{{3, 0}, BL},
     };
 }
 
@@ -106,7 +116,8 @@ int main(int argc, char* /*argv*/[])
         const ge::Polygons polygons
         {
             polygons::points,
-            polygons::vertices
+            polygons::triangles,
+            polygons::lines
         };
 
         render.set_object_to_draw(polygons);

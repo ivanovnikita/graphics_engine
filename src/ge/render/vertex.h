@@ -46,8 +46,15 @@ namespace ge
             Color color;
         };
 
+        struct Line final
+        {
+            std::array<size_t, 2> inds;
+            Color color;
+        };
+
         std::span<const Vertex> points;
         std::span<const Triangle> triangles;
+        std::span<const Line> lines;
     };
 
     template <typename T>

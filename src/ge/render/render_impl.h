@@ -63,7 +63,8 @@ namespace ge
         std::vector<vk::DescriptorSet>      descriptor_sets_;
 
         vk::UniqueRenderPass                render_pass_;
-        vk::UniquePipeline                  polygons_pipeline_;
+        vk::UniquePipeline                  triangles_pipeline_;
+        vk::UniquePipeline                  lines_pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
 
         factory::PolygonsInDeviceMemory     polygon_in_device_mem_;

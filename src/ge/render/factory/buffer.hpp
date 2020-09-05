@@ -75,17 +75,21 @@ namespace ge::factory
 
     /*
         Polygons in memory:
-        [Points: [vec2; vec2], ...]
-        [vertice points: [vec2, ...]]
-        [vertice colors: [u8vec, ...]]
+        [triangle points: [[vec2; vec2; vec2], ...]]
+        [line points: [[vec2; vec2], ...]]
+        [triangle colors: [[u8vec; u8vec; u8vec], ...]]
+        [line colors: [[u8vec; u8vec], ...]]
     */
     struct PolygonsInDeviceMemory final
     {
         vk::UniqueDeviceMemory memory;
         vk::UniqueBuffer buffer;
-        vk::DeviceSize vertice_points_offset;
-        vk::DeviceSize vertice_colors_offset;
-        size_t vertice_points_count;
+        vk::DeviceSize triangle_points_offset;
+        vk::DeviceSize line_points_offset;
+        vk::DeviceSize triangle_colors_offset;
+        vk::DeviceSize line_colors_offset;
+        size_t triangle_points_count;
+        size_t line_points_count;
     };
 
     PolygonsInDeviceMemory load_polygons_to_device

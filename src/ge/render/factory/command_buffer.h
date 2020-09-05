@@ -33,7 +33,8 @@ namespace ge::factory
         const vk::RenderPass&,
         const vk::Extent2D&,
         const vk::ClearColorValue& background_color,
-        const vk::Pipeline& polygons_pipeline,
+        const vk::Pipeline& triangles_pipeline,
+        const vk::Pipeline& lines_pipeline,
         const vk::PipelineLayout& pipeline_layout,
         const std::span<const vk::DescriptorSet> descriptor_sets,
         const PolygonsInDeviceMemory&
