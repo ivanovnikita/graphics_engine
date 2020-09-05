@@ -71,6 +71,32 @@ namespace ge::factory
 
     // TODO: add func for partial update of colors
     // TODO: add func for full update of colors
+
+
+    /*
+        Polygons in memory:
+        [Points: [vec2; vec2], ...]
+        [vertice points: [vec2, ...]]
+        [vertice colors: [u8vec, ...]]
+    */
+    struct PolygonsInDeviceMemory final
+    {
+        vk::UniqueDeviceMemory memory;
+        vk::UniqueBuffer buffer;
+        vk::DeviceSize vertice_points_offset;
+        vk::DeviceSize vertice_colors_offset;
+        size_t vertice_points_count;
+    };
+
+    PolygonsInDeviceMemory load_polygons_to_device
+    (
+        const vk::PhysicalDevice&,
+        const vk::Device&,
+        const vk::CommandPool&,
+        const vk::Queue& transfer,
+        const vk::Fence& transfer_finished,
+        const Polygons&
+    );
 }
 
 #include "ge/render/factory/buffer_impl.hpp"

@@ -21,9 +21,9 @@ namespace ge
 
     Render::~Render() = default;
 
-    void Render::set_object_to_draw(const Graph& graph)
+    void Render::set_object_to_draw(const Polygons& polygons)
     {
-        impl_->set_object_to_draw(graph);
+        impl_->set_object_to_draw(polygons);
     }
 
     void Render::draw_frame()

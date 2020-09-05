@@ -18,7 +18,7 @@ namespace ge
         );
         ~RenderImpl();
 
-        void set_object_to_draw(const Graph&);
+        void set_object_to_draw(const Polygons&);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
@@ -63,11 +63,10 @@ namespace ge
         std::vector<vk::DescriptorSet>      descriptor_sets_;
 
         vk::UniqueRenderPass                render_pass_;
-        vk::UniquePipeline                  graph_acrs_pipeline_;
-        vk::UniquePipeline                  graph_vertices_pipeline_;
+        vk::UniquePipeline                  polygons_pipeline_;
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
 
-        factory::GraphInDeviceMemory        graph_in_device_mem_;
+        factory::PolygonsInDeviceMemory     polygon_in_device_mem_;
 
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;

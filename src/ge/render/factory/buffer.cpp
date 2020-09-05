@@ -221,4 +221,98 @@ namespace ge::factory
 
         return result;
     }
+
+    PolygonsInDeviceMemory load_polygons_to_device
+    (
+        const vk::PhysicalDevice& physical_device,
+        const vk::Device& logical_device,
+        const vk::CommandPool& command_pool,
+        const vk::Queue& transfer,
+        const vk::Fence& transfer_finished,
+        const Polygons& polygons
+    )
+    {
+        static_assert(sizeof(Vertex) == 2 * sizeof(float));
+        static_assert(sizeof(Color) == 3 * sizeof(float));
+
+        const size_t vertice_points_memory_usage = 3 * sizeof(Vertex) * polygons.triangles.size();
+        const size_t vertice_colors_memory_usage = 3 * sizeof(Color) * polygons.triangles.size();
+
+        const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
+        (
+            vertice_points_memory_usage + vertice_colors_memory_usage
+        );
+
+        auto [staging_buffer, staging_memory] = factory::create_buffer
+        (
+            physical_device
+            , logical_device
+            , buffer_size
+            , vk::BufferUsageFlagBits::eTransferSrc
+            , vk::MemoryPropertyFlagBits::eHostVisible
+            | vk::MemoryPropertyFlagBits::eHostCoherent
+        );
+
+        constexpr vk::DeviceSize offset = 0;
+        [[maybe_unused]] void* memory_start = logical_device.mapMemory
+        (
+            *staging_memory
+            , offset
+            , buffer_size
+            , vk::MemoryMapFlags{}
+        );
+
+        uint8_t* current_offset = static_cast<uint8_t*>(memory_start);
+
+        for (const Polygons::Triangle& triangle : polygons.triangles)
+        {
+            for (const size_t ind : triangle.inds)
+            {
+                std::memcpy(current_offset, &polygons.points[ind], sizeof(Vertex));
+                current_offset += sizeof(Vertex);
+            }
+        }
+
+        for (const Polygons::Triangle& triangle : polygons.triangles)
+        {
+            for (size_t i = 0; i < 3; ++i)
+            {
+                std::memcpy(current_offset, &triangle.color, sizeof(Color));
+                current_offset += sizeof(Color);
+            }
+        }
+
+        assert(current_offset == static_cast<uint8_t*>(memory_start) + buffer_size);
+
+        logical_device.unmapMemory(*staging_memory);
+
+        auto [buffer, memory] = factory::create_buffer
+        (
+            physical_device
+          , logical_device
+          , buffer_size
+          , vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer
+          , vk::MemoryPropertyFlagBits::eDeviceLocal
+        );
+
+        copy_buffer
+        (
+            logical_device
+            , command_pool
+            , transfer
+            , transfer_finished
+            , *staging_buffer
+            , *buffer
+            , buffer_size
+        );
+
+        PolygonsInDeviceMemory result;
+        result.memory = std::move(memory);
+        result.buffer = std::move(buffer);
+        result.vertice_points_offset = 0;
+        result.vertice_colors_offset = result.vertice_points_offset + vertice_points_memory_usage;
+        result.vertice_points_count = 3 * polygons.triangles.size();
+
+        return result;
+    }
 }

@@ -223,15 +223,7 @@ namespace ge
             *logical_device_
             , *camera_2d_descriptor_set_layout_
         );
-        graph_acrs_pipeline_ = factory::graph_arcs_pipeline
-        (
-            *logical_device_
-          , *render_pass_
-          , shaders_storage_
-          , surface_extent_
-          , *camera_2d_pipeline_layout_
-        );
-        graph_vertices_pipeline_ = factory::graph_vertices_pipeline
+        polygons_pipeline_ = factory::polygon_pipeline
         (
             *logical_device_
           , *render_pass_
@@ -265,8 +257,7 @@ namespace ge
         );
         command_buffers_.clear();
         framebuffers_.clear();
-        graph_acrs_pipeline_.reset();
-        graph_vertices_pipeline_.reset();
+        polygons_pipeline_.reset();
         camera_2d_pipeline_layout_.reset();
         render_pass_.reset();
 
@@ -298,16 +289,16 @@ namespace ge
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
-    void Render::RenderImpl::set_object_to_draw(const Graph& graph)
+    void Render::RenderImpl::set_object_to_draw(const Polygons& polygons)
     {
-        graph_in_device_mem_ = factory::load_graph_to_device
+        polygon_in_device_mem_ = factory::load_polygons_to_device
         (
             physical_device_
             , *logical_device_
             , *command_pool_
             , queues_.graphics // TODO: transfer queue?
             , *transfer_finished_fence_
-            , graph
+            , polygons
         );
 
         create_command_buffers();
@@ -327,7 +318,7 @@ namespace ge
             command_buffers_.clear();
         }
 
-        command_buffers_ = factory::draw_graph_commands
+        command_buffers_ = factory::draw_polygons_commands
         (
             *logical_device_
             , *command_pool_
@@ -335,11 +326,10 @@ namespace ge
             , *render_pass_
             , surface_extent_
             , surface_background_color_
-            , *graph_acrs_pipeline_
-            , *graph_vertices_pipeline_
+            , *polygons_pipeline_
             , *camera_2d_pipeline_layout_
             , descriptor_sets_
-            , graph_in_device_mem_
+            , polygon_in_device_mem_
         );
     }
 

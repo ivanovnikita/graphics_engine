@@ -40,7 +40,7 @@ namespace ge
         );
         ~Render();
 
-        void set_object_to_draw(const Graph&);
+        void set_object_to_draw(const Polygons&);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 

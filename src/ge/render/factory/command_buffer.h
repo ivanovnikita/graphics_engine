@@ -24,4 +24,18 @@ namespace ge::factory
         , const std::span<const vk::DescriptorSet> descriptor_sets
         , const GraphInDeviceMemory&
     );
+
+    std::vector<vk::CommandBuffer> draw_polygons_commands
+    (
+        const vk::Device&,
+        const vk::CommandPool&,
+        const std::span<const vk::UniqueFramebuffer>&,
+        const vk::RenderPass&,
+        const vk::Extent2D&,
+        const vk::ClearColorValue& background_color,
+        const vk::Pipeline& polygons_pipeline,
+        const vk::PipelineLayout& pipeline_layout,
+        const std::span<const vk::DescriptorSet> descriptor_sets,
+        const PolygonsInDeviceMemory&
+    );
 }

@@ -395,31 +395,17 @@ if (${GE_BUILD_TESTS})
 endif()
 
 if (${GE_BUILD_EXAMPLES})
-    add_executable(example_graph examples/graph/main.cpp)
-    target_compile_options(example_graph PRIVATE ${compile_options})
-    set_target_properties(example_graph PROPERTIES ${target_properties})
-    target_link_libraries(example_graph
+    add_executable(example_2d_polygons examples/polygons/main.cpp)
+    target_compile_options(example_2d_polygons PRIVATE ${compile_options})
+    set_target_properties(example_2d_polygons PROPERTIES ${target_properties})
+    target_link_libraries(example_2d_polygons
         GE::render
         GE::window
         GE::render_loop
         CONAN_PKG::Vulkan-Headers
         ${std_libs}
     )
-    target_include_directories(example_graph PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
-    define_source_group(example_graph)
-    install(TARGETS example_graph DESTINATION examples/graph)
-
-    add_executable(example_2d_grid examples/grid/main.cpp)
-    target_compile_options(example_2d_grid PRIVATE ${compile_options})
-    set_target_properties(example_2d_grid PROPERTIES ${target_properties})
-    target_link_libraries(example_2d_grid
-        GE::render
-        GE::window
-        GE::render_loop
-        CONAN_PKG::Vulkan-Headers
-        ${std_libs}
-    )
-    target_include_directories(example_2d_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
-    define_source_group(example_2d_grid)
-    install(TARGETS example_2d_grid DESTINATION examples/2d_grid)
+    target_include_directories(example_2d_polygons PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_2d_polygons)
+    install(TARGETS example_2d_polygons DESTINATION examples/2d_polygons)
 endif()

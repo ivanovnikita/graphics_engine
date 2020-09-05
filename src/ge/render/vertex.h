@@ -38,6 +38,18 @@ namespace ge
         std::span<const Arc> arcs;
     };
 
+    struct Polygons final
+    {
+        struct Triangle final
+        {
+            std::array<size_t, 3> inds;
+            Color color;
+        };
+
+        std::span<const Vertex> points;
+        std::span<const Triangle> triangles;
+    };
+
     template <typename T>
     struct Required final
     {

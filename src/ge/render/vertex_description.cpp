@@ -6,7 +6,6 @@ namespace ge
 {
     std::span<const vk::VertexInputBindingDescription> vertex_binding_description()
     {
-         // TODO: split into several bindings: points, line colors, points colors
         static const std::array descriptions
         {
             vk::VertexInputBindingDescription{}

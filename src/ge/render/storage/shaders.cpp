@@ -12,6 +12,7 @@ namespace ge::storage
 
         create_module(ShaderName::point_2d_camera_Vertex);
         create_module(ShaderName::line_2d_camera_Vertex);
+        create_module(ShaderName::polygon_2d_camera_Vertex);
         create_module(ShaderName::simple_color_Fragment);
     }
 
