@@ -99,7 +99,7 @@ namespace ge::factory
         const vk::CommandPool&,
         const vk::Queue& transfer,
         const vk::Fence& transfer_finished,
-        const Polygons&
+        const std::span<const Polygons>&
     );
 }
 

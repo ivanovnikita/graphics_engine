@@ -18,7 +18,7 @@ namespace ge
         );
         ~RenderImpl();
 
-        void set_object_to_draw(const Polygons&);
+        void set_object_to_draw(const std::span<const Polygons>&);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 

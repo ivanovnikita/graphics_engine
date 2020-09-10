@@ -298,7 +298,7 @@ namespace ge
         return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
-    void Render::RenderImpl::set_object_to_draw(const Polygons& polygons)
+    void Render::RenderImpl::set_object_to_draw(const std::span<const Polygons>& polygons)
     {
         polygon_in_device_mem_ = factory::load_polygons_to_device
         (

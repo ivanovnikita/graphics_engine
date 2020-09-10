@@ -229,16 +229,30 @@ namespace ge::factory
         const vk::CommandPool& command_pool,
         const vk::Queue& transfer,
         const vk::Fence& transfer_finished,
-        const Polygons& polygons
+        const std::span<const Polygons>& polygons
     )
     {
         static_assert(sizeof(Vertex) == 2 * sizeof(float));
         static_assert(sizeof(Color) == 3 * sizeof(float));
 
-        const size_t triangle_points_memory_usage = 3 * sizeof(Vertex) * polygons.triangles.size();
-        const size_t triangle_colors_memory_usage = 3 * sizeof(Color) * polygons.triangles.size();
-        const size_t line_points_memory_usage = 2 * sizeof(Vertex) * polygons.lines.size();
-        const size_t line_colors_memory_usage = 2 * sizeof(Color) * polygons.lines.size();
+        size_t triangle_points_memory_usage = 0;
+        size_t triangle_colors_memory_usage = 0;
+        size_t line_points_memory_usage = 0;
+        size_t line_colors_memory_usage = 0;
+
+        PolygonsInDeviceMemory result;
+        result.triangle_points_count = 0;
+        result.line_points_count = 0;
+        for (const Polygons& polygon : polygons)
+        {
+            triangle_points_memory_usage += 3 * sizeof(Vertex) * polygon.triangles.size();
+            triangle_colors_memory_usage += 3 * sizeof(Color) * polygon.triangles.size();
+            line_points_memory_usage += 2 * sizeof(Vertex) * polygon.lines.size();
+            line_colors_memory_usage += 2 * sizeof(Color) * polygon.lines.size();
+
+            result.triangle_points_count += 3 * polygon.triangles.size();
+            result.line_points_count += 2 * polygon.lines.size();
+        }
 
         const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
         (
@@ -267,39 +281,51 @@ namespace ge::factory
 
         uint8_t* current_offset = static_cast<uint8_t*>(memory_start);
 
-        for (const Polygons::Triangle& triangle : polygons.triangles)
+        for (const Polygons& polygon : polygons)
         {
-            for (const size_t ind : triangle.inds)
+            for (const Polygons::Triangle& triangle : polygon.triangles)
             {
-                std::memcpy(current_offset, &polygons.points[ind], sizeof(Vertex));
-                current_offset += sizeof(Vertex);
+                for (const size_t ind : triangle.inds)
+                {
+                    std::memcpy(current_offset, &polygon.points[ind], sizeof(Vertex));
+                    current_offset += sizeof(Vertex);
+                }
             }
         }
 
-        for (const Polygons::Line& line : polygons.lines)
+        for (const Polygons& polygon : polygons)
         {
-            for (const size_t ind : line.inds)
+            for (const Polygons::Line& line : polygon.lines)
             {
-                std::memcpy(current_offset, &polygons.points[ind], sizeof(Vertex));
-                current_offset += sizeof(Vertex);
+                for (const size_t ind : line.inds)
+                {
+                    std::memcpy(current_offset, &polygon.points[ind], sizeof(Vertex));
+                    current_offset += sizeof(Vertex);
+                }
             }
         }
 
-        for (const Polygons::Triangle& triangle : polygons.triangles)
+        for (const Polygons& polygon : polygons)
         {
-            for (size_t i = 0; i < 3; ++i)
+            for (const Polygons::Triangle& triangle : polygon.triangles)
             {
-                std::memcpy(current_offset, &triangle.color, sizeof(Color));
-                current_offset += sizeof(Color);
+                for (size_t i = 0; i < 3; ++i)
+                {
+                    std::memcpy(current_offset, &triangle.color, sizeof(Color));
+                    current_offset += sizeof(Color);
+                }
             }
         }
 
-        for (const Polygons::Line& line : polygons.lines)
+        for (const Polygons& polygon : polygons)
         {
-            for (size_t i = 0; i < 2; ++i)
+            for (const Polygons::Line& line : polygon.lines)
             {
-                std::memcpy(current_offset, &line.color, sizeof(Color));
-                current_offset += sizeof(Color);
+                for (size_t i = 0; i < 2; ++i)
+                {
+                    std::memcpy(current_offset, &line.color, sizeof(Color));
+                    current_offset += sizeof(Color);
+                }
             }
         }
 
@@ -327,15 +353,12 @@ namespace ge::factory
             , buffer_size
         );
 
-        PolygonsInDeviceMemory result;
         result.memory = std::move(memory);
         result.buffer = std::move(buffer);
         result.triangle_points_offset = 0;
         result.line_points_offset = result.triangle_points_offset + triangle_points_memory_usage;
         result.triangle_colors_offset = result.line_points_offset + line_points_memory_usage;
         result.line_colors_offset = result.triangle_colors_offset + triangle_colors_memory_usage;
-        result.triangle_points_count = 3 * polygons.triangles.size();
-        result.line_points_count = 2 * polygons.lines.size();
 
         return result;
     }

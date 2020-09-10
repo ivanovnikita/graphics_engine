@@ -150,7 +150,7 @@ int main(int argc, char* /*argv*/[])
             hex::border
         };
 
-        render.set_object_to_draw(polygons);
+        render.set_object_to_draw({&polygons, 1});
 
         const glm::vec2 camera_pos = camera_on_center(hex::points);
         render.set_camera_pos(camera_pos);

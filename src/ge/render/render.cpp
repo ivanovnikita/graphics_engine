@@ -21,7 +21,7 @@ namespace ge
 
     Render::~Render() = default;
 
-    void Render::set_object_to_draw(const Polygons& polygons)
+    void Render::set_object_to_draw(const std::span<const Polygons>& polygons)
     {
         impl_->set_object_to_draw(polygons);
     }
