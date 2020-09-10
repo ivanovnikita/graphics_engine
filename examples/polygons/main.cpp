@@ -49,7 +49,7 @@ namespace square
 
 namespace hex
 {
-    constexpr std::array points
+    const std::vector<ge::Vertex> points
     {
         C{{0.f, 2.f}},
         C{{1.f, 0.f}},
@@ -59,7 +59,7 @@ namespace hex
         C{{1.f, 4.f}},
     };
 
-    constexpr std::array triangles
+    const std::vector<ge::Polygons::Triangle> triangles
     {
         T{{0, 1, 2}, WH},
         T{{3, 4, 5}, WH},
@@ -67,7 +67,7 @@ namespace hex
         T{{5, 0, 2}, WH},
     };
 
-    constexpr std::array border
+    const std::vector<ge::Polygons::Line> border
     {
         L{{0, 1}, BL},
         L{{1, 2}, BL},
@@ -102,6 +102,22 @@ namespace
             (min_x + max_x) / 2.f
           , (min_y + max_y) / 2.f
         };
+    }
+
+    ge::Polygons move_object
+    (
+        const ge::Polygons& x,
+        const glm::vec2& offset
+    )
+    {
+        ge::Polygons result = x;
+
+        for (auto& vertex : result.points)
+        {
+            vertex.pos += offset;
+        }
+
+        return result;
     }
 }
 
@@ -150,7 +166,16 @@ int main(int argc, char* /*argv*/[])
             hex::border
         };
 
-        render.set_object_to_draw({&polygons, 1});
+        std::vector<ge::Polygons> values;
+        values.emplace_back(polygons);
+        values.emplace_back(move_object(polygons, {3, 2}));
+        values.emplace_back(move_object(polygons, {3, -2}));
+        values.emplace_back(move_object(polygons, {-3, 2}));
+        values.emplace_back(move_object(polygons, {-3, -2}));
+        values.emplace_back(move_object(polygons, {0, 4}));
+        values.emplace_back(move_object(polygons, {0, -4}));
+
+        render.set_object_to_draw(values);
 
         const glm::vec2 camera_pos = camera_on_center(hex::points);
         render.set_camera_pos(camera_pos);

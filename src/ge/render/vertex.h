@@ -4,6 +4,7 @@
 
 #include <variant>
 #include <span>
+#include <vector>
 
 namespace ge
 {
@@ -52,9 +53,9 @@ namespace ge
             Color color;
         };
 
-        std::span<const Vertex> points;
-        std::span<const Triangle> triangles;
-        std::span<const Line> lines;
+        std::vector<Vertex> points;
+        std::vector<Triangle> triangles;
+        std::vector<Line> lines;
     };
 
     template <typename T>
