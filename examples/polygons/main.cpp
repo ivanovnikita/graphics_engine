@@ -76,6 +76,53 @@ namespace hex
         L{{4, 5}, BL},
         L{{5, 0}, BL},
     };
+
+    const std::vector<ge::Polygons::Line> lines_1
+    {
+        L{{0, 1}, BL},
+        L{{1, 2}, BL},
+        L{{2, 3}, BL},
+        L{{3, 4}, BL},
+        L{{4, 5}, BL},
+        L{{5, 0}, BL},
+
+        L{{0, 3}, BL},
+        L{{1, 4}, BL},
+        L{{2, 5}, BL},
+    };
+
+    const std::vector<ge::Polygons::Line> lines_2
+    {
+        L{{0, 1}, BL},
+        L{{2, 3}, BL},
+        L{{3, 4}, BL},
+        L{{5, 0}, BL},
+
+        L{{1, 4}, BL},
+        L{{2, 5}, BL},
+    };
+
+    const std::vector<ge::Polygons::Line> lines_3
+    {
+        L{{0, 1}, BL},
+        L{{1, 2}, BL},
+        L{{3, 4}, BL},
+        L{{4, 5}, BL},
+
+        L{{0, 3}, BL},
+        L{{2, 5}, BL},
+    };
+
+    const std::vector<ge::Polygons::Line> lines_4
+    {
+        L{{1, 2}, BL},
+        L{{2, 3}, BL},
+        L{{4, 5}, BL},
+        L{{5, 0}, BL},
+
+        L{{0, 3}, BL},
+        L{{1, 4}, BL},
+    };
 }
 
 namespace
@@ -174,6 +221,114 @@ int main(int argc, char* /*argv*/[])
         values.emplace_back(move_object(polygons, {-3, -2}));
         values.emplace_back(move_object(polygons, {0, 4}));
         values.emplace_back(move_object(polygons, {0, -4}));
+
+        const ge::Polygons p_l_1
+        {
+            hex::points,
+            hex::triangles,
+            hex::lines_1
+        };
+        values.emplace_back(move_object(p_l_1, {0, 8}));
+        values.emplace_back(move_object(p_l_1, {3, 6}));
+        values.emplace_back(move_object(p_l_1, {-3, 6}));
+        values.emplace_back(move_object(p_l_1, {0, 12}));
+        values.emplace_back(move_object(p_l_1, {3, 10}));
+        values.emplace_back(move_object(p_l_1, {-3, 10}));
+
+        const ge::Polygons p_l_2
+        {
+            hex::points,
+            hex::triangles,
+            hex::lines_2
+        };
+        values.emplace_back(move_object(p_l_2, {0, -8}));
+        values.emplace_back(move_object(p_l_2, {3, -6}));
+        values.emplace_back(move_object(p_l_2, {-3, -6}));
+        values.emplace_back(move_object(p_l_2, {0, -12}));
+        values.emplace_back(move_object(p_l_2, {3, -10}));
+        values.emplace_back(move_object(p_l_2, {-3, -10}));
+
+        values.emplace_back(move_object(p_l_2, {-15, 2}));
+        values.emplace_back(move_object(p_l_2, {-15, -2}));
+        values.emplace_back(move_object(p_l_2, {-18, 4}));
+        values.emplace_back(move_object(p_l_2, {-18, 0}));
+        values.emplace_back(move_object(p_l_2, {-18, -4}));
+        values.emplace_back(move_object(p_l_2, {-21, 2}));
+        values.emplace_back(move_object(p_l_2, {-21, -2}));
+        values.emplace_back(move_object(p_l_2, {-24, 4}));
+        values.emplace_back(move_object(p_l_2, {-24, 0}));
+        values.emplace_back(move_object(p_l_2, {-24, -4}));
+        values.emplace_back(move_object(p_l_2, {-27, 2}));
+        values.emplace_back(move_object(p_l_2, {-27, -2}));
+        values.emplace_back(move_object(p_l_2, {-30, 0}));
+
+        const ge::Polygons p_l_3
+        {
+            hex::points,
+            hex::triangles,
+            hex::lines_3
+        };
+        values.emplace_back(move_object(p_l_3, {6, 0}));
+        values.emplace_back(move_object(p_l_3, {6, 4}));
+        values.emplace_back(move_object(p_l_3, {6, -4}));
+        values.emplace_back(move_object(p_l_3, {9, 2}));
+        values.emplace_back(move_object(p_l_3, {9, -2}));
+        values.emplace_back(move_object(p_l_3, {12, 0}));
+        values.emplace_back(move_object(p_l_3, {12, 4}));
+        values.emplace_back(move_object(p_l_3, {12, -4}));
+
+        values.emplace_back(move_object(p_l_3, {-9, 6}));
+        values.emplace_back(move_object(p_l_3, {-6, 8}));
+        values.emplace_back(move_object(p_l_3, {-12, 8}));
+        values.emplace_back(move_object(p_l_3, {-9, 10}));
+        values.emplace_back(move_object(p_l_3, {-6, 12}));
+        values.emplace_back(move_object(p_l_3, {-12, 12}));
+
+        values.emplace_back(move_object(p_l_3, {-9, -6}));
+        values.emplace_back(move_object(p_l_3, {-6, -8}));
+        values.emplace_back(move_object(p_l_3, {-12, -8}));
+        values.emplace_back(move_object(p_l_3, {-9, -10}));
+        values.emplace_back(move_object(p_l_3, {-6, -12}));
+        values.emplace_back(move_object(p_l_3, {-12, -12}));
+
+        values.emplace_back(move_object(p_l_3, {-15, 6}));
+        values.emplace_back(move_object(p_l_3, {-15, 10}));
+        values.emplace_back(move_object(p_l_3, {-18, 8}));
+        values.emplace_back(move_object(p_l_3, {-21, 6}));
+
+        const ge::Polygons p_l_4
+        {
+            hex::points,
+            hex::triangles,
+            hex::lines_4
+        };
+        values.emplace_back(move_object(p_l_4, {-6, 0}));
+        values.emplace_back(move_object(p_l_4, {-6, 4}));
+        values.emplace_back(move_object(p_l_4, {-6, -4}));
+        values.emplace_back(move_object(p_l_4, {-9, 2}));
+        values.emplace_back(move_object(p_l_4, {-9, -2}));
+        values.emplace_back(move_object(p_l_4, {-12, 0}));
+        values.emplace_back(move_object(p_l_4, {-12, 4}));
+        values.emplace_back(move_object(p_l_4, {-12, -4}));
+
+        values.emplace_back(move_object(p_l_4, {9, 6}));
+        values.emplace_back(move_object(p_l_4, {6, 8}));
+        values.emplace_back(move_object(p_l_4, {12, 8}));
+        values.emplace_back(move_object(p_l_4, {9, 10}));
+        values.emplace_back(move_object(p_l_4, {6, 12}));
+        values.emplace_back(move_object(p_l_4, {12, 12}));
+
+        values.emplace_back(move_object(p_l_4, {9, -6}));
+        values.emplace_back(move_object(p_l_4, {6, -8}));
+        values.emplace_back(move_object(p_l_4, {12, -8}));
+        values.emplace_back(move_object(p_l_4, {9, -10}));
+        values.emplace_back(move_object(p_l_4, {6, -12}));
+        values.emplace_back(move_object(p_l_4, {12, -12}));
+
+        values.emplace_back(move_object(p_l_4, {-15, -6}));
+        values.emplace_back(move_object(p_l_4, {-15, -10}));
+        values.emplace_back(move_object(p_l_4, {-18, -8}));
+        values.emplace_back(move_object(p_l_4, {-21, -6}));
 
         render.set_object_to_draw(values);
 
