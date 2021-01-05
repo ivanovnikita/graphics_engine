@@ -51,7 +51,8 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     list(APPEND conan_settings compiler.libcxx=libstdc++11)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    list(APPEND conan_settings compiler.libcxx=libc++)
+#    list(APPEND conan_settings compiler.libcxx=libc++)
+    list(APPEND conan_settings compiler.libcxx=libstdc++11)
 endif()
 
 conan_cmake_run(
@@ -123,6 +124,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 
     set(std_libs -lstdc++fs)
+    #list(APPEND cxx_flags -fanalyzer)
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND warnings
@@ -143,8 +145,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-weak-vtables
         )
 
-    set(std_libs -lc++ -lc++abi -lc++experimental)
-    list(APPEND cxx_flags -stdlib=libc++)
+#    set(std_libs -lc++ -lc++abi -lc++experimental)
+#    list(APPEND cxx_flags -stdlib=libc++)
 endif()
 
 set(compile_options ${cxx_flags} ${warnings})
@@ -184,6 +186,20 @@ target_include_directories(ge_common
 )
 add_library(GE::common ALIAS ge_common)
 define_source_group(ge_common)
+
+sources_in_dir_recurse(src/ge/geometry geometry_sources)
+add_library(ge_geometry ${geometry_sources})
+target_compile_options(ge_geometry PRIVATE ${compile_options})
+set_target_properties(ge_geometry PROPERTIES ${target_properties})
+target_include_directories(ge_geometry
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+)
+add_library(GE::geometry ALIAS ge_geometry)
+define_source_group(ge_geometry)
 
 if (WIN32)
 elseif(UNIX)
@@ -261,7 +277,11 @@ endif()
 add_library(ge_render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
 target_compile_options(ge_render PRIVATE ${compile_options})
 set_target_properties(ge_render PROPERTIES ${target_properties})
-target_compile_definitions(ge_render PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_compile_definitions(ge_render
+    PRIVATE
+        -DVK_USE_PLATFORM_XCB_KHR=1
+        #-DVULKAN_HPP_DISABLE_IMPLICIT_RESULT_VALUE_CAST=1
+)
 if (${GE_ENABLE_DEBUG_LAYERS})
     target_compile_definitions(ge_render PUBLIC -DGE_DEBUG_LAYERS_ENABLED=1)
 endif()
