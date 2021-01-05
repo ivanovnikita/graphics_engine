@@ -381,6 +381,7 @@ if (${GE_BUILD_TESTS})
     target_link_libraries(tests_common
         CONAN_PKG::gtest
         GE::common
+        GE::geometry
         GE::render
         Threads::Threads
         ${std_libs}
