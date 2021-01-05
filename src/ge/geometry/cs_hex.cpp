@@ -2,12 +2,12 @@
 
 namespace ge
 {
-    bool operator==(const CoordHex& a, const CoordHex& b) noexcept
+    bool operator==(const HexCoordDoubled& a, const HexCoordDoubled& b) noexcept
     {
         return a.x == b.x and a.y == b.y;
     }
 
-    bool operator!=(const CoordHex& a, const CoordHex& b) noexcept
+    bool operator!=(const HexCoordDoubled& a, const HexCoordDoubled& b) noexcept
     {
         return not (a == b);
     }

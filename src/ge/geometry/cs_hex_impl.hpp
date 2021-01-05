@@ -34,7 +34,7 @@ namespace ge
     }
 
     template <typename T>
-    CoordHex CsHex<T>::convert(const Point2d<T>& in) const noexcept
+    HexCoordDoubled CsHex<T>::convert(const Point2d<T>& in) const noexcept
     {
         const int x_quot = static_cast<int>(in.x / width_cycle_);
         const T x_rem = std::fabs(std::fmod(in.x, static_cast<T>(width_cycle_)));
@@ -133,7 +133,7 @@ namespace ge
     }
 
     template <typename T>
-    Point2d<T> CsHex<T>::convert(const CoordHex& in) const noexcept
+    Point2d<T> CsHex<T>::convert(const HexCoordDoubled& in) const noexcept
     {
         T x = sign(in.x) * (std::abs(in.x) / 2) * width_cycle_;
         T y = sign(in.y) * (std::abs(in.y) / 2) * height_;

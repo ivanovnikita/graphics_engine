@@ -6,14 +6,15 @@
 
 namespace ge
 {
-    struct CoordHex final
+    // doubled coords: https://www.redblobgames.com/grids/hexagons/#coordinates-doubled
+    struct HexCoordDoubled final
     {
         int x;
         int y;
     };
 
-    bool operator==(const CoordHex&, const CoordHex&) noexcept;
-    bool operator!=(const CoordHex&, const CoordHex&) noexcept;
+    bool operator==(const HexCoordDoubled&, const HexCoordDoubled&) noexcept;
+    bool operator!=(const HexCoordDoubled&, const HexCoordDoubled&) noexcept;
 
     // Opposite sides of hex are parallel and symmetric
     // Origin of floating point CS is in the center of hex (0; 0)
@@ -30,9 +31,9 @@ namespace ge
             T x_2
         ) noexcept;
 
-        CoordHex convert(const Point2d<T>&) const noexcept;
+        HexCoordDoubled convert(const Point2d<T>&) const noexcept;
 
-        Point2d<T> convert(const CoordHex&) const noexcept;
+        Point2d<T> convert(const HexCoordDoubled&) const noexcept;
 
     private:
         T width_;

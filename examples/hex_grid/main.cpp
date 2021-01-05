@@ -14,17 +14,22 @@
 #include <regex>
 #include <span>
 
+#include <iostream>
+
 using C = ge::Vertex;
 using T = ge::Polygons::Triangle;
 using L = ge::Polygons::Line;
 using Cl = ge::Color;
 
-constexpr Cl WH{{1.f, 1.f, 1.f}};
-constexpr Cl BL{{0.f, 0.f, 0.f}};
+[[ maybe_unused ]] constexpr Cl WH{{1.f, 1.f, 1.f}};
+[[ maybe_unused ]] constexpr Cl BL{{0.f, 0.f, 0.f}};
+[[ maybe_unused ]] constexpr Cl OR{{0.835f, 0.468f, 0.2f}};
+[[ maybe_unused ]] constexpr Cl VI{{0.584f, 0.454f, 0.65f}};
+[[ maybe_unused ]] constexpr Cl GR{{0.415f, 0.529f, 0.349f}};
 
 namespace hex
 {
-    const std::vector<ge::Vertex> points
+    [[ maybe_unused ]] const std::vector<ge::Vertex> points
     {
         C{{-2.f, 0.f}},
         C{{-1.f, -2.f}},
@@ -34,15 +39,27 @@ namespace hex
         C{{-1.f, 2.f}},
     };
 
-    const std::vector<ge::Polygons::Triangle> triangles
+    [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> triangles
     {
-        T{{0, 1, 2}, WH},
-        T{{3, 4, 5}, WH},
-        T{{2, 3, 5}, WH},
-        T{{5, 0, 2}, WH},
+        T{{0, 1, 2}, GR},
+        T{{3, 4, 5}, GR},
+        T{{2, 3, 5}, GR},
+        T{{5, 0, 2}, GR},
     };
 
-    const std::vector<ge::Polygons::Line> border
+    [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> selected_triangles = []
+    {
+        auto result = triangles;
+
+        for (ge::Polygons::Triangle& tr : result)
+        {
+            tr.color = OR;
+        }
+
+        return result;
+    } ();
+
+    [[ maybe_unused ]] const std::vector<ge::Polygons::Line> border
     {
         L{{0, 1}, BL},
         L{{1, 2}, BL},
@@ -51,6 +68,16 @@ namespace hex
         L{{4, 5}, BL},
         L{{5, 0}, BL},
     };
+
+    [[ maybe_unused ]] const std::vector<ge::Polygons::Line> selected_border = []
+    {
+        auto result = border;
+        for (ge::Polygons::Line& line : result)
+        {
+            line.color = GR;
+        }
+        return result;
+    } ();
 }
 
 namespace
@@ -134,37 +161,66 @@ int main(int /*argc*/, char* /*argv*/[])
 
     window->start_display();
 
-    std::optional<CoordHex> prev_selected_hex;
-    const Polygons polygons
+    const CsHex cs_hex(4.f, 4.f, -1.f, 1.f);
+
+    std::optional<HexCoordDoubled> prev_selected_hex;
+    const Polygons hex
     {
         hex::points,
         hex::triangles,
         hex::border
     };
 
-    render.set_object_to_draw({&polygons, 1});
+    const Polygons selected_hex
+    {
+        hex::points,
+        hex::selected_triangles,
+        hex::border
+    };
 
-    const CsHex cs_hex(4.f, 4.f, -1.f, 1.f);
+    constexpr int fixed_grid_side = 23;
+    std::vector<Polygons> fixed_grid;
+    fixed_grid.reserve(fixed_grid_side * fixed_grid_side);
+    for (int x = -fixed_grid_side / 2; x < fixed_grid_side / 2; ++x)
+    {
+        for (int y = -fixed_grid_side / 2; y < fixed_grid_side / 2; ++y)
+        {
+            if (std::abs(x % 2) != std::abs(y % 2))
+            {
+                continue;
+            }
+
+            const Point2dF pos = cs_hex.convert(HexCoordDoubled{x, y});
+            fixed_grid.emplace_back(move_object(hex, {pos.x, pos.y}));
+        }
+    }
+
+    fixed_grid.emplace_back(selected_hex);
+
+    render.set_object_to_draw(fixed_grid);
+
     const auto draw_seleted_hex =
     [
-        &polygons,
+        &selected_hex,
         &render,
         &cs_hex,
-        &prev_selected_hex
+        &prev_selected_hex,
+        &fixed_grid
     ] (const glm::vec2& new_pos)
     {
-        const CoordHex selected_hex = cs_hex.convert(Point2dF{new_pos.x, new_pos.y});
-        if (selected_hex == prev_selected_hex)
+        const HexCoordDoubled selected_hex_pos = cs_hex.convert(Point2dF{new_pos.x, new_pos.y});
+        if (selected_hex_pos == prev_selected_hex)
         {
             return;
         }
 
-        prev_selected_hex = selected_hex;
+        prev_selected_hex = selected_hex_pos;
+//        std::cout << selected_hex_pos.x << " " << selected_hex_pos.y << std::endl;
 
-        const Point2dF pos = cs_hex.convert(selected_hex);
-        const Polygons moved_polygons = move_object(polygons, {pos.x, pos.y});
+        const Point2dF pos = cs_hex.convert(selected_hex_pos);
+        fixed_grid.back() = move_object(selected_hex, {pos.x, pos.y});
 
-        render.set_object_to_draw({&moved_polygons, 1});
+        render.set_object_to_draw(fixed_grid);
     };
 
 
