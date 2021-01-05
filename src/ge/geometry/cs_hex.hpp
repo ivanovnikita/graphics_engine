@@ -28,11 +28,11 @@ namespace ge
             T height,
             T x_1,
             T x_2
-        );
+        ) noexcept;
 
-        CoordHex convert(const Point2d<T>&) const;
+        CoordHex convert(const Point2d<T>&) const noexcept;
 
-        Point2d<T> convert(const CoordHex&) const;
+        Point2d<T> convert(const CoordHex&) const noexcept;
 
     private:
         T width_;
