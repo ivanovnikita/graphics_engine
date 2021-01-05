@@ -429,4 +429,19 @@ if (${GE_BUILD_EXAMPLES})
     target_include_directories(example_2d_polygons PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
     define_source_group(example_2d_polygons)
     install(TARGETS example_2d_polygons DESTINATION examples/2d_polygons)
+
+    add_executable(example_hex_grid examples/hex_grid/main.cpp)
+    target_compile_options(example_hex_grid PRIVATE ${compile_options})
+    set_target_properties(example_hex_grid PROPERTIES ${target_properties})
+    target_link_libraries(example_hex_grid
+        GE::render
+        GE::window
+        GE::render_loop
+        GE::geometry
+        CONAN_PKG::Vulkan-Headers
+        ${std_libs}
+    )
+    target_include_directories(example_hex_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_hex_grid)
+    install(TARGETS example_hex_grid DESTINATION examples/hex_grid)
 endif()

@@ -110,6 +110,15 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseMoveEvent& event)
     {
+        if (mouse_move_callback_ != nullptr)
+        {
+            // TODO: rewrite copy-pasted code
+            const ProjVec2 normalized_mouse_pos = render_.normalize_in_proj_space(event.pos);
+            const ModelVec2 mouse_pos = render_.proj_to_model_space(normalized_mouse_pos);
+            mouse_move_callback_(mouse_pos);
+            need_draw_ = true;
+        }
+
         if (not prev_move_mouse_pos_.has_value() or not event.modifiers.mouse_left)
         {
             prev_move_mouse_pos_.reset();
@@ -170,5 +179,10 @@ namespace ge
             render_.draw_frame();
             need_draw_ = false;
         }
+    }
+
+    void RenderLoop::set_mouse_move_callback(MouseMoveCallback callback)
+    {
+        mouse_move_callback_ = std::move(callback);
     }
 }
