@@ -424,3 +424,109 @@ TEST(cs_hex_flat, hex_doubled_height_to_draw_space)
         EXPECT_EQ(p, pr);
     }
 }
+
+TEST(cs_hex_flat, hex_doubled_height_to_offset_flat)
+{
+    using namespace ge;
+
+    {
+        const HexCoordOffsetFlat e{0, 0};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordOffsetFlat e{1, 0};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{1, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-1, 0};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-1, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordOffsetFlat e{2, 1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{2, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-2, 1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-2, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordDoubledHeight{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}
+
+TEST(cs_hex_flat, offset_flat_to_hex_doubled_height)
+{
+    using namespace ge;
+
+    {
+        const HexCoordDoubledHeight e{0, 0};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordDoubledHeight e{1, 3};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{1, -1};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-1, 3};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-1, -1};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordDoubledHeight e{2, 4};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{2, -4};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-2, 4};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-2, -4};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordOffsetFlat{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}

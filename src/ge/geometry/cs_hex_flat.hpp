@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/geometry/concepts.hpp"
 #include "point.hpp"
 
 #include <cstdint>
@@ -13,8 +14,23 @@ namespace ge
         int y;
     };
 
-    bool operator==(const HexCoordDoubledHeight&, const HexCoordDoubledHeight&) noexcept;
-    bool operator!=(const HexCoordDoubledHeight&, const HexCoordDoubledHeight&) noexcept;
+    // offset coords in vertical layout: https://www.redblobgames.com/grids/hexagons/#coordinates-offset
+    struct HexCoordOffsetFlat final
+    {
+        int x;
+        int y;
+    };
+
+    HexCoordOffsetFlat to_hex_offset_flat(const HexCoordDoubledHeight&) noexcept;
+    HexCoordDoubledHeight to_hex_doubled_height(const HexCoordOffsetFlat&) noexcept;
+
+    template <typename T>
+        requires Coord2dLike<T>
+    bool operator==(const T&, const T&) noexcept;
+
+    template <typename T>
+        requires Coord2dLike<T>
+    bool operator!=(const T&, const T&) noexcept;
 
     // Opposite sides of hex are parallel and symmetric
     // Origin of draw space CS is in the center of hex (0; 0)

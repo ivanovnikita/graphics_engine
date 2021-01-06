@@ -2,13 +2,27 @@
 
 namespace ge
 {
-    bool operator==(const HexCoordDoubledHeight& a, const HexCoordDoubledHeight& b) noexcept
+    HexCoordOffsetFlat to_hex_offset_flat(const HexCoordDoubledHeight& in) noexcept
     {
-        return a.x == b.x and a.y == b.y;
+        if ((in.x & 1) == 0)
+        {
+            return {in.x, in.y / 2};
+        }
+        else
+        {
+            return {in.x, (in.y - 1) / 2};
+        }
     }
 
-    bool operator!=(const HexCoordDoubledHeight& a, const HexCoordDoubledHeight& b) noexcept
+    HexCoordDoubledHeight to_hex_doubled_height(const HexCoordOffsetFlat& in) noexcept
     {
-        return not (a == b);
+        if ((in.x & 1) == 0)
+        {
+            return {in.x, 2 * in.y};
+        }
+        else
+        {
+            return {in.x, 2 * in.y + 1};
+        }
     }
 }

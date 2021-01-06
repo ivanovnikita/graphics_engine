@@ -2,6 +2,7 @@
 
 #include "cs_hex_flat.hpp"
 #include "point_localization.hpp"
+#include "sign.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -9,9 +10,17 @@
 namespace ge
 {
     template <typename T>
-    int sign(T val)
+        requires Coord2dLike<T>
+    bool operator==(const T& a, const T& b) noexcept
     {
-        return (T(0) < val) - (val < T(0));
+        return a.x == b.x and a.y == b.y;
+    }
+
+    template <typename T>
+        requires Coord2dLike<T>
+    bool operator!=(const T& a, const T& b) noexcept
+    {
+        return not (a == b);
     }
 
     template <typename T>
@@ -138,7 +147,7 @@ namespace ge
         T x = sign(in.x) * (std::abs(in.x) / 2) * width_cycle_;
         T y = sign(in.y) * (std::abs(in.y) / 2) * height_;
 
-        if (in.x % 2 != 0)
+        if ((in.x & 1) == 1)
         {
             x += sign(in.x) * (0.5 * width_ + x_2_);
             y += sign(in.y) * 0.5 * height_;

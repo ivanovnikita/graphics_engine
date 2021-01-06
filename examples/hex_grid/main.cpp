@@ -185,12 +185,7 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         for (int y = -fixed_grid_side / 2; y < fixed_grid_side / 2; ++y)
         {
-            if (std::abs(x % 2) != std::abs(y % 2))
-            {
-                continue;
-            }
-
-            const Point2dF pos = cs_hex.to_draw_space(HexCoordDoubledHeight{x, y});
+            const Point2dF pos = cs_hex.to_draw_space(to_hex_doubled_height(HexCoordOffsetFlat{x, y}));
             fixed_grid.emplace_back(move_object(hex, {pos.x, pos.y}));
         }
     }
