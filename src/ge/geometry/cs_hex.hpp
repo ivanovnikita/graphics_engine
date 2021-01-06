@@ -6,18 +6,18 @@
 
 namespace ge
 {
-    // doubled coords: https://www.redblobgames.com/grids/hexagons/#coordinates-doubled
-    struct HexCoordDoubled final
+    // doubled height coords: https://www.redblobgames.com/grids/hexagons/#coordinates-doubled
+    struct HexCoordDoubledHeight final
     {
         int x;
         int y;
     };
 
-    bool operator==(const HexCoordDoubled&, const HexCoordDoubled&) noexcept;
-    bool operator!=(const HexCoordDoubled&, const HexCoordDoubled&) noexcept;
+    bool operator==(const HexCoordDoubledHeight&, const HexCoordDoubledHeight&) noexcept;
+    bool operator!=(const HexCoordDoubledHeight&, const HexCoordDoubledHeight&) noexcept;
 
     // Opposite sides of hex are parallel and symmetric
-    // Origin of floating point CS is in the center of hex (0; 0)
+    // Origin of draw space CS is in the center of hex (0; 0)
     template <typename T>
     class CsHex final
     {
@@ -31,9 +31,8 @@ namespace ge
             T x_2
         ) noexcept;
 
-        HexCoordDoubled convert(const Point2d<T>&) const noexcept;
-
-        Point2d<T> convert(const HexCoordDoubled&) const noexcept;
+        HexCoordDoubledHeight to_hex_doubled_height(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordDoubledHeight&) const noexcept;
 
     private:
         T width_;

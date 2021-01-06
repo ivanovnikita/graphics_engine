@@ -163,7 +163,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     const CsHex cs_hex(4.f, 4.f, -1.f, 1.f);
 
-    std::optional<HexCoordDoubled> prev_selected_hex;
+    std::optional<HexCoordDoubledHeight> prev_selected_hex;
     const Polygons hex
     {
         hex::points,
@@ -190,7 +190,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 continue;
             }
 
-            const Point2dF pos = cs_hex.convert(HexCoordDoubled{x, y});
+            const Point2dF pos = cs_hex.to_draw_space(HexCoordDoubledHeight{x, y});
             fixed_grid.emplace_back(move_object(hex, {pos.x, pos.y}));
         }
     }
@@ -208,7 +208,7 @@ int main(int /*argc*/, char* /*argv*/[])
         &fixed_grid
     ] (const glm::vec2& new_pos)
     {
-        const HexCoordDoubled selected_hex_pos = cs_hex.convert(Point2dF{new_pos.x, new_pos.y});
+        const HexCoordDoubledHeight selected_hex_pos = cs_hex.to_hex_doubled_height(Point2dF{new_pos.x, new_pos.y});
         if (selected_hex_pos == prev_selected_hex)
         {
             return;
@@ -217,7 +217,7 @@ int main(int /*argc*/, char* /*argv*/[])
         prev_selected_hex = selected_hex_pos;
 //        std::cout << selected_hex_pos.x << " " << selected_hex_pos.y << std::endl;
 
-        const Point2dF pos = cs_hex.convert(selected_hex_pos);
+        const Point2dF pos = cs_hex.to_draw_space(selected_hex_pos);
         fixed_grid.back() = move_object(selected_hex, {pos.x, pos.y});
 
         render.set_object_to_draw(fixed_grid);
