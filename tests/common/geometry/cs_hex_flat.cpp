@@ -1,12 +1,12 @@
-#include "ge/geometry/cs_hex.hpp"
+#include "ge/geometry/cs_hex_flat.hpp"
 
 #include <gtest/gtest.h>
 
-TEST(cs_hex, to_hex)
+TEST(cs_hex_flat, draw_space_to_hex_doubled_height)
 {
     using namespace ge;
 
-    const CsHex cs{4.f, 4.f, -1.f, 1.f};
+    const CsHexFlat cs{4.f, 4.f, -1.f, 1.f};
 
     {
         const Point2dF p{0.f, 0.f};
@@ -287,11 +287,11 @@ TEST(cs_hex, to_hex)
     }
 }
 
-TEST(cs_hex, from_hex)
+TEST(cs_hex_flat, hex_doubled_height_to_draw_space)
 {
     using namespace ge;
 
-    const CsHex cs{4.f, 4.f, -1.f, 1.f};
+    const CsHexFlat cs{4.f, 4.f, -1.f, 1.f};
 
     {
         const HexCoordDoubledHeight ph{0, 0};

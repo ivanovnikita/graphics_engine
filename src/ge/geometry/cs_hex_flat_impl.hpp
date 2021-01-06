@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cs_hex.hpp"
+#include "cs_hex_flat.hpp"
 #include "point_localization.hpp"
 
 #include <cmath>
@@ -15,7 +15,7 @@ namespace ge
     }
 
     template <typename T>
-    CsHex<T>::CsHex
+    CsHexFlat<T>::CsHexFlat
     (
         T width,
         T height,
@@ -34,7 +34,7 @@ namespace ge
     }
 
     template <typename T>
-    HexCoordDoubledHeight CsHex<T>::to_hex_doubled_height(const Point2d<T>& in) const noexcept
+    HexCoordDoubledHeight CsHexFlat<T>::to_hex_doubled_height(const Point2d<T>& in) const noexcept
     {
         const int x_quot = static_cast<int>(in.x / width_cycle_);
         const T x_rem = std::fabs(std::fmod(in.x, static_cast<T>(width_cycle_)));
@@ -133,7 +133,7 @@ namespace ge
     }
 
     template <typename T>
-    Point2d<T> CsHex<T>::to_draw_space(const HexCoordDoubledHeight& in) const noexcept
+    Point2d<T> CsHexFlat<T>::to_draw_space(const HexCoordDoubledHeight& in) const noexcept
     {
         T x = sign(in.x) * (std::abs(in.x) / 2) * width_cycle_;
         T y = sign(in.y) * (std::abs(in.y) / 2) * height_;

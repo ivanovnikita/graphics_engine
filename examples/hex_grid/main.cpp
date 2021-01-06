@@ -1,4 +1,4 @@
-#include "ge/geometry/cs_hex.hpp"
+#include "ge/geometry/cs_hex_flat.hpp"
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 #include "ge/render_loop/render_loop.h"
@@ -161,7 +161,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     window->start_display();
 
-    const CsHex cs_hex(4.f, 4.f, -1.f, 1.f);
+    const CsHexFlat cs_hex(4.f, 4.f, -1.f, 1.f);
 
     std::optional<HexCoordDoubledHeight> prev_selected_hex;
     const Polygons hex

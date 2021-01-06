@@ -19,11 +19,11 @@ namespace ge
     // Opposite sides of hex are parallel and symmetric
     // Origin of draw space CS is in the center of hex (0; 0)
     template <typename T>
-    class CsHex final
+    class CsHexFlat final
     {
     public:
         // x_0 < x_1 < x_2 < x_3
-        explicit CsHex
+        explicit CsHexFlat
         (
             T width,
             T height,
@@ -48,4 +48,4 @@ namespace ge
     };
 }
 
-#include "cs_hex_impl.hpp"
+#include "cs_hex_flat_impl.hpp"
