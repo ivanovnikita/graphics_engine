@@ -530,3 +530,215 @@ TEST(cs_hex_flat, offset_flat_to_hex_doubled_height)
         EXPECT_EQ(e, r);
     }
 }
+
+TEST(cs_hex_flat, axial_flat_to_offset_flat)
+{
+    using namespace ge;
+
+    {
+        const HexCoordOffsetFlat e{0, 0};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordOffsetFlat e{1, 1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{1, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-1, 0};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-1, -2};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordOffsetFlat e{2, 3};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{2, -1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-2, 1};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordOffsetFlat e{-2, -3};
+        const HexCoordOffsetFlat r = to_hex_offset_flat(HexCoordAxialFlat{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}
+
+TEST(cs_hex_flat, offset_flat_to_axial_flat)
+{
+    using namespace ge;
+
+    {
+        const HexCoordAxialFlat e{0, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordAxialFlat e{1, 1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{1, -1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-1, 2};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-1, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordAxialFlat e{2, 1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{2, -3};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-2, 3};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-2, -1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordOffsetFlat{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}
+
+TEST(cs_hex_flat, axial_flat_to_hex_doubled_height)
+{
+    using namespace ge;
+
+    {
+        const HexCoordDoubledHeight e{0, 0};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordDoubledHeight e{1, 3};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{1, -1};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-1, 1};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-1, -3};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordDoubledHeight e{2, 6};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{2, -2};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-2, 2};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordDoubledHeight e{-2, -6};
+        const HexCoordDoubledHeight r = to_hex_doubled_height(HexCoordAxialFlat{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}
+
+TEST(cs_hex_flat, hex_doubled_height_to_axial_flat)
+{
+    using namespace ge;
+
+    {
+        const HexCoordAxialFlat e{0, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{0, 0});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordAxialFlat e{1, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{1, -1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{1, -1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-1, 1};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{-1, 1});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-1, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{-1, -1});
+        EXPECT_EQ(e, r);
+    }
+
+    {
+        const HexCoordAxialFlat e{2, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{2, -2};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{2, -2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-2, 2};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{-2, 2});
+        EXPECT_EQ(e, r);
+    }
+    {
+        const HexCoordAxialFlat e{-2, 0};
+        const HexCoordAxialFlat r = to_hex_axial_flat(HexCoordDoubledHeight{-2, -2});
+        EXPECT_EQ(e, r);
+    }
+}

@@ -21,8 +21,22 @@ namespace ge
         int y;
     };
 
+    struct HexCoordAxialFlat final
+    {
+        int x;
+        int y;
+
+        int z() const noexcept;
+    };
+
     HexCoordOffsetFlat to_hex_offset_flat(const HexCoordDoubledHeight&) noexcept;
+    HexCoordOffsetFlat to_hex_offset_flat(const HexCoordAxialFlat&) noexcept;
+
     HexCoordDoubledHeight to_hex_doubled_height(const HexCoordOffsetFlat&) noexcept;
+    HexCoordDoubledHeight to_hex_doubled_height(const HexCoordAxialFlat&) noexcept;
+
+    HexCoordAxialFlat to_hex_axial_flat(const HexCoordDoubledHeight&) noexcept;
+    HexCoordAxialFlat to_hex_axial_flat(const HexCoordOffsetFlat&) noexcept;
 
     template <typename T>
         requires Coord2dLike<T>
