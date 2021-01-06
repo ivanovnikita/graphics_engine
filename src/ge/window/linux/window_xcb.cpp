@@ -902,17 +902,7 @@ namespace ge
         xcb_flush(connection_);
 
         constexpr std::string_view title{"window"};
-        xcb_change_property
-        (
-            connection_
-          , XCB_PROP_MODE_REPLACE
-          , handle_
-          , XCB_ATOM_WM_NAME
-          , XCB_ATOM_STRING
-          , WindowPropertyFormat::BIT_8
-          , static_cast<uint32_t>(title.length())
-          , title.data()
-        );
+        set_window_title(title);
 
         delete_reply_ = &subscribe_to_close_event(*connection_, handle_);
 
@@ -963,6 +953,22 @@ namespace ge
         wait_event(XCB_MAP_NOTIFY);
         wait_event(XCB_EXPOSE);
         wait_event(XCB_CONFIGURE_NOTIFY);
+    }
+
+    void WindowXCB::set_window_title(const std::string_view title)
+    {
+        xcb_change_property
+        (
+            connection_
+          , XCB_PROP_MODE_REPLACE
+          , handle_
+          , XCB_ATOM_WM_NAME
+          , XCB_ATOM_STRING
+          , WindowPropertyFormat::BIT_8
+          , static_cast<uint32_t>(title.length())
+          , title.data()
+        );
+        xcb_flush(connection_);
     }
 
     std::vector<WindowEvent> WindowXCB::grab_events()

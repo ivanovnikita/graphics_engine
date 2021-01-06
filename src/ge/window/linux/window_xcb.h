@@ -26,6 +26,7 @@ namespace ge
         void start_display() override;
         std::vector<WindowEvent> grab_events() override;
         void resize(const Size&) override;
+        void set_window_title(std::string_view) override;
 
     private:
         template <typename T>

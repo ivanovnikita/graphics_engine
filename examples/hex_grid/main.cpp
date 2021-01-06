@@ -121,6 +121,25 @@ namespace
 
         return result;
     }
+
+    std::string print_coords(const ge::HexCoordDoubledHeight& doubled)
+    {
+        using namespace ge;
+
+        const HexCoordOffsetFlat offset = to_hex_offset_flat(doubled);
+        const HexCoordAxialFlat axial = to_hex_axial_flat(doubled);
+
+        std::stringstream in;
+        in << "doubled: {"
+            << doubled.x << ", "
+            << doubled.y << "} | offset: {"
+            << offset.x << ", "
+            << offset.y << "} | axial: {"
+            << axial.x << ", "
+            << axial.y << "}";
+
+        return in.str();
+    }
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -194,13 +213,14 @@ int main(int /*argc*/, char* /*argv*/[])
 
     render.set_object_to_draw(fixed_grid);
 
-    const auto draw_seleted_hex =
+    const auto draw_selected_hex =
     [
         &selected_hex,
         &render,
         &cs_hex,
         &prev_selected_hex,
-        &fixed_grid
+        &fixed_grid,
+        &window
     ] (const glm::vec2& new_pos)
     {
         const HexCoordDoubledHeight selected_hex_pos = cs_hex.to_hex_doubled_height(Point2dF{new_pos.x, new_pos.y});
@@ -216,6 +236,8 @@ int main(int /*argc*/, char* /*argv*/[])
         fixed_grid.back() = move_object(selected_hex, {pos.x, pos.y});
 
         render.set_object_to_draw(fixed_grid);
+
+        window->set_window_title(print_coords(selected_hex_pos));
     };
 
 
@@ -227,7 +249,7 @@ int main(int /*argc*/, char* /*argv*/[])
     render.draw_frame();
 
     RenderLoop render_loop(*window, render);
-    render_loop.set_mouse_move_callback({draw_seleted_hex});
+    render_loop.set_mouse_move_callback({draw_selected_hex});
     while (not render_loop.stopped())
     {
         render_loop.handle_window_events();

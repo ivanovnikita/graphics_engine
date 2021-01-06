@@ -38,6 +38,7 @@ namespace ge
         virtual void start_display() = 0;
         virtual std::vector<WindowEvent> grab_events() = 0;
         virtual void resize(const Size&) = 0;
+        virtual void set_window_title(std::string_view) = 0;
 
     protected:
         Window();
