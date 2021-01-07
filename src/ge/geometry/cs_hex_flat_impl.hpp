@@ -11,28 +11,6 @@
 namespace ge
 {
     template <typename T>
-        requires Coord2dLike<T>
-    bool operator==(const T& a, const T& b) noexcept
-    {
-        return a.x == b.x and a.y == b.y;
-    }
-
-    template <typename T>
-        requires Coord2dLike<T>
-    bool operator!=(const T& a, const T& b) noexcept
-    {
-        return not (a == b);
-    }
-
-    template <typename T>
-        requires Coord2dLike<T>
-    std::ostream& operator<<(std::ostream& out, const T& v)
-    {
-        out << "{" << v.x << ", " << v.y << "}";
-        return out;
-    }
-
-    template <typename T>
     CsHexFlat<T>::CsHexFlat
     (
         T width,
@@ -170,9 +148,10 @@ namespace ge
     template <typename T>
     HexCoordAxialFlat CsHexFlat<T>::to_hex_axial_flat(const Point2d<T>& in) const noexcept
     {
-        const Point2d<T> normalized(in.x / width_half_, std::sqrt(3) * (in.y / height_));
+        const T sqrt_3 = std::sqrt(static_cast<T>(3));
+        const Point2d<T> normalized(in.x / width_half_, sqrt_3 * (in.y / height_));
         const T x = (static_cast<T>(2) / 3) * normalized.x;
-        const T y = (static_cast<T>(-1) / 3) * normalized.x + (std::sqrt(static_cast<T>(3)) / 3) * normalized.y;
+        const T y = (static_cast<T>(-1) / 3) * normalized.x + (sqrt_3 / 3) * normalized.y;
         return hex_round<HexCoordAxialFlat>(HexCoordCubeFractional<T>{x, y, -x - y});
     }
 
@@ -183,8 +162,8 @@ namespace ge
         const T sqrt_3 = std::sqrt(static_cast<T>(3));
         return
         {
-            ((static_cast<T>(3) / 2) * in.x) * width_half_,
-            ((sqrt_3 / 2) * in.x + sqrt_3 * in.y) * (height_ / sqrt_3)
+            (static_cast<T>(1.5) * in.x) * width_half_,
+            (in.x / static_cast<T>(2) + in.y) * height_
         };
     }
 }

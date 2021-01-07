@@ -1,9 +1,8 @@
 #pragma once
 
-#include "ge/geometry/concepts.hpp"
+#include "concepts.hpp"
+#include "coord_helpers.hpp"
 #include "point.hpp"
-
-#include <iostream>
 
 #include <cstdint>
 
@@ -16,7 +15,7 @@ namespace ge
         int y;
     };
 
-    // offset coords in vertical layout: https://www.redblobgames.com/grids/hexagons/#coordinates-offset
+    // offset odd-q coords in vertical layout: https://www.redblobgames.com/grids/hexagons/#coordinates-offset
     struct HexCoordOffsetFlat final
     {
         int x;
@@ -39,18 +38,6 @@ namespace ge
 
     HexCoordAxialFlat to_hex_axial_flat(const HexCoordDoubledHeight&) noexcept;
     HexCoordAxialFlat to_hex_axial_flat(const HexCoordOffsetFlat&) noexcept;
-
-    template <typename T>
-        requires Coord2dLike<T>
-    bool operator==(const T&, const T&) noexcept;
-
-    template <typename T>
-        requires Coord2dLike<T>
-    bool operator!=(const T&, const T&) noexcept;
-
-    template <typename T>
-        requires Coord2dLike<T>
-    std::ostream& operator<<(std::ostream&, const T&);
 
     // Opposite sides of hex are parallel and symmetric
     // Origin of draw space CS is in the center of hex (0; 0)
