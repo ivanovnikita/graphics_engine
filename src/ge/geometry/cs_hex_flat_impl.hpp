@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cs_hex_flat.hpp"
+#include "hex_coord_cube_fractional.hpp"
 #include "point_localization.hpp"
 #include "sign.hpp"
 
@@ -163,5 +164,27 @@ namespace ge
         }
 
         return {x, y};
+    }
+
+    // https://www.redblobgames.com/grids/hexagons/implementation.html#pixel-to-hex
+    template <typename T>
+    HexCoordAxialFlat CsHexFlat<T>::to_hex_axial_flat(const Point2d<T>& in) const noexcept
+    {
+        const Point2d<T> normalized(in.x / width_half_, std::sqrt(3) * (in.y / height_));
+        const T x = (static_cast<T>(2) / 3) * normalized.x;
+        const T y = (static_cast<T>(-1) / 3) * normalized.x + (std::sqrt(static_cast<T>(3)) / 3) * normalized.y;
+        return hex_round<HexCoordAxialFlat>(HexCoordCubeFractional<T>{x, y, -x - y});
+    }
+
+    // https://www.redblobgames.com/grids/hexagons/implementation.html#hex-to-pixel
+    template <typename T>
+    Point2d<T> CsHexFlat<T>::to_draw_space(const HexCoordAxialFlat& in) const noexcept
+    {
+        const T sqrt_3 = std::sqrt(static_cast<T>(3));
+        return
+        {
+            ((static_cast<T>(3) / 2) * in.x) * width_half_,
+            ((sqrt_3 / 2) * in.x + sqrt_3 * in.y) * (height_ / sqrt_3)
+        };
     }
 }

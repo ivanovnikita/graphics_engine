@@ -70,6 +70,9 @@ namespace ge
         HexCoordDoubledHeight to_hex_doubled_height(const Point2d<T>&) const noexcept;
         Point2d<T> to_draw_space(const HexCoordDoubledHeight&) const noexcept;
 
+        HexCoordAxialFlat to_hex_axial_flat(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordAxialFlat&) const noexcept;
+
     private:
         T width_;
         T height_;

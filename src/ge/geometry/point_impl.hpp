@@ -2,12 +2,15 @@
 
 #include "point.hpp"
 
+#include <cmath>
+
 namespace ge
 {
     template <typename T>
     bool operator==(const Point2d<T>& a, const Point2d<T>& b) noexcept
     {
-        return a.x == b.x and a.y == b.y;
+        constexpr T eps = 10 * std::numeric_limits<T>::epsilon();
+        return (std::abs(a.x - b.x) <= eps) and (std::abs(a.y - b.y) <= eps);
     }
 
     template <typename T>
