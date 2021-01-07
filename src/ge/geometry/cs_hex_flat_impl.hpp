@@ -24,6 +24,14 @@ namespace ge
     }
 
     template <typename T>
+        requires Coord2dLike<T>
+    std::ostream& operator<<(std::ostream& out, const T& v)
+    {
+        out << "{" << v.x << ", " << v.y << "}";
+        return out;
+    }
+
+    template <typename T>
     CsHexFlat<T>::CsHexFlat
     (
         T width,
@@ -38,6 +46,7 @@ namespace ge
         , width_cycle_{width_ + (x_2_ - x_1_)}
         , width_half_{width_ / 2}
         , height_half_{height_ / 2}
+        , last_x_{width_ + x_2_}
         , pre_last_x_{width_half_ + (x_2_ - x_1_)}
     {
     }
@@ -82,7 +91,7 @@ namespace ge
                 if (y_rem < height_half_)
                 {
                     const Point2d<T> a{pre_last_x_, 0};
-                    const Point2d<T> b{width_cycle_, height_half_};
+                    const Point2d<T> b{last_x_, height_half_};
                     if (is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
                     {
                         x += 1 * sign(in.x);
@@ -95,7 +104,7 @@ namespace ge
                 }
                 else
                 {
-                    const Point2d<T> a{width_cycle_, height_half_};
+                    const Point2d<T> a{last_x_, height_half_};
                     const Point2d<T> b{pre_last_x_, height_};
                     if (is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
                     {

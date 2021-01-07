@@ -285,6 +285,20 @@ TEST(cs_hex_flat, draw_space_to_hex_doubled_height)
         const HexCoordDoubledHeight phr = cs.to_hex_doubled_height(p);
         EXPECT_EQ(ph, phr);
     }
+
+    // regression
+    {
+        const Point2dF p{4.81625f, 0.936103f};
+        const HexCoordDoubledHeight ph{2, 0};
+        const HexCoordDoubledHeight phr = cs.to_hex_doubled_height(p);
+        EXPECT_EQ(ph, phr);
+    }
+    {
+        const Point2dF p{4.81625f, 2.936103f};
+        const HexCoordDoubledHeight ph{2, 2};
+        const HexCoordDoubledHeight phr = cs.to_hex_doubled_height(p);
+        EXPECT_EQ(ph, phr);
+    }
 }
 
 TEST(cs_hex_flat, hex_doubled_height_to_draw_space)

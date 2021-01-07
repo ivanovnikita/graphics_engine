@@ -122,7 +122,7 @@ namespace
         return result;
     }
 
-    std::string print_coords(const ge::HexCoordDoubledHeight& doubled)
+    std::string print_coords(const ge::HexCoordDoubledHeight& doubled, const glm::vec2& pixel)
     {
         using namespace ge;
 
@@ -130,13 +130,10 @@ namespace
         const HexCoordAxialFlat axial = to_hex_axial_flat(doubled);
 
         std::stringstream in;
-        in << "doubled: {"
-            << doubled.x << ", "
-            << doubled.y << "} | offset: {"
-            << offset.x << ", "
-            << offset.y << "} | axial: {"
-            << axial.x << ", "
-            << axial.y << "}";
+        in << "doubled: " << doubled
+            << " | offset: " << offset
+            << " | axial: " << axial
+            << " | pixel: " << pixel;
 
         return in.str();
     }
@@ -224,6 +221,9 @@ int main(int /*argc*/, char* /*argv*/[])
     ] (const glm::vec2& new_pos)
     {
         const HexCoordDoubledHeight selected_hex_pos = cs_hex.to_hex_doubled_height(Point2dF{new_pos.x, new_pos.y});
+
+        window->set_window_title(print_coords(selected_hex_pos, new_pos));
+
         if (selected_hex_pos == prev_selected_hex)
         {
             return;
@@ -236,8 +236,6 @@ int main(int /*argc*/, char* /*argv*/[])
         fixed_grid.back() = move_object(selected_hex, {pos.x, pos.y});
 
         render.set_object_to_draw(fixed_grid);
-
-        window->set_window_title(print_coords(selected_hex_pos));
     };
 
 

@@ -3,6 +3,8 @@
 #include "ge/geometry/concepts.hpp"
 #include "point.hpp"
 
+#include <iostream>
+
 #include <cstdint>
 
 namespace ge
@@ -46,6 +48,10 @@ namespace ge
         requires Coord2dLike<T>
     bool operator!=(const T&, const T&) noexcept;
 
+    template <typename T>
+        requires Coord2dLike<T>
+    std::ostream& operator<<(std::ostream&, const T&);
+
     // Opposite sides of hex are parallel and symmetric
     // Origin of draw space CS is in the center of hex (0; 0)
     template <typename T>
@@ -72,8 +78,10 @@ namespace ge
 
         T width_cycle_;
         T width_half_;
+
         T height_half_;
 
+        T last_x_;
         T pre_last_x_;
     };
 }
