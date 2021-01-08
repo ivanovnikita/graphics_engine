@@ -218,15 +218,18 @@ int main(int /*argc*/, char* /*argv*/[])
         &prev_selected_hex,
         &fixed_grid,
         &window
-    ] (const glm::vec2& new_pos)
+    ] (const MouseMoveEvent& event)
     {
-        const HexCoordDoubledHeight selected_hex_pos = cs_hex.to_hex_doubled_height(Point2dF{new_pos.x, new_pos.y});
+        const HexCoordDoubledHeight selected_hex_pos = cs_hex.to_hex_doubled_height
+        (
+            Point2dF{event.pos.x, event.pos.y})
+        ;
 
-        window->set_window_title(print_coords(selected_hex_pos, new_pos));
+        window->set_window_title(print_coords(selected_hex_pos, event.pos));
 
         if (selected_hex_pos == prev_selected_hex)
         {
-            return;
+            return RenderLoop::NeedRedraw::No;
         }
 
         prev_selected_hex = selected_hex_pos;
@@ -236,6 +239,8 @@ int main(int /*argc*/, char* /*argv*/[])
         fixed_grid.back() = move_object(selected_hex, {pos.x, pos.y});
 
         render.set_object_to_draw(fixed_grid);
+
+        return RenderLoop::NeedRedraw::Yes;
     };
 
 
