@@ -244,20 +244,21 @@ int main(int /*argc*/, char* /*argv*/[])
         hex::border
     };
 
-    constexpr int fixed_grid_side = 24;
     std::vector<Polygons> fixed_grid_flat;
     std::vector<Polygons> fixed_grid_pointy;
-    fixed_grid_flat.reserve(fixed_grid_side * fixed_grid_side);
-    fixed_grid_pointy.reserve(fixed_grid_flat.size());
-    for (int x = -fixed_grid_side / 2; x < fixed_grid_side / 2; ++x)
+
+    constexpr int hex_map_radius = 11;
+    for (int x = -hex_map_radius; x <= hex_map_radius; ++x)
     {
-        for (int y = -fixed_grid_side / 2; y < fixed_grid_side / 2; ++y)
+        const int y1 = std::max(-hex_map_radius, -x - hex_map_radius);
+        const int y2 = std::min(hex_map_radius, -x + hex_map_radius);
+        for (int y = y1; y <= y2; ++y)
         {
-            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordOffsetFlat{x, y}));
+            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
             fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
 
             // TODO: rewrite copy-pasted code
-            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordOffsetPointy{x, y}));
+            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
             fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
         }
     }
@@ -380,7 +381,9 @@ int main(int /*argc*/, char* /*argv*/[])
         &prev_selected_hex_flat,
         &prev_selected_hex_pointy,
         &draw_selected_hex_flat,
-        &draw_selected_hex_pointy
+        &draw_selected_hex_pointy,
+        &selected_hex_flat,
+        &selected_hex_pointy
     ] (const MouseButtonRelease& e)
     {
         if (e.button != MouseButton::RIGHT)
@@ -398,6 +401,8 @@ int main(int /*argc*/, char* /*argv*/[])
             if (pressed_hex_flat == released_hex)
             {
                 prev_selected_hex_flat.reset();
+                fixed_grid_flat.back() = selected_hex_flat;
+
                 render.set_object_to_draw(fixed_grid_pointy);
                 render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
                 current_cs = HexCsType::Pointy;
@@ -412,6 +417,8 @@ int main(int /*argc*/, char* /*argv*/[])
             if (pressed_hex_pointy == released_hex)
             {
                 prev_selected_hex_pointy.reset();
+                fixed_grid_pointy.back() = selected_hex_pointy;
+
                 render.set_object_to_draw(fixed_grid_flat);
                 render_loop.set_mouse_move_callback({draw_selected_hex_flat});
                 current_cs = HexCsType::Flat;
