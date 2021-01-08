@@ -757,7 +757,7 @@ TEST(cs_hex_flat, hex_doubled_height_to_axial_flat)
     }
 }
 
-TEST(cs_hex_flat, draw_space_to_hex_axial)
+TEST(cs_hex_flat, draw_space_to_hex_axial_flat)
 {
     using namespace ge;
 
@@ -1056,7 +1056,7 @@ TEST(cs_hex_flat, draw_space_to_hex_axial)
     }
 }
 
-TEST(cs_hex_flat, hex_axial_to_draw_space)
+TEST(cs_hex_flat, hex_axial_flat_to_draw_space)
 {
     using namespace ge;
 

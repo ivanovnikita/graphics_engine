@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ge/geometry/concepts.hpp"
+#include "concepts.hpp"
+#include "coord_helpers.hpp"
 #include "point.hpp"
 
 #include <iostream>

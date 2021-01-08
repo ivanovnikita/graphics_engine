@@ -150,8 +150,8 @@ namespace ge
     {
         const T sqrt_3 = std::sqrt(static_cast<T>(3));
         const Point2d<T> normalized(sqrt_3 * (in.x / width_), in.y / height_half_);
-        const T x = (sqrt_3 / 3) * in.x - (static_cast<T>(1) / 3) * in.y;
-        const T y = (static_cast<T>(2) / 3) * in.y;
+        const T x = (sqrt_3 / 3) * normalized.x - (static_cast<T>(1) / 3) * normalized.y;
+        const T y = (static_cast<T>(2) / 3) * normalized.y;
         return hex_round<HexCoordAxialPointy>(HexCoordCubeFractional<T>{x, y, -x - y});
     }
 
