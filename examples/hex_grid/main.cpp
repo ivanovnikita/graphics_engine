@@ -1,5 +1,6 @@
 #include "ge/geometry/cs_hex_flat.hpp"
 #include "ge/geometry/cs_hex_pointy.hpp"
+#include "ge/geometry/convert_between_flat_and_pointy.h"
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 #include "ge/render_loop/render_loop.h"
@@ -429,8 +430,15 @@ int main(int /*argc*/, char* /*argv*/[])
             HexCoordDoubledHeight released_hex = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
             if (pressed_hex_flat == released_hex)
             {
-                prev_selected_hex_flat.reset();
-                fixed_grid_flat.back() = selected_hex_flat;
+                if (prev_selected_hex_flat.has_value())
+                {
+                    prev_selected_hex_pointy = to_hex_doubled_width
+                    (
+                        to_pointy_by_cw_rotation(to_hex_axial_flat(*prev_selected_hex_flat))
+                    );
+                    const Point2dF pos = cs_hex_pointy.to_draw_space(*prev_selected_hex_pointy);
+                    fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
+                }
 
                 render.set_object_to_draw(fixed_grid_pointy);
                 render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
@@ -445,8 +453,15 @@ int main(int /*argc*/, char* /*argv*/[])
             HexCoordDoubledWidth released_hex = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
             if (pressed_hex_pointy == released_hex)
             {
-                prev_selected_hex_pointy.reset();
-                fixed_grid_pointy.back() = selected_hex_pointy;
+                if (prev_selected_hex_pointy.has_value())
+                {
+                    prev_selected_hex_flat = to_hex_doubled_height
+                    (
+                        to_flat_by_ccw_rotation(to_hex_axial_pointy(*prev_selected_hex_pointy))
+                    );
+                    const Point2dF pos = cs_hex_flat.to_draw_space(*prev_selected_hex_flat);
+                    fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
+                }
 
                 render.set_object_to_draw(fixed_grid_flat);
                 render_loop.set_mouse_move_callback({draw_selected_hex_flat});
