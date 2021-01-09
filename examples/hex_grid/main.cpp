@@ -30,24 +30,27 @@ using Cl = ge::Color;
 
 namespace hex
 {
+    // https://www.redblobgames.com/grids/hexagons/#basics
+    constexpr float hex_size_part = 1;
+
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_flat
     {
-        C{{-2.f, 0.f}},
-        C{{-1.f, -2.f}},
-        C{{1.f, -2.f}},
-        C{{2.f, 0.f}},
-        C{{1.f, 2.f}},
-        C{{-1.f, 2.f}},
+        C{{-hex_size_part, 0.f}},
+        C{{-hex_size_part / 2.f, std::sqrt(3) * (-hex_size_part / 2.f)}},
+        C{{hex_size_part / 2.f, std::sqrt(3) * (-hex_size_part / 2.f)}},
+        C{{hex_size_part, 0.f}},
+        C{{hex_size_part / 2.f, std::sqrt(3) * (hex_size_part / 2.f)}},
+        C{{-hex_size_part / 2.f, std::sqrt(3) * (hex_size_part / 2.f)}},
     };
 
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_pointy
     {
-        C{{0.f, -2.f}},
-        C{{2.f, -1.f}},
-        C{{2.f, 1.f}},
-        C{{0.f, 2.f}},
-        C{{-2.f, 1.f}},
-        C{{-2.f, -1.f}},
+        C{{0.f, -hex_size_part}},
+        C{{std::sqrt(3) * (hex_size_part / 2.f), -hex_size_part / 2.f}},
+        C{{std::sqrt(3) * (hex_size_part / 2.f), hex_size_part / 2.f}},
+        C{{0.f, hex_size_part}},
+        C{{std::sqrt(3) * (-hex_size_part / 2.f), hex_size_part / 2.f}},
+        C{{std::sqrt(3) * (-hex_size_part / 2.f), -hex_size_part / 2.f}},
     };
 
     [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> triangles
@@ -213,8 +216,20 @@ int main(int /*argc*/, char* /*argv*/[])
 
     RenderLoop render_loop(*window, render);
 
-    const CsHexFlat cs_hex_flat(4.f, 4.f, -1.f, 1.f);
-    const CsHexPointy cs_hex_pointy(4.f, 4.f, -1.f, 1.f);
+    const CsHexFlat cs_hex_flat
+    (
+        2.f * hex::hex_size_part,
+        static_cast<float>(std::sqrt(3) * hex::hex_size_part),
+        hex::points_flat[1].pos.x,
+        hex::points_flat[2].pos.x
+    );
+    const CsHexPointy cs_hex_pointy
+    (
+        static_cast<float>(std::sqrt(3) * hex::hex_size_part),
+        2.f * hex::hex_size_part,
+        hex::points_pointy[1].pos.y,
+        hex::points_pointy[2].pos.y
+    );
 
     std::optional<HexCoordDoubledHeight> prev_selected_hex_flat;
     const Polygons hex_flat
