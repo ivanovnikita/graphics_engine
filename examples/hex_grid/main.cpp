@@ -263,11 +263,25 @@ int main(int /*argc*/, char* /*argv*/[])
     std::vector<Polygons> fixed_grid_pointy;
 
     constexpr int hex_map_radius = 11;
-    for (int x = -hex_map_radius; x <= hex_map_radius; ++x)
+//    for (int x = -hex_map_radius; x <= hex_map_radius; ++x)
+//    {
+//        const int y1 = std::max(-hex_map_radius, -x - hex_map_radius);
+//        const int y2 = std::min(hex_map_radius, -x + hex_map_radius);
+//        for (int y = y1; y <= y2; ++y)
+//        {
+//            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
+//            fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
+
+//            // TODO: rewrite copy-pasted code
+//            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
+//            fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
+//        }
+//    }
+
+    for (int y = 0; y < hex_map_radius; ++y)
     {
-        const int y1 = std::max(-hex_map_radius, -x - hex_map_radius);
-        const int y2 = std::min(hex_map_radius, -x + hex_map_radius);
-        for (int y = y1; y <= y2; ++y)
+        int y_offset = static_cast<int>(std::floor(y / 2));
+        for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
         {
             const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
             fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
