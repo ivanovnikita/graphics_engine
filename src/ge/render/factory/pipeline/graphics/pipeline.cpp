@@ -183,7 +183,7 @@ namespace ge::factory
         (
             vk::PipelineCache()
           , pipeline_create_info
-        );
+        ).value;
 
         return pipeline;
     }
@@ -251,7 +251,7 @@ namespace ge::factory
         (
             vk::PipelineCache()
           , pipeline_create_info
-        );
+        ).value;
 
         return pipeline;
     }
@@ -320,7 +320,7 @@ namespace ge::factory
         (
             vk::PipelineCache()
           , pipeline_create_info
-        );
+        ).value;
 
         return pipeline;
     }
@@ -390,7 +390,7 @@ namespace ge::factory
         (
             vk::PipelineCache()
           , pipeline_create_info
-        );
+        ).value;
 
         return pipeline;
     }

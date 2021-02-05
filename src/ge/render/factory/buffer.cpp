@@ -102,11 +102,14 @@ namespace ge::factory
             .setCommandBufferCount(1)
             .setPCommandBuffers(&command_buffer);
 
-        logical_device.resetFences(1, &transfer_finished);
-        transfer.submit(1, &submit_info, transfer_finished);
+        logical_device.resetFences({transfer_finished});
+        transfer.submit({submit_info}, transfer_finished);
 
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-        logical_device.waitForFences(1, &transfer_finished, VK_TRUE, timeout);
+        if (vk::Result r = logical_device.waitForFences({transfer_finished}, VK_TRUE, timeout); r != vk::Result::eSuccess)
+        {
+            vk::throwResultException(r, VULKAN_HPP_NAMESPACE_STRING"::LogicalDevice::wairForFences");
+        }
     }
 
     GraphInDeviceMemory load_graph_to_device

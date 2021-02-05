@@ -6,9 +6,8 @@ class GraphicsEngineConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "lto": [True, False],
         "with_xcb": [True, False],
-        "with_debug_layers": [True, False],
+        "with_debug_layers": [False],
         "with_gtests": [True, False]
     }
     default_options = {
@@ -24,46 +23,13 @@ class GraphicsEngineConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("GraphicsEngine is only supported for Linux")
 
-        self.options["Vulkan-Loader"].with_xcb = self.options.with_xcb
-        self.options["Vulkan-ValidationLayers"].with_xcb = self.options.with_xcb
-
-        self.options["SPIRV-Tools"].lto = self.options.lto
-        self.options["glslang"].lto = self.options.lto
-        self.options["shaderc"].lto = self.options.lto
-        self.options["Vulkan-Loader"].lto = self.options.lto
-        self.options["xau"].lto = self.options.lto
-        self.options["xdmcp"].lto = self.options.lto
-        self.options["xcb"].lto = self.options.lto
-        self.options["xcb-util-wm"].lto = self.options.lto
-        self.options["xcb-util-errors"].lto = self.options.lto
-        self.options["xcb-util-keysyms"].lto = self.options.lto
-
-        self.options["xcb"].with_xinput = True
-
-        self.options["xcb"].shared = True
-        self.options["xau"].shared = True
-        self.options["xdmcp"].shared = True
-
     def requirements(self):
-        self.requires.add("shaderc/b4a735cc", private=False)
-        self.requires.add("Vulkan-Loader/1.2.141", private=False)
+        self.requires.add("vulkan-loader/1.2.162.0", private=False)
+        self.requires.add("shaderc/2019.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
         if self.options.with_xcb:
-            self.requires.add("xcb/1.14", private=False)
-            self.requires.add("xcb-util/0.4.0", private=False)
-            self.requires.add("xcb-util-wm/0.4.1", private=False)
-            self.requires.add("xcb-util-errors/1.0", private=False)
-            self.requires.add("xcb-util-keysyms/0.4.0", private=False)
-            self.requires.add("xorgproto/2019.2", private=False)
+            self.requires.add("xorg/system", private=False)
 
         if self.options.with_gtests:
-            self.requires.add("gtest/1.10.0 ", private=True)
-
-        if self.options.with_debug_layers:
-            self.requires.add("Vulkan-ValidationLayers/1.2.141", private=False)
-
-    def imports(self):
-        self.copy("*xcb.so*", "lib", "lib")
-        self.copy("*Xau.so*", "lib", "lib")
-        self.copy("*Xdmcp.so*", "lib", "lib")
+            self.requires.add("gtest/1.10.0", private=True)

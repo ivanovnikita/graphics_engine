@@ -51,7 +51,7 @@ namespace ge
         constexpr auto options_instance = Instance
         {
 #ifndef NDEBUG
-            Debug{DebugCallback{ENABLED}, ValidationLayers{ENABLED}}
+            Debug{DebugCallback{ENABLED}, ValidationLayers{DISABLED}}
 #else
             Debug{DebugCallback{DISABLED}, ValidationLayers{DISABLED}}
 #endif
@@ -465,9 +465,8 @@ namespace ge
             .setSignalSemaphoreCount(signal_semaphores.size())
             .setPSignalSemaphores(signal_semaphores.data());
 
-        constexpr uint32_t submit_info_count = 1;
-        logical_device_->resetFences(1, &*render_finished_fence_);
-        queues_.graphics.submit(submit_info_count, &submit_info, *render_finished_fence_);
+        logical_device_->resetFences({*render_finished_fence_});
+        queues_.graphics.submit({submit_info}, *render_finished_fence_);
 
         const std::array<vk::SwapchainKHR, 1> swapchains{*swapchain_};
 
@@ -488,6 +487,9 @@ namespace ge
             vk::throwResultException(present_result, VULKAN_HPP_NAMESPACE_STRING"::Queue::presentKHR");
         }
 
-        logical_device_->waitForFences(1, &*render_finished_fence_, VK_TRUE, timeout);
+        if (vk::Result r = logical_device_->waitForFences({*render_finished_fence_}, VK_TRUE, timeout); r != vk::Result::eSuccess)
+        {
+            vk::throwResultException(r, VULKAN_HPP_NAMESPACE_STRING"::LogicalDevice::wairForFences");
+        }
     }
 }

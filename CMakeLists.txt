@@ -204,12 +204,11 @@ define_source_group(ge_geometry)
 if (WIN32)
 elseif(UNIX)
     set(window_libs
-        CONAN_PKG::xcb
-        CONAN_PKG::xcb-util
-        CONAN_PKG::xcb-util-wm
-        CONAN_PKG::xcb-util-errors
-        CONAN_PKG::xcb-util-keysyms
-        CONAN_PKG::xorgproto
+        xcb
+        xcb-util
+        xcb-errors
+        xcb-keysyms
+        xcb-icccm
     )
 endif()
 
@@ -221,7 +220,7 @@ target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(ge_window
     PRIVATE
         CONAN_PKG::glm
-        CONAN_PKG::Vulkan-Loader
+        CONAN_PKG::vulkan-loader
         ${window_libs}
 )
 target_include_directories(ge_window
@@ -240,7 +239,7 @@ target_compile_options(ge_shader_compiler PRIVATE ${compile_options})
 set_target_properties(ge_shader_compiler PROPERTIES ${target_properties})
 target_link_libraries(ge_shader_compiler
     PRIVATE
-        CONAN_PKG::Vulkan-Headers
+        CONAN_PKG::vulkan-headers
         CONAN_PKG::shaderc
         Threads::Threads
         ${std_libs}
@@ -290,7 +289,7 @@ target_link_libraries(ge_render
     PUBLIC
         CONAN_PKG::glm
     PRIVATE
-        CONAN_PKG::Vulkan-Loader
+        CONAN_PKG::vulkan-loader
         Threads::Threads
         ${std_libs}
         dl
@@ -401,7 +400,7 @@ if (${GE_BUILD_TESTS})
             GE::window
             GE::render
             CONAN_PKG::gtest
-            CONAN_PKG::Vulkan-Headers
+            CONAN_PKG::vulkan-headers
             ${std_libs}
         )
         target_include_directories(tests_graphics
@@ -423,7 +422,7 @@ if (${GE_BUILD_EXAMPLES})
         GE::render
         GE::window
         GE::render_loop
-        CONAN_PKG::Vulkan-Headers
+        CONAN_PKG::vulkan-headers
         ${std_libs}
     )
     target_include_directories(example_2d_polygons PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
@@ -438,7 +437,7 @@ if (${GE_BUILD_EXAMPLES})
         GE::window
         GE::render_loop
         GE::geometry
-        CONAN_PKG::Vulkan-Headers
+        CONAN_PKG::vulkan-headers
         ${std_libs}
     )
     target_include_directories(example_hex_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
