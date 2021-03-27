@@ -7,12 +7,11 @@ class GraphicsEngineConan(ConanFile):
     options = {
         "shared": [True, False],
         "with_xcb": [True, False],
-        "with_debug_layers": [False],
+        "with_debug_layers": [True, False],
         "with_gtests": [True, False]
     }
     default_options = {
         "shared": False,
-        "lto": False,
         "with_xcb": False,
         "with_debug_layers": False,
         "with_gtests": False
