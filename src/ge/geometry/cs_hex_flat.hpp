@@ -55,10 +55,10 @@ namespace ge
         ) noexcept;
 
         HexCoordDoubledHeight to_hex_doubled_height(const Point2d<T>&) const noexcept;
-        Point2d<T> to_draw_space(const HexCoordDoubledHeight&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordDoubledHeight&) const noexcept; // hex center
 
         HexCoordAxialFlat to_hex_axial_flat(const Point2d<T>&) const noexcept;
-        Point2d<T> to_draw_space(const HexCoordAxialFlat&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordAxialFlat&) const noexcept; // hex center
 
     private:
         T width_;
