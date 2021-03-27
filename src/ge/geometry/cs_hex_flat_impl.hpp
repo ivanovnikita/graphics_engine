@@ -34,10 +34,10 @@ namespace ge
     HexCoordDoubledHeight CsHexFlat<T>::to_hex_doubled_height(const Point2d<T>& in) const noexcept
     {
         const int x_quot = static_cast<int>(in.x / width_cycle_);
-        const T x_rem = std::fabs(std::fmod(in.x, static_cast<T>(width_cycle_)));
+        const T x_rem = std::fabs(std::fmod(in.x, width_cycle_));
 
         const int y_quot = static_cast<int>(in.y / height_);
-        const T y_rem = std::fabs(std::fmod(in.y, static_cast<T>(height_)));
+        const T y_rem = std::fabs(std::fmod(in.y, height_));
 
         int x = 2 * x_quot;
         int y = 2 * y_quot;
@@ -71,7 +71,7 @@ namespace ge
                 {
                     const Point2d<T> a{pre_last_x_, 0};
                     const Point2d<T> b{last_x_, height_half_};
-                    if (is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
+                    if (is_left_side(LineCRef2d<T>{a, b}, {x_rem, y_rem}))
                     {
                         x += 1 * sign(in.x);
                         y += 1 * sign(in.y);
@@ -85,7 +85,7 @@ namespace ge
                 {
                     const Point2d<T> a{last_x_, height_half_};
                     const Point2d<T> b{pre_last_x_, height_};
-                    if (is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
+                    if (is_left_side(LineCRef2d<T>{a, b}, {x_rem, y_rem}))
                     {
                         x += 1 * sign(in.x);
                         y += 1 * sign(in.y);
@@ -104,7 +104,7 @@ namespace ge
             {
                 const Point2d<T> a{width_half_, 0};
                 const Point2d<T> b{x_2_, height_half_};
-                if (not is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
+                if (not is_left_side(LineCRef2d<T>{a, b}, {x_rem, y_rem}))
                 {
                     x += 1 * sign(in.x);
                     y += 1 * sign(in.y);
@@ -114,7 +114,7 @@ namespace ge
             {
                 const Point2d<T> a{x_2_, height_half_};
                 const Point2d<T> b{width_half_, height_};
-                if (is_left_side(LineCRef2dF{a, b}, {x_rem, y_rem}))
+                if (is_left_side(LineCRef2d<T>{a, b}, {x_rem, y_rem}))
                 {
                     y += 2 * sign(in.y);
                 }
@@ -132,8 +132,8 @@ namespace ge
     template <typename T>
     Point2d<T> CsHexFlat<T>::to_draw_space(const HexCoordDoubledHeight& in) const noexcept
     {
-        T x = sign(in.x) * (std::abs(in.x) / 2) * width_cycle_;
-        T y = sign(in.y) * (std::abs(in.y) / 2) * height_;
+        T x = (in.x / 2) * width_cycle_;
+        T y = (in.y / 2) * height_;
 
         if ((in.x & 1) == 1)
         {
