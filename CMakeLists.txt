@@ -443,4 +443,18 @@ if (${GE_BUILD_EXAMPLES})
     target_include_directories(example_hex_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
     define_source_group(example_hex_grid)
     install(TARGETS example_hex_grid DESTINATION examples/hex_grid)
+
+    add_executable(example_graph examples/graph/main.cpp)
+    target_compile_options(example_graph PRIVATE ${compile_options})
+    set_target_properties(example_graph PROPERTIES ${target_properties})
+    target_link_libraries(example_graph
+        GE::render
+        GE::window
+        GE::render_loop
+        CONAN_PKG::vulkan-headers
+        ${std_libs}
+    )
+    target_include_directories(example_graph PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_graph)
+    install(TARGETS example_graph DESTINATION examples/graph)
 endif()

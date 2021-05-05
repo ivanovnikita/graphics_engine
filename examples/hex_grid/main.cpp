@@ -210,7 +210,8 @@ int main(int /*argc*/, char* /*argv*/[])
             , .width = width
             , .height = height
             , .background_color = background_color
-        }
+        },
+        ge::DrawMode::POLYGONS
     );
 
     window->start_display();

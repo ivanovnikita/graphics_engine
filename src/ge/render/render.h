@@ -31,16 +31,24 @@ namespace ge
         std::array<uint8_t, 4> background_color;
     };
 
+    enum class DrawMode
+    {
+        POLYGONS,
+        GRAPH
+    };
+
     class Render final
     {
     public:
         Render
         (
-            const SurfaceParams&
+            const SurfaceParams&,
+            DrawMode
         );
         ~Render();
 
         void set_object_to_draw(const std::span<const Polygons>&);
+        void set_object_to_draw(const Graph&);
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 

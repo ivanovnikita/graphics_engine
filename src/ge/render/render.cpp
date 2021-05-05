@@ -7,13 +7,15 @@ namespace ge
 {
     Render::Render
     (
-        const SurfaceParams& surface_params
+        const SurfaceParams& surface_params,
+        const DrawMode draw_mode
     )
         : impl_
         (
             new RenderImpl
             (
-                surface_params
+                surface_params,
+                draw_mode
             )
         )
     {
@@ -24,6 +26,11 @@ namespace ge
     void Render::set_object_to_draw(const std::span<const Polygons>& polygons)
     {
         impl_->set_object_to_draw(polygons);
+    }
+
+    void Render::set_object_to_draw(const Graph& graph)
+    {
+        impl_->set_object_to_draw(graph);
     }
 
     void Render::draw_frame()

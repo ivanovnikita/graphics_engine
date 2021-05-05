@@ -14,11 +14,14 @@ namespace ge
     public:
         RenderImpl
         (
-            const SurfaceParams&
+            const SurfaceParams&,
+            DrawMode
         );
         ~RenderImpl();
 
         void set_object_to_draw(const std::span<const Polygons>&);
+        void set_object_to_draw(const Graph&);
+
         void draw_frame();
         void resize(const uint16_t new_surface_width, const uint16_t new_surface_height);
 
@@ -38,6 +41,8 @@ namespace ge
         void create_command_buffers();
         void update_uniform_buffer(size_t current_image);
         void update_camera_transform();
+
+        DrawMode                            draw_mode_;
 
         vk::UniqueInstance                  instance_;
         vk::UniqueDebugReportCallbackEXT    debug_callback_;
@@ -63,11 +68,18 @@ namespace ge
         std::vector<vk::DescriptorSet>      descriptor_sets_;
 
         vk::UniqueRenderPass                render_pass_;
+
         vk::UniquePipeline                  triangles_pipeline_;
         vk::UniquePipeline                  lines_pipeline_;
+
+        vk::UniquePipeline                  graph_acrs_pipeline_;
+        vk::UniquePipeline                  graph_vertices_pipeline_;
+
         std::vector<vk::UniqueFramebuffer>  framebuffers_;
 
         factory::PolygonsInDeviceMemory     polygon_in_device_mem_;
+
+        factory::GraphInDeviceMemory        graph_in_device_mem_;
 
         vk::UniqueCommandPool               command_pool_;
         std::vector<vk::CommandBuffer>      command_buffers_;

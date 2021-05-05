@@ -29,9 +29,11 @@ namespace ge
 {
     Render::RenderImpl::RenderImpl
     (
-        const SurfaceParams& surface_params
+        const SurfaceParams& surface_params,
+        const DrawMode draw_mode
     )
-        : surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
+        : draw_mode_{draw_mode}
+        , surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
         , surface_background_color_
         {
             // TODO: this conversion may be incorrect, use linear to sRGB colorspace conversion
@@ -223,22 +225,50 @@ namespace ge
             *logical_device_
             , *camera_2d_descriptor_set_layout_
         );
-        triangles_pipeline_ = factory::polygon_pipeline
-        (
-            *logical_device_
-          , *render_pass_
-          , shaders_storage_
-          , surface_extent_
-          , *camera_2d_pipeline_layout_
-        );
-        lines_pipeline_ = factory::lines_pipeline
-        (
-            *logical_device_
-          , *render_pass_
-          , shaders_storage_
-          , surface_extent_
-          , *camera_2d_pipeline_layout_
-        );
+
+        switch (draw_mode_)
+        {
+        case DrawMode::POLYGONS:
+        {
+            triangles_pipeline_ = factory::polygon_pipeline
+            (
+                *logical_device_
+              , *render_pass_
+              , shaders_storage_
+              , surface_extent_
+              , *camera_2d_pipeline_layout_
+            );
+            lines_pipeline_ = factory::lines_pipeline
+            (
+                *logical_device_
+              , *render_pass_
+              , shaders_storage_
+              , surface_extent_
+              , *camera_2d_pipeline_layout_
+            );
+            break;
+        }
+        case DrawMode::GRAPH:
+        {
+            graph_acrs_pipeline_ = factory::graph_arcs_pipeline
+            (
+                *logical_device_
+              , *render_pass_
+              , shaders_storage_
+              , surface_extent_
+              , *camera_2d_pipeline_layout_
+            );
+            graph_vertices_pipeline_ = factory::graph_vertices_pipeline
+            (
+                *logical_device_
+              , *render_pass_
+              , shaders_storage_
+              , surface_extent_
+              , *camera_2d_pipeline_layout_
+            );
+            break;
+        }
+        }
 
         framebuffers_.reserve(image_views_.size());
         for (const auto& image_view : image_views_)
@@ -265,8 +295,13 @@ namespace ge
         );
         command_buffers_.clear();
         framebuffers_.clear();
+
         triangles_pipeline_.reset();
         lines_pipeline_.reset();
+
+        graph_acrs_pipeline_.reset();
+        graph_vertices_pipeline_.reset();
+
         camera_2d_pipeline_layout_.reset();
         render_pass_.reset();
 
@@ -313,6 +348,21 @@ namespace ge
         create_command_buffers();
     }
 
+    void Render::RenderImpl::set_object_to_draw(const Graph& graph)
+    {
+        graph_in_device_mem_ = factory::load_graph_to_device
+        (
+            physical_device_
+            , *logical_device_
+            , *command_pool_
+            , queues_.graphics // TODO: transfer queue?
+            , *transfer_finished_fence_
+            , graph
+        );
+
+        create_command_buffers();
+    }
+
     void Render::RenderImpl::create_command_buffers()
     {
         if (not command_buffers_.empty())
@@ -327,20 +377,45 @@ namespace ge
             command_buffers_.clear();
         }
 
-        command_buffers_ = factory::draw_polygons_commands
-        (
-            *logical_device_
-            , *command_pool_
-            , framebuffers_
-            , *render_pass_
-            , surface_extent_
-            , surface_background_color_
-            , *triangles_pipeline_
-            , *lines_pipeline_
-            , *camera_2d_pipeline_layout_
-            , descriptor_sets_
-            , polygon_in_device_mem_
-        );
+        switch (draw_mode_)
+        {
+        case DrawMode::POLYGONS:
+        {
+            command_buffers_ = factory::draw_polygons_commands
+            (
+                *logical_device_
+                , *command_pool_
+                , framebuffers_
+                , *render_pass_
+                , surface_extent_
+                , surface_background_color_
+                , *triangles_pipeline_
+                , *lines_pipeline_
+                , *camera_2d_pipeline_layout_
+                , descriptor_sets_
+                , polygon_in_device_mem_
+            );
+            break;
+        }
+        case DrawMode::GRAPH:
+        {
+            command_buffers_ = factory::draw_graph_commands
+            (
+                *logical_device_
+                , *command_pool_
+                , framebuffers_
+                , *render_pass_
+                , surface_extent_
+                , surface_background_color_
+                , *graph_acrs_pipeline_
+                , *graph_vertices_pipeline_
+                , *camera_2d_pipeline_layout_
+                , descriptor_sets_
+                , graph_in_device_mem_
+            );
+            break;
+        }
+        }
     }
 
     void Render::RenderImpl::update_uniform_buffer(const size_t current_image_index)
