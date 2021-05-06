@@ -267,7 +267,7 @@ add_custom_command(
 
 sources_in_dir_recurse(src/ge/render render_sources)
 if (${GE_ENABLE_DEBUG_LAYERS})
-    set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/share/vulkan/explicit_layer.d")
+    set(VK_LAYER_PATH "${CONAN_RES_DIRS_VULKAN-VALIDATIONLAYERS}/vulkan/explicit_layer.d")
     set(template "src/ge/render/vk_layer_path.h.in")
     set(generated "${CMAKE_CURRENT_BINARY_DIR}/generated_include/vk_layer_path.h")
     configure_file(${template} ${generated})

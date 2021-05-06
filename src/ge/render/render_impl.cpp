@@ -53,7 +53,7 @@ namespace ge
         constexpr auto options_instance = Instance
         {
 #ifndef NDEBUG
-            Debug{DebugCallback{ENABLED}, ValidationLayers{DISABLED}}
+            Debug{DebugCallback{ENABLED}, ValidationLayers{ENABLED}}
 #else
             Debug{DebugCallback{DISABLED}, ValidationLayers{DISABLED}}
 #endif

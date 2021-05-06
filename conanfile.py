@@ -23,7 +23,9 @@ class GraphicsEngineConan(ConanFile):
             raise ConanInvalidConfiguration("GraphicsEngine is only supported for Linux")
 
     def requirements(self):
-        self.requires.add("vulkan-loader/1.2.162.0", private=False)
+        self.requires.add("vulkan-headers/1.2.154.0 ", private=False)
+        self.requires.add("vulkan-loader/1.2.154.0", private=False)
+        self.requires.add("vulkan-validationlayers/1.2.154.0", private=False)
         self.requires.add("shaderc/2019.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
