@@ -13,6 +13,11 @@
 #include <regex>
 #include <span>
 
+using Cl = ge::Color;
+
+constexpr Cl BL{{0.f, 0.f, 0.f}};
+constexpr Cl GR{{0.5f, 0.5f, 0.5f}};
+
 namespace
 {
     std::vector<std::vector<ge::Vertex>> read_points(const std::string_view& filepath)
@@ -56,7 +61,7 @@ namespace
 
         for (size_t i = 0; i < points.size(); ++i)
         {
-            result.emplace_back(ge::Graph::Vertice{i, ge::Color{{1.f, 0.f, 0.f}}});
+            result.emplace_back(ge::Graph::Vertice{i, BL});
         }
 
         return result;
@@ -81,7 +86,7 @@ namespace
             for (size_t i = 1; i < road.size(); ++i)
             {
                 points.emplace_back(road[i]);
-                arcs.emplace_back(ge::Graph::Arc{points.size() - 2, points.size() - 1, ge::Color{{0.f, 1.f, 0.f}}});
+                arcs.emplace_back(ge::Graph::Arc{points.size() - 2, points.size() - 1, GR});
             }
         }
 
@@ -110,6 +115,37 @@ namespace
             (min_x + max_x) / 2.f
           , (min_y + max_y) / 2.f
         };
+    }
+
+    float scale_to_fit_all
+    (
+        const std::span<const ge::Vertex>& points,
+        const uint16_t window_width,
+        const uint16_t window_height
+    )
+    {
+        float min_x = std::numeric_limits<float>::max();
+        float max_x = std::numeric_limits<float>::min();
+
+        float min_y = std::numeric_limits<float>::max();
+        float max_y = std::numeric_limits<float>::min();
+
+        for (const ge::Vertex& point : points)
+        {
+            min_x = std::min(min_x, point.pos.x);
+            max_x = std::max(max_x, point.pos.x);
+
+            min_y = std::min(min_y, point.pos.y);
+            max_y = std::max(max_y, point.pos.y);
+        }
+
+        const float width_in_model_space = max_x - min_x;
+        const float height_in_model_space = max_y - min_y;
+
+        const float width_scale = width_in_model_space / static_cast<float>(window_width);
+        const float height_scale = height_in_model_space / static_cast<float>(window_height);
+
+        return std::min(width_scale, height_scale);
     }
 
     namespace triangle
@@ -142,15 +178,15 @@ int main(int argc, char* argv[])
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
-    constexpr uint16_t width = 500;
-    constexpr uint16_t height = 500;
+    constexpr uint16_t width = 1024;
+    constexpr uint16_t height = 768;
     constexpr ge::DynamicSize size
     {
         .default_size = ge::Size{width, height}
         , .min_size = ge::Size{100, 100}
         , .max_size = std::nullopt
     };
-    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
+    constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
 
     auto window = ge::Window::create(size, background_color);
 
@@ -184,27 +220,31 @@ int main(int argc, char* argv[])
 
         const glm::vec2 camera_pos = camera_on_center(triangle::points);
         render.set_camera_pos(camera_pos);
+        render.set_camera_scale(1.f / 300.f);
     }
     else
     {
         std::string_view graph_file_path{argv[1]};
         const std::vector<std::vector<ge::Vertex>> raw_points = read_points(graph_file_path);
-        const auto [points, arcs] = init_arcs(raw_points);
+        auto [points, arcs] = init_arcs(raw_points);
+
         const std::vector<ge::Graph::Vertice> vertices = init_vertices(points);
+
         const ge::Graph graph
         {
-            points
-          , vertices
-          , arcs
+            points,
+            vertices,
+//            {},
+            arcs
         };
 
         render.set_object_to_draw(graph);
 
         const glm::vec2 camera_pos = camera_on_center(points);
         render.set_camera_pos(camera_pos);
-    }
 
-    render.set_camera_scale(1.f / 300.f);
+        render.set_camera_scale(scale_to_fit_all(points, width, height));
+    }
 
     render.draw_frame();
 
