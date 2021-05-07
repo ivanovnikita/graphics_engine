@@ -22,13 +22,20 @@ cmake_dependent_option(
         "GE_BUILD_TESTS" OFF
 )
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include("third_party/cmake-conan/conan.cmake")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    option(GE_USE_LIBC++ "Use libc++?" ON)
 
-if (WIN32)
-elseif(UNIX)
-    list(APPEND conan_options with_xcb=True)
+    if (${GE_USE_LIBC++})
+        list(APPEND CMAKE_CXX_FLAGS -stdlib=libc++ -lc++ -lc++abi -lc++experimental)
+    endif()
 endif()
+
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 if (${GE_ENABLE_LTO})
     include(CheckIPOSupported)
@@ -37,41 +44,41 @@ if (${GE_ENABLE_LTO})
 
     list(APPEND linker_flags "-fuse-ld=gold -fuse-linker-plugin")
 
-    list(APPEND conan_options lto=True)
+    list(APPEND conan_options enable_lto=True)
 endif()
 
 if (${GE_ENABLE_DEBUG_LAYERS})
-    list(APPEND conan_options with_debug_layers=True)
+    list(APPEND conan_options enable_debug_layers=True)
 endif()
 
 if (${GE_BUILD_TESTS})
-    list(APPEND conan_options with_gtests=True)
+    list(APPEND conan_options build_tests=True)
+    if (${GE_BUILD_GRAPHICS_TESTS})
+        list(APPEND conan_options build_graphics_tests=True)
+    endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    list(APPEND conan_settings compiler.libcxx=libstdc++11)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#    list(APPEND conan_settings compiler.libcxx=libc++)
-    list(APPEND conan_settings compiler.libcxx=libstdc++11)
+if(NOT CONAN_EXPORTED)
+    set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+    include("third_party/cmake-conan/conan.cmake")
+    conan_cmake_autodetect(settings)
+    conan_cmake_install(
+        PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR}
+        BUILD missing
+        SETTINGS ${settings}
+        OPTIONS ${conan_options}
+    )
 endif()
 
-conan_cmake_run(
-    CONANFILE conanfile.py
-    BASIC_SETUP
-    CMAKE_TARGETS
-    BUILD missing
-    NO_OUTPUT_DIRS
-    KEEP_RPATHS
-    SETTINGS ${conan_settings}
-    OPTIONS ${conan_options}
-)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 list(APPEND CMAKE_SHARED_LINKER_FLAGS ${linker_flags})
 list(APPEND CMAKE_EXE_LINKER_FLAGS ${linker_flags})
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX
-        "${CMAKE_CURRENT_BINARY_DIR}/build"
+        "${CMAKE_SOURCE_DIR}/builded_package"
         CACHE
         PATH
         "Install path prefix"
@@ -80,18 +87,12 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    list(APPEND cxx_flags -Ofast)
+    list(APPEND cxx_flags -O3)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     list(APPEND cxx_flags -O0)
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
 endif()
-
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND warnings
     -Werror
@@ -144,9 +145,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-global-constructors
         -Wno-weak-vtables
         )
-
-#    set(std_libs -lc++ -lc++abi -lc++experimental)
-#    list(APPEND cxx_flags -stdlib=libc++)
 endif()
 
 set(compile_options ${cxx_flags} ${warnings})
@@ -174,32 +172,32 @@ endfunction()
 find_package(Threads REQUIRED)
 
 sources_in_dir_recurse(src/ge/common common_sources)
-add_library(ge_common ${common_sources})
-target_compile_options(ge_common PRIVATE ${compile_options})
-set_target_properties(ge_common PROPERTIES ${target_properties})
-target_include_directories(ge_common
+add_library(common ${common_sources})
+target_compile_options(common PRIVATE ${compile_options})
+set_target_properties(common PROPERTIES ${target_properties} OUTPUT_NAME ge_common)
+target_include_directories(common
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
 )
-add_library(GE::common ALIAS ge_common)
-define_source_group(ge_common)
+add_library(GE::common ALIAS common)
+define_source_group(common)
 
 sources_in_dir_recurse(src/ge/geometry geometry_sources)
-add_library(ge_geometry ${geometry_sources})
-target_compile_options(ge_geometry PRIVATE ${compile_options})
-set_target_properties(ge_geometry PROPERTIES ${target_properties})
-target_include_directories(ge_geometry
+add_library(geometry ${geometry_sources})
+target_compile_options(geometry PRIVATE ${compile_options})
+set_target_properties(geometry PROPERTIES ${target_properties} OUTPUT_NAME ge_geometry)
+target_include_directories(geometry
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
 )
-add_library(GE::geometry ALIAS ge_geometry)
-define_source_group(ge_geometry)
+add_library(GE::geometry ALIAS geometry)
+define_source_group(geometry)
 
 if (WIN32)
 elseif(UNIX)
@@ -213,25 +211,25 @@ elseif(UNIX)
 endif()
 
 sources_in_dir_recurse(src/ge/window window_sources)
-add_library(ge_window ${window_sources})
-target_compile_options(ge_window PRIVATE ${compile_options})
-set_target_properties(ge_window PROPERTIES ${target_properties})
-target_compile_definitions(ge_window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
-target_link_libraries(ge_window
+add_library(window ${window_sources})
+target_compile_options(window PRIVATE ${compile_options})
+set_target_properties(window PROPERTIES ${target_properties} OUTPUT_NAME ge_window)
+target_compile_definitions(window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
+target_link_libraries(window
     PRIVATE
         CONAN_PKG::glm
         CONAN_PKG::vulkan-loader
         ${window_libs}
 )
-target_include_directories(ge_window
+target_include_directories(window
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
 )
-add_library(GE::window ALIAS ge_window)
-define_source_group(ge_window)
+add_library(GE::window ALIAS window)
+define_source_group(window)
 
 sources_in_dir_recurse(src/ge/shader_compiler shader_compiler_sources)
 add_executable(ge_shader_compiler ${shader_compiler_sources})
@@ -273,19 +271,19 @@ if (${GE_ENABLE_DEBUG_LAYERS})
     configure_file(${template} ${generated})
     list(APPEND render_sources ${template} ${generated})
 endif()
-add_library(ge_render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
-target_compile_options(ge_render PRIVATE ${compile_options})
-set_target_properties(ge_render PROPERTIES ${target_properties})
-target_compile_definitions(ge_render
+add_library(render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
+target_compile_options(render PRIVATE ${compile_options})
+set_target_properties(render PROPERTIES ${target_properties} OUTPUT_NAME ge_render)
+target_compile_definitions(render
     PRIVATE
         -DVK_USE_PLATFORM_XCB_KHR=1
         #-DVULKAN_HPP_DISABLE_IMPLICIT_RESULT_VALUE_CAST=1
 )
 if (${GE_ENABLE_DEBUG_LAYERS})
-    target_compile_definitions(ge_render PUBLIC -DGE_DEBUG_LAYERS_ENABLED=1)
+    target_compile_definitions(render PUBLIC -DGE_DEBUG_LAYERS_ENABLED=1)
 endif()
 
-target_link_libraries(ge_render
+target_link_libraries(render
     PUBLIC
         CONAN_PKG::glm
     PRIVATE
@@ -294,7 +292,7 @@ target_link_libraries(ge_render
         ${std_libs}
         dl
 )
-target_include_directories(ge_render
+target_include_directories(render
     SYSTEM PRIVATE
         $<BUILD_INTERFACE:${CONAN_INCLUDE_DIRS_SHADERC}>
     PRIVATE
@@ -305,33 +303,35 @@ target_include_directories(ge_render
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_shaders>
         $<INSTALL_INTERFACE:include>
 )
-add_library(GE::render ALIAS ge_render)
-define_source_group(ge_render)
+add_library(GE::render ALIAS render)
+define_source_group(render)
 
 sources_in_dir_recurse(src/ge/render_loop render_loop_sources)
-add_library(ge_render_loop ${render_loop_sources})
-target_compile_options(ge_render_loop PRIVATE ${compile_options})
-set_target_properties(ge_render_loop PROPERTIES ${target_properties})
-target_include_directories(ge_render_loop
+add_library(render_loop ${render_loop_sources})
+target_compile_options(render_loop PRIVATE ${compile_options})
+set_target_properties(render_loop PROPERTIES ${target_properties} OUTPUT_NAME ge_render_loop)
+target_include_directories(render_loop
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(ge_render_loop
+target_link_libraries(render_loop
     PRIVATE
         GE::render
         GE::window
         ${std_libs}
 )
-add_library(GE::render_loop ALIAS ge_render_loop)
-define_source_group(ge_render_loop)
+add_library(GE::render_loop ALIAS render_loop)
+define_source_group(render_loop)
 
 install(
     TARGETS
-        ge_window
-        ge_render
+        window
+        render
+        render_loop
+        geometry
     EXPORT
         GraphicsEngine
     RUNTIME DESTINATION bin
@@ -347,16 +347,24 @@ install(
 )
 install(
     FILES
-        src/ge/render/utils/span.hpp
-        src/ge/render/utils/span_impl.hpp
-    DESTINATION
-        include/ge/render/utils
-)
-install(
-    FILES
         src/ge/window/window.h
     DESTINATION
         include/ge/window
+)
+install(
+    FILES
+        src/ge/render_loop/render_loop.h
+    DESTINATION
+        include/ge/render_loop
+)
+install(
+    DIRECTORY
+        src/ge/geometry
+    DESTINATION
+        include/ge
+    FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp"
 )
 # TODO: install deps too (it is not usable now)
 install(
@@ -389,7 +397,6 @@ if (${GE_BUILD_TESTS})
     set_target_properties(tests_common PROPERTIES ${target_properties})
     define_source_group(tests_common)
     gtest_discover_tests(tests_common)
-    install(TARGETS tests_common DESTINATION tests/bin)
 
     if (${GE_BUILD_GRAPHICS_TESTS})
         sources_in_dir_recurse(tests/graphics graphics_tests_sources)
@@ -410,7 +417,6 @@ if (${GE_BUILD_TESTS})
         )
         define_source_group(tests_graphics)
         gtest_discover_tests(tests_graphics)
-        install(TARGETS tests_graphics DESTINATION tests/bin)
     endif()
 endif()
 

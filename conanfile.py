@@ -6,15 +6,17 @@ class GraphicsEngineConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "with_xcb": [True, False],
-        "with_debug_layers": [True, False],
-        "with_gtests": [True, False]
+        "enable_lto": [True, False],
+        "enable_debug_layers": [True, False],
+        "build_tests": [True, False],
+        "build_graphics_tests": [True, False],
     }
     default_options = {
         "shared": False,
-        "with_xcb": False,
-        "with_debug_layers": False,
-        "with_gtests": False
+        "enable_lto": False,
+        "enable_debug_layers": False,
+        "build_tests": False,
+        "build_graphics_tests": False
     }
     generators = "cmake"
 
@@ -25,12 +27,15 @@ class GraphicsEngineConan(ConanFile):
     def requirements(self):
         self.requires.add("vulkan-headers/1.2.154.0 ", private=False)
         self.requires.add("vulkan-loader/1.2.154.0", private=False)
-        self.requires.add("vulkan-validationlayers/1.2.154.0", private=False)
-        self.requires.add("shaderc/2019.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
-        if self.options.with_xcb:
+        self.requires.add("shaderc/2019.0", private=True)
+
+        if self.settings.os == "Linux":
             self.requires.add("xorg/system", private=False)
 
-        if self.options.with_gtests:
+        if self.options.enable_debug_layers:
+            self.requires.add("vulkan-validationlayers/1.2.154.0", private=False)
+
+        if self.options.build_tests or self.options.build_graphics_tests:
             self.requires.add("gtest/1.10.0", private=True)
