@@ -4,3 +4,4 @@
 .idea
 .cmake
 examples/graph/data/*
+builded_package
