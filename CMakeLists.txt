@@ -36,6 +36,7 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (${GE_ENABLE_LTO})
     include(CheckIPOSupported)
@@ -62,6 +63,7 @@ if(NOT CONAN_EXPORTED)
     set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
     include("third_party/cmake-conan/conan.cmake")
     conan_cmake_autodetect(settings)
+    list(APPEND settings compiler.cppstd=20)
     conan_cmake_install(
         PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR}
         BUILD missing
@@ -348,6 +350,8 @@ install(
 install(
     FILES
         src/ge/window/window.h
+        src/ge/window/window_events.h
+        src/ge/window/window_size.h
     DESTINATION
         include/ge/window
 )
