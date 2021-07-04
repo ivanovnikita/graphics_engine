@@ -454,6 +454,21 @@ if (${GE_BUILD_EXAMPLES})
     define_source_group(example_hex_grid)
     install(TARGETS example_hex_grid DESTINATION examples/hex_grid)
 
+    add_executable(example_square_grid examples/square_grid/main.cpp)
+    target_compile_options(example_square_grid PRIVATE ${compile_options})
+    set_target_properties(example_square_grid PROPERTIES ${target_properties})
+    target_link_libraries(example_square_grid
+        GE::render
+        GE::window
+        GE::render_loop
+        GE::geometry
+        CONAN_PKG::vulkan-headers
+        ${std_libs}
+    )
+    target_include_directories(example_square_grid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated_include")
+    define_source_group(example_square_grid)
+    install(TARGETS example_square_grid DESTINATION examples/square_grid)
+
     add_executable(example_graph examples/graph/main.cpp)
     target_compile_options(example_graph PRIVATE ${compile_options})
     set_target_properties(example_graph PROPERTIES ${target_properties})
