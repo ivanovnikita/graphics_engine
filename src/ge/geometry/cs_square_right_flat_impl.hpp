@@ -37,11 +37,11 @@ namespace ge
     }
 
     template <typename T>
-    Point2d<T> CsSquareRightFlat<T>::to_draw_space(const SquareRightCoordAxial& /*in*/) const noexcept
+    Point2d<T> CsSquareRightFlat<T>::to_draw_space(const SquareRightCoordAxial& in) const noexcept
     {
-//        const T y = static_cast<T>(in.y) * height_;
-//        const T x = static_cast<T>(in.x) * width_ + (y / height_) * x_1_;
+        const T y = static_cast<T>(in.y) * height_;
+        const T x = static_cast<T>(in.x) * width_ + (y / height_) * x_1_;
 
-//        return {x, y};
+        return {x, y};
     }
 }
