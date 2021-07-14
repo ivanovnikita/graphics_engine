@@ -5,25 +5,25 @@
 
 namespace ge
 {
-    struct SquareRightCoordAxial final
+    struct SquareCoordAxial final
     {
         int x;
         int y;
     };
 
     template <typename T>
-    class CsSquareRightFlat final
+    class CsSquareFlat final
     {
     public:
-        explicit CsSquareRightFlat
+        explicit CsSquareFlat
         (
             T width,
             T height,
             T x_1
         ) noexcept;
 
-        SquareRightCoordAxial to_axial(const Point2d<T>&) const noexcept;
-        Point2d<T> to_draw_space(const SquareRightCoordAxial&) const noexcept; // square center
+        SquareCoordAxial to_axial(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const SquareCoordAxial&) const noexcept; // square center
 
     private:
         T width_;
@@ -32,4 +32,4 @@ namespace ge
     };
 }
 
-#include "cs_square_right_flat_impl.hpp"
+#include "cs_square_flat_impl.hpp"

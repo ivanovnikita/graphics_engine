@@ -1,13 +1,13 @@
 #pragma once
 
-#include "cs_square_right_flat.hpp"
+#include "cs_square_flat.hpp"
 #include "point_localization.hpp"
 #include "sign.hpp"
 
 namespace ge
 {
     template <typename T>
-    CsSquareRightFlat<T>::CsSquareRightFlat
+    CsSquareFlat<T>::CsSquareFlat
     (
         T width,
         T height,
@@ -20,7 +20,7 @@ namespace ge
     }
 
     template <typename T>
-    SquareRightCoordAxial CsSquareRightFlat<T>::to_axial(const Point2d<T>& in) const noexcept
+    SquareCoordAxial CsSquareFlat<T>::to_axial(const Point2d<T>& in) const noexcept
     {
         const Point2d<T> shifted_origin
         {
@@ -37,7 +37,7 @@ namespace ge
     }
 
     template <typename T>
-    Point2d<T> CsSquareRightFlat<T>::to_draw_space(const SquareRightCoordAxial& in) const noexcept
+    Point2d<T> CsSquareFlat<T>::to_draw_space(const SquareCoordAxial& in) const noexcept
     {
         const T y = static_cast<T>(in.y) * height_;
         const T x = static_cast<T>(in.x) * width_ + (y / height_) * x_1_;

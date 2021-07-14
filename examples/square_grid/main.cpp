@@ -1,4 +1,4 @@
-#include "ge/geometry/cs_square_right_flat.hpp"
+#include "ge/geometry/cs_square_flat.hpp"
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 #include "ge/render_loop/render_loop.h"
@@ -29,10 +29,9 @@ using Cl = ge::Color;
 
 namespace square
 {
-    // https://www.redblobgames.com/grids/hexagons/#basics
     constexpr float square_width = 4.f;
     constexpr float square_height = 2.f;
-    constexpr float square_tilt = 1.f;
+    constexpr float square_tilt = 0.f;
 
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_flat
     {
@@ -121,7 +120,7 @@ namespace
         return result;
     }
 
-    std::string print_coords(const ge::SquareRightCoordAxial& square, const glm::vec2& pixel)
+    std::string print_coords(const ge::SquareCoordAxial& square, const glm::vec2& pixel)
     {
         using namespace ge;
 
@@ -180,14 +179,14 @@ int main(int /*argc*/, char* /*argv*/[])
 
     RenderLoop render_loop(*window, render);
 
-    const CsSquareRightFlat cs_square_flat
+    const CsSquareFlat cs_square_flat
     (
         square::square_width,
         square::square_height,
         square::square_tilt
     );
 
-    std::optional<SquareRightCoordAxial> prev_selected_square_flat;
+    std::optional<SquareCoordAxial> prev_selected_square_flat;
     const Polygons square_flat
     {
         square::points_flat,
@@ -209,7 +208,7 @@ int main(int /*argc*/, char* /*argv*/[])
         int y_offset = static_cast<int>(std::floor(y / 2));
         for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
         {
-            const Point2dF pos_flat = cs_square_flat.to_draw_space(SquareRightCoordAxial{x, y});
+            const Point2dF pos_flat = cs_square_flat.to_draw_space(SquareCoordAxial{x, y});
             fixed_grid_flat.emplace_back(move_object(square_flat, {pos_flat.x, pos_flat.y}));
         }
     }
@@ -228,7 +227,7 @@ int main(int /*argc*/, char* /*argv*/[])
         &window
     ] (const MouseMoveEvent& event)
     {
-        const SquareRightCoordAxial selected_hex_pos = cs_square_flat.to_axial
+        const SquareCoordAxial selected_hex_pos = cs_square_flat.to_axial
         (
             Point2dF{event.pos.x, event.pos.y}
         );
