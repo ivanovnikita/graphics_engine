@@ -5,7 +5,7 @@
 
 namespace ge
 {
-    struct SquareCoordAxial final
+    struct SquareCoordAxialFlat final
     {
         int x;
         int y;
@@ -22,8 +22,8 @@ namespace ge
             T x_1
         ) noexcept;
 
-        SquareCoordAxial to_axial(const Point2d<T>&) const noexcept;
-        Point2d<T> to_draw_space(const SquareCoordAxial&) const noexcept; // square center
+        SquareCoordAxialFlat to_axial(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const SquareCoordAxialFlat&) const noexcept; // square center
 
     private:
         T width_;

@@ -120,7 +120,7 @@ namespace
         return result;
     }
 
-    std::string print_coords(const ge::SquareCoordAxial& square, const glm::vec2& pixel)
+    std::string print_coords(const ge::SquareCoordAxialFlat& square, const glm::vec2& pixel)
     {
         using namespace ge;
 
@@ -186,7 +186,7 @@ int main(int /*argc*/, char* /*argv*/[])
         square::square_tilt
     );
 
-    std::optional<SquareCoordAxial> prev_selected_square_flat;
+    std::optional<SquareCoordAxialFlat> prev_selected_square_flat;
     const Polygons square_flat
     {
         square::points_flat,
@@ -208,7 +208,7 @@ int main(int /*argc*/, char* /*argv*/[])
         int y_offset = static_cast<int>(std::floor(y / 2));
         for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
         {
-            const Point2dF pos_flat = cs_square_flat.to_draw_space(SquareCoordAxial{x, y});
+            const Point2dF pos_flat = cs_square_flat.to_draw_space(SquareCoordAxialFlat{x, y});
             fixed_grid_flat.emplace_back(move_object(square_flat, {pos_flat.x, pos_flat.y}));
         }
     }
@@ -227,7 +227,7 @@ int main(int /*argc*/, char* /*argv*/[])
         &window
     ] (const MouseMoveEvent& event)
     {
-        const SquareCoordAxial selected_hex_pos = cs_square_flat.to_axial
+        const SquareCoordAxialFlat selected_hex_pos = cs_square_flat.to_axial
         (
             Point2dF{event.pos.x, event.pos.y}
         );

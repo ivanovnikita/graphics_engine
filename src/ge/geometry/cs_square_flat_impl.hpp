@@ -20,7 +20,7 @@ namespace ge
     }
 
     template <typename T>
-    SquareCoordAxial CsSquareFlat<T>::to_axial(const Point2d<T>& in) const noexcept
+    SquareCoordAxialFlat CsSquareFlat<T>::to_axial(const Point2d<T>& in) const noexcept
     {
         const Point2d<T> shifted_origin
         {
@@ -37,7 +37,7 @@ namespace ge
     }
 
     template <typename T>
-    Point2d<T> CsSquareFlat<T>::to_draw_space(const SquareCoordAxial& in) const noexcept
+    Point2d<T> CsSquareFlat<T>::to_draw_space(const SquareCoordAxialFlat& in) const noexcept
     {
         const T y = static_cast<T>(in.y) * height_;
         const T x = static_cast<T>(in.x) * width_ + (y / height_) * x_1_;
