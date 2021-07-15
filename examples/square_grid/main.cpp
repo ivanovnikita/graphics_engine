@@ -1,4 +1,5 @@
 #include "ge/geometry/cs_square_flat.hpp"
+#include "ge/geometry/cs_square_pointy.hpp"
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 #include "ge/render_loop/render_loop.h"
@@ -31,14 +32,14 @@ namespace square
 {
     constexpr float square_width = 4.f;
     constexpr float square_height = 2.f;
-    constexpr float square_tilt = 0.f;
+    constexpr float square_tilt_y = -1.f;
 
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_flat
     {
-        C{{square_width / 2.f -  square_tilt / 2.f, -square_height / 2.f}},
-        C{{square_width / 2.f + square_tilt / 2.f, square_height / 2.f}},
-        C{{-square_width / 2.f + square_tilt / 2.f, square_height / 2.f}},
-        C{{-square_width / 2.f - square_tilt / 2.f, -square_height / 2.f}}
+        C{{square_width / 2.f, -square_height / 2.f + square_tilt_y / 2.f}},
+        C{{square_width / 2.f, square_height / 2.f + square_tilt_y / 2.f}},
+        C{{-square_width / 2.f, square_height / 2.f - square_tilt_y / 2.f}},
+        C{{-square_width / 2.f, -square_height / 2.f - square_tilt_y / 2.f}}
     };
 
     [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> triangles
@@ -120,7 +121,7 @@ namespace
         return result;
     }
 
-    std::string print_coords(const ge::SquareCoordAxialFlat& square, const glm::vec2& pixel)
+    std::string print_coords(const ge::SquareCoordAxialPointy& square, const glm::vec2& pixel)
     {
         using namespace ge;
 
@@ -179,28 +180,28 @@ int main(int /*argc*/, char* /*argv*/[])
 
     RenderLoop render_loop(*window, render);
 
-    const CsSquareFlat cs_square_flat
+    const CsSquarePointy cs_square_pointy
     (
         square::square_width,
         square::square_height,
-        square::square_tilt
+        square::square_tilt_y
     );
 
-    std::optional<SquareCoordAxialFlat> prev_selected_square_flat;
-    const Polygons square_flat
+    std::optional<SquareCoordAxialPointy> prev_selected_square_pointy;
+    const Polygons square_pointy
     {
         square::points_flat,
         square::triangles,
         square::border
     };
-    const Polygons selected_square_flat
+    const Polygons selected_square_pointy
     {
         square::points_flat,
         square::selected_triangles,
         square::border
     };
 
-    std::vector<Polygons> fixed_grid_flat;
+    std::vector<Polygons> fixed_grid_pointy;
 
     constexpr int hex_map_radius = 11;
     for (int y = 0; y < hex_map_radius; ++y)
@@ -208,43 +209,43 @@ int main(int /*argc*/, char* /*argv*/[])
         int y_offset = static_cast<int>(std::floor(y / 2));
         for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
         {
-            const Point2dF pos_flat = cs_square_flat.to_draw_space(SquareCoordAxialFlat{x, y});
-            fixed_grid_flat.emplace_back(move_object(square_flat, {pos_flat.x, pos_flat.y}));
+            const Point2dF pos_flat = cs_square_pointy.to_draw_space(SquareCoordAxialPointy{x, y});
+            fixed_grid_pointy.emplace_back(move_object(square_pointy, {pos_flat.x, pos_flat.y}));
         }
     }
 
-    fixed_grid_flat.emplace_back(selected_square_flat);
+    fixed_grid_pointy.emplace_back(selected_square_pointy);
 
-    render.set_object_to_draw(fixed_grid_flat);
+    render.set_object_to_draw(fixed_grid_pointy);
 
-    const auto draw_selected_hex_flat =
+    const auto draw_selected_hex_pointy =
     [
-        &selected_square_flat,
+        &selected_square_pointy,
         &render,
-        &cs_square_flat,
-        &prev_selected_square_flat,
-        &fixed_grid_flat,
+        &cs_square_pointy,
+        &prev_selected_square_pointy,
+        &fixed_grid_pointy,
         &window
     ] (const MouseMoveEvent& event)
     {
-        const SquareCoordAxialFlat selected_hex_pos = cs_square_flat.to_axial
+        const SquareCoordAxialPointy selected_hex_pos = cs_square_pointy.to_axial
         (
             Point2dF{event.pos.x, event.pos.y}
         );
 
         window->set_window_title(print_coords(selected_hex_pos, event.pos));
 
-        if (selected_hex_pos == prev_selected_square_flat)
+        if (selected_hex_pos == prev_selected_square_pointy)
         {
             return RenderLoop::NeedRedraw::No;
         }
 
-        prev_selected_square_flat = selected_hex_pos;
+        prev_selected_square_pointy = selected_hex_pos;
 
-        const Point2dF pos = cs_square_flat.to_draw_space(selected_hex_pos);
-        fixed_grid_flat.back() = move_object(selected_square_flat, {pos.x, pos.y});
+        const Point2dF pos = cs_square_pointy.to_draw_space(selected_hex_pos);
+        fixed_grid_pointy.back() = move_object(selected_square_pointy, {pos.x, pos.y});
 
-        render.set_object_to_draw(fixed_grid_flat);
+        render.set_object_to_draw(fixed_grid_pointy);
 
         return RenderLoop::NeedRedraw::Yes;
     };
@@ -256,7 +257,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     render.draw_frame();
 
-    render_loop.set_mouse_move_callback({draw_selected_hex_flat});
+    render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
 
     while (not render_loop.stopped())
     {

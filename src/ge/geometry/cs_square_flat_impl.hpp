@@ -40,7 +40,7 @@ namespace ge
     Point2d<T> CsSquareFlat<T>::to_draw_space(const SquareCoordAxialFlat& in) const noexcept
     {
         const T y = static_cast<T>(in.y) * height_;
-        const T x = static_cast<T>(in.x) * width_ + (y / height_) * x_1_;
+        const T x = static_cast<T>(in.x) * width_ + in.y * x_1_;
 
         return {x, y};
     }
