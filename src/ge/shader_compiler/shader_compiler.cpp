@@ -49,6 +49,7 @@ namespace ge
             case vk::ShaderStageFlagBits::eCallableNV:
             case vk::ShaderStageFlagBits::eTaskNV:
             case vk::ShaderStageFlagBits::eMeshNV:
+            case vk::ShaderStageFlagBits::eSubpassShadingHUAWEI:
             {
                 throw std::logic_error("Unknown shader type");
             }
