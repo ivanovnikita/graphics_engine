@@ -18,12 +18,21 @@ namespace ge::factory
             .setAttachment(0) // first attachment in array
             .setLayout(vk::ImageLayout::eColorAttachmentOptimal);
 
+        // Один проход рендера может состоять из множества подпроходов (subpasses). Подпроходы — это
+        // последовательные операции рендеринга, зависящие от содержимого фреймбуферов в предыдущих проходах.
+        // К ним относятся, например, эффекты постобработки, применяемые друг за другом. Если объединить их в
+        // один проход рендера, Vulkan сможет перегруппировать операции для лучшего сохранения пропускной
+        // способности памяти и большей производительности (видимо, имеется в виду тайловый рендеринг).
         const auto subpass = vk::SubpassDescription()
             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
             .setColorAttachmentCount(1)
-            .setPColorAttachments(&color_attachment_ref); // The index of the attachment in this array is directly
-                                                          // referenced from the fragment shader with the
-                                                          // layout(location = 0) out vec4 outColor directive!
+
+            // The index of the attachment in this array is directly
+            // referenced from the fragment shader with the
+            // 'layout(location = 0) out vec4 outColor' directive in fragment shader.
+            // (ссылается именно на порядковый номер буфера в массиве)
+            // (типа если location = 1, то это отсылка ко второму буферу в ColorAttachments?)
+            .setPColorAttachments(&color_attachment_ref);
 
         const auto dependency = vk::SubpassDependency{}
             .setSrcSubpass(VK_SUBPASS_EXTERNAL)

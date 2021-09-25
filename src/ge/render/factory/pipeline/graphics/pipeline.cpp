@@ -179,6 +179,11 @@ namespace ge::factory
             .setRenderPass(render_pass)
             .setSubpass(0);
 
+        // TODO: Создать общий конвеер и от него создать частные дочерние конвееры.
+        // Cоздание производного конвейера не требует больших затрат, поскольку большинство функций берется
+        // из родительского конвейера. Также переключение между дочерними конвейерами одного родителя осуществляется
+        // намного быстрее.
+
         vk::UniquePipeline pipeline = logical_device.createGraphicsPipelineUnique
         (
             vk::PipelineCache()
