@@ -74,6 +74,9 @@ namespace ge
         T last_x_;
         T pre_last_x_;
     };
+
+    template <typename T>
+    CsHexFlat(T, T, T, T) -> CsHexFlat<T>;
 }
 
 #include "cs_hex_flat_impl.hpp"

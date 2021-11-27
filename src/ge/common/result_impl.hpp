@@ -2,6 +2,8 @@
 
 #include "result.hpp"
 
+#include <memory>
+
 namespace ge
 {
     template <typename T, typename Err>
@@ -49,42 +51,42 @@ namespace ge
     {
     }
 
-    template <typename T, typename Err>
-    template <typename... OtherErr>
-    Result<T, Err>::Result(Result<T, Errors<OtherErr...>>&& other) noexcept
-        requires
-            (... and std::is_nothrow_move_constructible_v<Err, OtherErr>)
-        : tag{other.tag}
-        , storage
-        {
-            [this, &other] () mutable
-            {
-                switch (tag)
-                {
-                case result_tag::ok:
-                {
-                    return Storage{ok_tag{}, std::move(other.storage.ok)};
-                }
-                case result_tag::err:
-                {
-                    return Storage
-                    {
-                        err_tag{},
-                        std::move(other.storage.err).
-                            match
-                            (
-                                [] (auto&& v) noexcept
-                                {
-                                    return Err{std::move(v)};
-                                }
-                            )
-                    };
-                }
-                }
-            } ()
-        }
-    {
-    }
+//    template <typename T, typename Err>
+//    template <typename... OtherErr>
+//    Result<T, Err>::Result(Result<T, Errors<OtherErr...>>&& other) noexcept
+//        requires
+//            (... and std::is_nothrow_move_constructible_v<Err, OtherErr>)
+//        : tag{other.tag}
+//        , storage
+//        {
+//            [this, &other] () mutable
+//            {
+//                switch (tag)
+//                {
+//                case result_tag::ok:
+//                {
+//                    return Storage{ok_tag{}, std::move(other.storage.ok)};
+//                }
+//                case result_tag::err:
+//                {
+//                    return Storage
+//                    {
+//                        err_tag{},
+//                        std::move(other.storage.err).
+//                            match
+//                            (
+//                                [] (auto&& v) noexcept
+//                                {
+//                                    return Err{std::move(v)};
+//                                }
+//                            )
+//                    };
+//                }
+//                }
+//            } ()
+//        }
+//    {
+//    }
 
     template <typename T, typename Err>
     Result<T, Err>::~Result() noexcept
@@ -540,9 +542,9 @@ namespace ge
             return then_func(std::move(storage.ok))
                 .match
                 (
-                    [] (auto&& ok) noexcept -> R
+                    [] (auto&& okv) noexcept -> R
                     {
-                        return R{std::move(ok)};
+                        return R{std::move(okv)};
                     },
                     [] (auto&& err) noexcept -> R
                     {

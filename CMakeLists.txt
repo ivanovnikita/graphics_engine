@@ -26,7 +26,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     option(GE_USE_LIBC++ "Use libc++?" ON)
 
     if (${GE_USE_LIBC++})
-        list(APPEND CMAKE_CXX_FLAGS -stdlib=libc++ -lc++ -lc++abi -lc++experimental)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     endif()
 endif()
 
@@ -139,14 +139,18 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -Wno-unreachable-code
         -Wno-padded
 
-        # remove on clang >= 10
-        -Wno-c99-extensions
+        # Or it is better to not ignore?
+        -Wno-exit-time-destructors
 
         # for gtest
         -Wno-gnu-zero-variadic-macro-arguments
         -Wno-global-constructors
         -Wno-weak-vtables
         )
+
+    if (${GE_USE_LIBC++})
+        set(std_libs -lc++ -lc++abi -lc++experimental)
+    endif()
 endif()
 
 set(compile_options ${cxx_flags} ${warnings})
@@ -289,6 +293,7 @@ target_link_libraries(render
     PUBLIC
         CONAN_PKG::glm
     PRIVATE
+        CONAN_PKG::vulkan-headers
         CONAN_PKG::vulkan-loader
         Threads::Threads
         ${std_libs}
@@ -391,6 +396,7 @@ if (${GE_BUILD_TESTS})
     add_executable(tests_common ${common_tests_sources})
     target_link_libraries(tests_common
         CONAN_PKG::gtest
+        CONAN_PKG::vulkan-headers
         GE::common
         GE::geometry
         GE::render

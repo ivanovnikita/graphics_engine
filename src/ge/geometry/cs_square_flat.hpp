@@ -30,6 +30,9 @@ namespace ge
         T height_;
         T x_1_;
     };
+
+    template <typename T>
+    CsSquareFlat(T, T, T) -> CsSquareFlat<T>;
 }
 
 #include "cs_square_flat_impl.hpp"

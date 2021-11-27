@@ -37,21 +37,21 @@ namespace hex
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_flat
     {
         C{{-hex_size_part, 0.f}},
-        C{{-hex_size_part / 2.f, std::sqrt(3) * (-hex_size_part / 2.f)}},
-        C{{hex_size_part / 2.f, std::sqrt(3) * (-hex_size_part / 2.f)}},
+        C{{-hex_size_part / 2.f, std::sqrt(3.f) * (-hex_size_part / 2.f)}},
+        C{{hex_size_part / 2.f, std::sqrt(3.f) * (-hex_size_part / 2.f)}},
         C{{hex_size_part, 0.f}},
-        C{{hex_size_part / 2.f, std::sqrt(3) * (hex_size_part / 2.f)}},
-        C{{-hex_size_part / 2.f, std::sqrt(3) * (hex_size_part / 2.f)}},
+        C{{hex_size_part / 2.f, std::sqrt(3.f) * (hex_size_part / 2.f)}},
+        C{{-hex_size_part / 2.f, std::sqrt(3.f) * (hex_size_part / 2.f)}},
     };
 
     [[ maybe_unused ]] const std::vector<ge::Vertex> points_pointy
     {
         C{{0.f, -hex_size_part}},
-        C{{std::sqrt(3) * (hex_size_part / 2.f), -hex_size_part / 2.f}},
-        C{{std::sqrt(3) * (hex_size_part / 2.f), hex_size_part / 2.f}},
+        C{{std::sqrt(3.f) * (hex_size_part / 2.f), -hex_size_part / 2.f}},
+        C{{std::sqrt(3.f) * (hex_size_part / 2.f), hex_size_part / 2.f}},
         C{{0.f, hex_size_part}},
-        C{{std::sqrt(3) * (-hex_size_part / 2.f), hex_size_part / 2.f}},
-        C{{std::sqrt(3) * (-hex_size_part / 2.f), -hex_size_part / 2.f}},
+        C{{std::sqrt(3.f) * (-hex_size_part / 2.f), hex_size_part / 2.f}},
+        C{{std::sqrt(3.f) * (-hex_size_part / 2.f), -hex_size_part / 2.f}},
     };
 
     [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> triangles

@@ -29,10 +29,10 @@ namespace ge
             requires
                 std::is_nothrow_constructible_v<Err, U>;
 
-        template <typename... OtherErr>
-        Result(Result<T, Errors<OtherErr...>>&& other) noexcept
-            requires
-                (... and std::is_nothrow_move_constructible_v<Err, OtherErr>);
+//        template <typename... OtherErr>
+//        Result(Result<T, Errors<OtherErr...>>&& other) noexcept
+//            requires
+//                (... and std::is_nothrow_move_constructible_v<Err, OtherErr>);
 
         ~Result() noexcept
             requires

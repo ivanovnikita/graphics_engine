@@ -7,8 +7,8 @@ TEST(variant, construct)
     using namespace ge;
 
     {
-        Variant<int, float, char> v(1);
-        v.match
+        Variant<int, float, char> val(1);
+        val.match
         (
             [] (int v)
             {
@@ -21,8 +21,8 @@ TEST(variant, construct)
         );
     }
     {
-        Variant<int, float, char> v(2.f);
-        v.match
+        Variant<int, float, char> val(2.f);
+        val.match
         (
             [] (float v)
             {
@@ -35,8 +35,8 @@ TEST(variant, construct)
         );
     }
     {
-        Variant<int, float, char> v('a');
-        v.match
+        Variant<int, float, char> val('a');
+        val.match
         (
             [] (char v)
             {

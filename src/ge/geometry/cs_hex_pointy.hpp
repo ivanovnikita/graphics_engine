@@ -76,6 +76,9 @@ namespace ge
         T last_y_;
         T pre_last_y_;
     };
+
+    template <typename T>
+    CsHexPointy(T, T, T, T) -> CsHexPointy<T>;
 }
 
 #include "cs_hex_pointy_impl.hpp"
