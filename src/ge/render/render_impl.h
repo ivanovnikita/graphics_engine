@@ -6,6 +6,7 @@
 #include "ge/render/vertex.h"
 #include "ge/render/camera_2d.h"
 #include "ge/render/factory/buffer.hpp"
+#include "ge/render/2d_graph/2d_graph.h"
 
 namespace ge
 {

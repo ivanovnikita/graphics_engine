@@ -1,4 +1,5 @@
 #include "ge/render/debug_callback.h"
+#include "exception.h"
 
 #include <iostream>
 
@@ -6,17 +7,17 @@ namespace ge
 {
     VKAPI_ATTR vk::Bool32 VKAPI_CALL debug_callback
     (
-        VkDebugReportFlagsEXT       flags
-      , VkDebugReportObjectTypeEXT  /*object_type*/
-      , uint64_t                    /*object*/
-      , size_t                      /*location*/
-      , int32_t                     /*message_code*/
-      , const char*                 layer_prefix
-      , const char*                 message
-      , void*                       /*user_data*/
+        VkDebugReportFlagsEXT flags,
+        VkDebugReportObjectTypeEXT /*object_type*/,
+        uint64_t /*object*/,
+        size_t /*location*/,
+        int32_t /*message_code*/,
+        const char* layer_prefix,
+        const char* message,
+        void* /*user_data*/
     )
     {
-        if (std::strcmp(layer_prefix, "loader") == 0)
+        if (std::string_view{layer_prefix} == "loader")
         {
             return VK_FALSE;
         }
@@ -46,6 +47,37 @@ namespace ge
                   << "Message: " << message << "\n";
 
         return VK_FALSE;
+    }
+
+    vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance& instance)
+    {
+#ifndef NDEBUG
+        const vk::DebugReportCallbackCreateInfoEXT create_info
+        (
+            vk::DebugReportFlagBitsEXT::eError
+          | vk::DebugReportFlagBitsEXT::ePerformanceWarning
+          | vk::DebugReportFlagBitsEXT::eWarning
+          , debug_callback
+        );
+
+        vk::DebugReportCallbackEXT callback;
+        const vk::Result result = instance.createDebugReportCallbackEXT(&create_info, nullptr, &callback);
+        switch (result)
+        {
+        case vk::Result::eSuccess:
+             break;
+        case vk::Result::eErrorOutOfHostMemory:
+            GE_THROW_EXPECTED_RESULT(result);
+        default:
+        {
+            GE_THROW_UNEXPECTED_RESULT(result);
+        }
+        }
+
+        return vk::UniqueDebugReportCallbackEXT{std::move(callback), {instance}};
+#else
+        return nullptr;
+#endif
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ge/render/vertex.h"
+#include "ge/render/2d_graph/2d_graph.h"
 
 #include <vulkan/vulkan.hpp>
 

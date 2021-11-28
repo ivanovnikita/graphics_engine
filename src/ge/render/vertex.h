@@ -18,27 +18,6 @@ namespace ge
         glm::vec3 color;
     };
 
-    struct Graph final
-    {
-        struct Vertice final
-        {
-            size_t index;
-            Color color;
-        };
-
-        struct Arc final
-        {
-            size_t index_from;
-            size_t index_to;
-            Color color;
-        };
-
-        std::span<const Vertex> points;
-
-        std::span<const Vertice> vertices;
-        std::span<const Arc> arcs;
-    };
-
     struct Polygons final
     {
         struct Triangle final

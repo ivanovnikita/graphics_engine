@@ -35,28 +35,30 @@ namespace ge::factory::options
         WindowType type = WindowType::XCB;
     };
 
-    struct Graphics
+    struct Graphics final
     {
         bool enabled = false;
     };
 
-    struct Compute
+    struct Compute final
     {
         bool enabled = false;
     };
 
-    struct Transfer
+    struct Transfer final
     {
         bool enabled = false;
     };
 
     struct Instance final
     {
+        static Instance create_default();
+
         Debug debug;
         Window window;
     };
 
-    struct Device
+    struct Device final
     {
         ValidationLayers validation_layers;
         Graphics graphics;

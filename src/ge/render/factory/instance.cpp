@@ -165,9 +165,12 @@ namespace ge::factory
                 } break;
                 case options::WindowType::WIN32:
                 {
-                    // TODO: assert if not defined
+#ifdef _WIN32
 #if defined(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
                     extensions.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#else
+    #error Surface extension for WIN32 is absent
+#endif
 #endif
                 } break;
                 }

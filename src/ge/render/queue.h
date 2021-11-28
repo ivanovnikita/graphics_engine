@@ -8,7 +8,7 @@
 namespace ge
 {
 
-    struct QueueFamilyIndices
+    struct QueueFamilyIndices final
     {
         std::optional<uint32_t> graphics;
         std::optional<uint32_t> present;
@@ -16,7 +16,7 @@ namespace ge
         std::optional<uint32_t> transfer;
     };
 
-    struct Queues
+    struct Queues final
     {
         vk::Queue graphics;
         vk::Queue present;
