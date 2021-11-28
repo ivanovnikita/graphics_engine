@@ -136,8 +136,11 @@ namespace ge::factory
         const std::span<const vk::VertexInputBindingDescription> binding_description = vertex_binding_description();
         const std::span<const vk::VertexInputAttributeDescription> attribute_description = vertex_attribute_descriptions();
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
+            // TODO: validate maxVertexInputBindings (32)
             .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_description.size()))
             .setPVertexBindingDescriptions(binding_description.data())
+
+            // TODO: validate maxVertexInputAttributes (32)
             .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_description.size()))
             .setPVertexAttributeDescriptions(attribute_description.data());
 

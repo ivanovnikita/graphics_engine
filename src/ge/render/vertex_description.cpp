@@ -13,6 +13,7 @@ namespace ge
     //
     // Дополнительную информацию о layout квалификаторе можно найти в OpenGL wiki:
     // https://www.khronos.org/opengl/wiki/Layout_Qualifier_(GLSL)#Vertex_shader_attribute_index
+    // https://www.khronos.org/registry/vulkan/specs/1.2/html/chap21.html
 
     // Location sizes: Interfaces between programs can be of various types, even user-defined structs and arrays.
     // Some such types consume multiple locations. When a type that consumes multiple locations is used,
@@ -84,11 +85,14 @@ namespace ge
     // Описывает какой кусок данных нужно грузить для каждой вершины
     std::span<const vk::VertexInputBindingDescription> vertex_binding_description()
     {
+        // All binding numbers must be distinct
         static const std::array descriptions
         {
             vk::VertexInputBindingDescription{}
-                .setBinding(0) // привязка к команде bindVertexBuffers
-                .setStride(sizeof(Vertex))
+                // привязка к команде bindVertexBuffers
+                // TODO: validate maxVertexInputBindings (32)
+                .setBinding(0)
+                .setStride(sizeof(Vertex)) // TODO: validate maxVertexInputBindingStride (2048)
                 .setInputRate(vk::VertexInputRate::eVertex)
             , vk::VertexInputBindingDescription{}
                 .setBinding(1)
@@ -103,6 +107,8 @@ namespace ge
     std::span<const vk::VertexInputAttributeDescription> vertex_attribute_descriptions()
     {
         // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/chap39.html#_identification_of_formats
+        // Every 'binding' here must be present in vertex_binding_description
+        // All binding numbers must be distinct
         static const std::array descriptions
         {
             vk::VertexInputAttributeDescription{}
@@ -122,6 +128,7 @@ namespace ge
                 //    double: VK_FORMAT_R64_SFLOAT, число с плавающей запятой двойной точности (64-битное)
                 .setFormat(vk::Format::eR32G32Sfloat) // 2 float'а по 32 бит каждый
 
+                // TODO: validate maxVertexInputAttributeOffset (2047)
                 .setOffset(offsetof(Vertex, pos)) // Смещение от начала куска буфера, считанного для вершины
             , vk::VertexInputAttributeDescription{}
                 .setBinding(1)

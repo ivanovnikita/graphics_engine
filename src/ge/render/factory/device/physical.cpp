@@ -145,6 +145,23 @@ namespace ge::factory
                 all_required_are_available(required_layers, get_available_device_layers(device));
 
                 // TODO: get device feature and match with required features
+                [[ maybe_unused ]] const vk::PhysicalDeviceFeatures features = device.getFeatures();
+
+                // TODO: save limits and use them for checking everywhere
+                [[ maybe_unused ]] const vk::PhysicalDeviceProperties properties = device.getProperties();
+
+                // TODO: log available memory types and heap sizes
+                // TODO: save memory properties and use it everywhere
+                [[ maybe_unused ]] const vk::PhysicalDeviceMemoryProperties memory = device.getMemoryProperties();
+                [[ maybe_unused ]] const std::vector<vk::ExtensionProperties> extensions = device.enumerateDeviceExtensionProperties();
+                [[ maybe_unused ]] const std::vector<vk::LayerProperties> layers = device.enumerateDeviceLayerProperties();
+
+                // from vertex_attribute_descriptions
+                // TODO: print flags
+                [[ maybe_unused ]] const vk::FormatProperties format_1 = device.getFormatProperties(vk::Format::eR32G32Sfloat);
+                assert(format_1.bufferFeatures & vk::FormatFeatureFlagBits::eVertexBuffer);
+                [[ maybe_unused ]] const vk::FormatProperties format_2 = device.getFormatProperties(vk::Format::eR32G32B32Sfloat);
+                assert(format_2.bufferFeatures & vk::FormatFeatureFlagBits::eVertexBuffer);
 
                 QueueFamilyIndices indices;
 

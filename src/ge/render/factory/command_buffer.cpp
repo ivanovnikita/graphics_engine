@@ -66,6 +66,7 @@ namespace ge::factory
                 , arcs_offsets.data()
             );
 
+            // Each pipeline object can use up to maxBoundDescriptorSets (32)
             command_buffer.bindDescriptorSets
             (
                 vk::PipelineBindPoint::eGraphics
