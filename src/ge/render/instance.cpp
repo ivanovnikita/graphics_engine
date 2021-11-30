@@ -199,7 +199,20 @@ namespace ge
             }
             }
 
-            // TODO: log available properties
+            if (logger.enabled(LogType::SystemInfo))
+            {
+                logger.log(LogType::SystemInfo, "Available extensions:\n");
+                for (const vk::ExtensionProperties& property : properties)
+                {
+                    logger.log
+                    (
+                        LogType::SystemInfo,
+                        "- [%s] [spec. v. %d]\n",
+                        property.extensionName.data(),
+                        property.specVersion
+                    );
+                }
+            }
 
             for (const char* required_extension : required_extensions)
             {
@@ -323,7 +336,22 @@ namespace ge
             }
             }
 
-            // TODO: log available properties
+            if (logger.enabled(LogType::SystemInfo))
+            {
+                logger.log(LogType::SystemInfo, "Available layers:\n");
+                for (const vk::LayerProperties& property : properties)
+                {
+                    logger.log
+                    (
+                        LogType::SystemInfo,
+                        "- [%s] [spec. v. %d] [impl. v. %d] [%s]\n",
+                        property.layerName.data(),
+                        property.specVersion,
+                        property.implementationVersion,
+                        property.description.data()
+                    );
+                }
+            }
 
             for (const char* required_layer : required_layers)
             {
