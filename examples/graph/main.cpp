@@ -175,6 +175,8 @@ namespace
 
 int main(/*int argc, char* argv[]*/)
 {
+    using namespace ge;
+
 #ifdef GE_DEBUG_LAYERS_ENABLED
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
@@ -182,19 +184,28 @@ int main(/*int argc, char* argv[]*/)
 
     constexpr uint16_t width = 1024;
     constexpr uint16_t height = 768;
-    constexpr ge::DynamicSize size
+    constexpr DynamicSize size
     {
-        .default_size = ge::Size{width, height}
-        , .min_size = ge::Size{100, 100}
+        .default_size = Size{width, height}
+        , .min_size = Size{100, 100}
         , .max_size = std::nullopt
     };
     constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
 
-    auto window = ge::Window::create(size, background_color);
+    auto window = Window::create(size, background_color);
 
     try
     {
-        ge::Render2dGraph render
+        const Logger logger
+        {
+            Flags<LogType>
+            {
+                LogType::Error,
+                LogType::ErrorDetails,
+                LogType::SystemInfo
+            }
+        };
+        Render2dGraph render
         (
             ge::SurfaceParams
             {
@@ -205,7 +216,8 @@ int main(/*int argc, char* argv[]*/)
                 , .width = width
                 , .height = height
                 , .background_color = background_color
-            }
+            },
+            logger
         );
     }
     catch (const ge::expected_error& e)

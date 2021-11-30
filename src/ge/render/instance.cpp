@@ -93,7 +93,7 @@ namespace ge
             return {output.data(), layers_count};
         }
 
-        void check_required_extensions(const std::span<const char*> required_extensions)
+        void check_required_extensions(const std::span<const char*> required_extensions, const Logger& logger)
         {
             constexpr char* layer_name = nullptr;
             uint32_t property_count = 0;
@@ -136,7 +136,8 @@ namespace ge
             const auto process_absent_extensions =
             [
                 &absent_extensions_count,
-                &absent_extensions_storage
+                &absent_extensions_storage,
+                &logger
             ]
             {
                 if (absent_extensions_count == 0)
@@ -144,15 +145,14 @@ namespace ge
                     return;
                 }
 
-// TODO: use some error reporter
-#ifndef NDEBUG
-                std::cerr << "Absent extensions:\n";
-                for (size_t i = 0; i < absent_extensions_count; ++i)
+                if (logger.enabled(LogType::ErrorDetails))
                 {
-                    std::cerr << absent_extensions_storage[i] << "\n";
+                    logger.log(LogType::ErrorDetails, "Absent extensions:\n");
+                    for (size_t i = 0; i < absent_extensions_count; ++i)
+                    {
+                        logger.log(LogType::ErrorDetails, "- %s\n", absent_extensions_storage[i]);
+                    }
                 }
-                std::cerr << std::endl;
-#endif
                 GE_THROW_EXPECTED_ERROR("Some required extensions are absent");
             };
 
@@ -222,7 +222,7 @@ namespace ge
             process_absent_extensions();
         }
 
-        void check_required_layers(const std::span<const char*> required_layers)
+        void check_required_layers(const std::span<const char*> required_layers, const Logger& logger)
         {
             uint32_t layer_count = 0;
             const vk::Result layer_count_enumeration_result = vk::enumerateInstanceLayerProperties
@@ -262,7 +262,8 @@ namespace ge
             const auto process_absent_layers =
             [
                 &absent_layers_count,
-                &absent_layers_storage
+                &absent_layers_storage,
+                &logger
             ]
             {
                 if (absent_layers_count == 0)
@@ -270,15 +271,14 @@ namespace ge
                     return;
                 }
 
-// TODO: use some error reporter
-#ifndef NDEBUG
-                std::cerr << "Absent layers:\n";
-                for (size_t i = 0; i < absent_layers_count; ++i)
+                if (logger.enabled(LogType::ErrorDetails))
                 {
-                    std::cerr << absent_layers_storage[i] << "\n";
+                    logger.log(LogType::ErrorDetails, "Absent layers:\n");
+                    for (size_t i = 0; i < absent_layers_count; ++i)
+                    {
+                        logger.log(LogType::ErrorDetails, "- %s\n", absent_layers_storage[i]);
+                    }
                 }
-                std::cerr << std::endl;
-#endif
                 GE_THROW_EXPECTED_ERROR("Some required layers are absent");
             };
 
@@ -398,7 +398,7 @@ namespace ge
         }
     }
 
-    InstanceData InstanceData::create_default(const factory::options::Instance& options)
+    InstanceData InstanceData::create_default(const factory::options::Instance& options, const Logger& logger)
     {
         RequiredExtenstions required_extensions_storage;
         const std::span<const char*> required_extensions = get_required_extensions
@@ -409,7 +409,7 @@ namespace ge
 
         if (not required_extensions.empty())
         {
-            check_required_extensions(required_extensions);
+            check_required_extensions(required_extensions, logger);
         }
 
         RequiredLayers required_layers_storage;
@@ -421,11 +421,11 @@ namespace ge
 
         if (not required_layers.empty())
         {
-            check_required_layers(required_layers);
+            check_required_layers(required_layers, logger);
         }
 
         vk::UniqueInstance instance = create_instance(required_extensions, required_layers);
-        vk::UniqueDebugReportCallbackEXT debug_callback = init_default_debug_callback(*instance);
+        vk::UniqueDebugReportCallbackEXT debug_callback = init_default_debug_callback(*instance, logger);
         return InstanceData
         {
             std::move(instance),

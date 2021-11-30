@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/render/logger.hpp"
 #include "ge/render/instance.h"
 #include "ge/render/vertex.h"
 #include "ge/render/surface_params.h"
@@ -13,7 +14,7 @@ namespace ge
     class Render2dGraph final
     {
     public:
-        explicit Render2dGraph(const SurfaceParams&);
+        explicit Render2dGraph(const SurfaceParams&, const Logger&);
         ~Render2dGraph();
 
         void set_object_to_draw(const Graph&);

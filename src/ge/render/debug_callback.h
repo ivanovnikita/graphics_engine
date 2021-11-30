@@ -1,5 +1,7 @@
 #pragma once
 
+#include "logger.hpp"
+
 #include <vulkan/vulkan.hpp>
 
 namespace ge
@@ -16,5 +18,5 @@ namespace ge
         void* user_data
     );
 
-    vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance&);
+    vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance&, const Logger&);
 }

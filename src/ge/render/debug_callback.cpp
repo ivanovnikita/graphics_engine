@@ -14,7 +14,7 @@ namespace ge
         int32_t /*message_code*/,
         const char* layer_prefix,
         const char* message,
-        void* /*user_data*/
+        void* user_data
     )
     {
         if (std::string_view{layer_prefix} == "loader")
@@ -22,7 +22,7 @@ namespace ge
             return VK_FALSE;
         }
 
-        std::string type;
+        const char* type = "";
         switch (static_cast<vk::DebugReportFlagBitsEXT>(flags))
         {
         case vk::DebugReportFlagBitsEXT::eDebug:
@@ -42,22 +42,31 @@ namespace ge
             break;
         }
 
-        std::cerr << "Type: " << type << "\n"
-                  << "Layer: " << layer_prefix << "\n"
-                  << "Message: " << message << "\n";
+        const Logger& logger = *reinterpret_cast<const Logger*>(user_data);
+        logger.log
+        (
+            LogType::Error,
+            "Type: %s\n"
+            "Layer: %s\n"
+            "Message: %s\n",
+            type,
+            layer_prefix,
+            message
+        );
 
         return VK_FALSE;
     }
 
-    vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance& instance)
+    vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance& instance, const Logger& logger)
     {
 #ifndef NDEBUG
         const vk::DebugReportCallbackCreateInfoEXT create_info
         (
-            vk::DebugReportFlagBitsEXT::eError
-          | vk::DebugReportFlagBitsEXT::ePerformanceWarning
-          | vk::DebugReportFlagBitsEXT::eWarning
-          , debug_callback
+            vk::DebugReportFlagBitsEXT::eError |
+            vk::DebugReportFlagBitsEXT::ePerformanceWarning |
+            vk::DebugReportFlagBitsEXT::eWarning,
+            debug_callback,
+            reinterpret_cast<void*>(&const_cast<Logger&>(logger))
         );
 
         vk::DebugReportCallbackEXT callback;
