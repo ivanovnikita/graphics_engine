@@ -1,7 +1,7 @@
 #pragma once
 
 #include "variant.hpp"
-#include "overloaded.hpp"
+#include "ge/common/overloaded.hpp"
 
 namespace ge
 {
