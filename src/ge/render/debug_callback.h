@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logger.hpp"
+#include "ge/common/logger.hpp"
 
 #include <vulkan/vulkan.hpp>
 

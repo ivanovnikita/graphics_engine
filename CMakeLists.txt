@@ -223,6 +223,7 @@ set_target_properties(window PROPERTIES ${target_properties} OUTPUT_NAME ge_wind
 target_compile_definitions(window PRIVATE -DVK_USE_PLATFORM_XCB_KHR=1)
 target_link_libraries(window
     PRIVATE
+        GE::common
         CONAN_PKG::glm
         CONAN_PKG::vulkan-loader
         ${window_libs}
@@ -293,6 +294,7 @@ target_link_libraries(render
     PUBLIC
         CONAN_PKG::glm
     PRIVATE
+        GE::common
         CONAN_PKG::vulkan-headers
         CONAN_PKG::vulkan-loader
         Threads::Threads
@@ -335,6 +337,7 @@ define_source_group(render_loop)
 
 install(
     TARGETS
+        common
         window
         render
         render_loop

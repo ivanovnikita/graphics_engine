@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ge/render/logger.hpp"
+#include "ge/common/logger.hpp"
 #include "ge/render/instance.h"
 #include "ge/render/vertex.h"
 #include "ge/render/surface_params.h"
