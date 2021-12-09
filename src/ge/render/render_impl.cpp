@@ -30,7 +30,8 @@ namespace ge
     Render::RenderImpl::RenderImpl
     (
         const SurfaceParams& surface_params,
-        const DrawMode draw_mode
+        const DrawMode draw_mode,
+        const Logger& logger
     )
         : draw_mode_{draw_mode}
         , surface_extent_{vk::Extent2D{}.setWidth(surface_params.width).setHeight(surface_params.height)}
@@ -62,9 +63,8 @@ namespace ge
 
         instance_ = factory::create_instance(options_instance);
 
-#ifndef NDEBUG
-        debug_callback_ = create_debug_callback();
-#endif
+        debug_callback_ = init_default_debug_callback(*instance_, logger);
+
         surface_ = vk::UniqueSurfaceKHR(surface_params.surface_creator(*instance_));
 
         constexpr factory::options::Graphics option_graphics{ENABLED};
@@ -318,19 +318,6 @@ namespace ge
 
         create_graphics_pipeline();
         create_command_buffers();
-    }
-
-    vk::UniqueDebugReportCallbackEXT Render::RenderImpl::create_debug_callback() const
-    {
-        const vk::DebugReportCallbackCreateInfoEXT create_info
-        (
-            vk::DebugReportFlagBitsEXT::eError
-          | vk::DebugReportFlagBitsEXT::ePerformanceWarning
-          | vk::DebugReportFlagBitsEXT::eWarning
-          , debug_callback
-        );
-
-        return instance_->createDebugReportCallbackEXTUnique(create_info);
     }
 
     void Render::RenderImpl::set_object_to_draw(const std::span<const Polygons>& polygons)

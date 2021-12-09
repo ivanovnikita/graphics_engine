@@ -42,24 +42,27 @@ namespace ge
             break;
         }
 
-        const Logger& logger = *reinterpret_cast<const Logger*>(user_data);
-        logger.log
-        (
-            LogType::Error,
-            "Type: %s\n"
-            "Layer: %s\n"
-            "Message: %s\n",
-            type,
-            layer_prefix,
-            message
-        );
+        if (user_data != nullptr)
+        {
+            const Logger& logger = *reinterpret_cast<const Logger*>(user_data);
+            logger.log
+            (
+                LogType::Error,
+                "Type: %s\n"
+                "Layer: %s\n"
+                "Message: %s\n",
+                type,
+                layer_prefix,
+                message
+            );
+        }
 
         return VK_FALSE;
     }
 
     vk::UniqueDebugReportCallbackEXT init_default_debug_callback(const vk::Instance& instance, const Logger& logger)
     {
-#ifndef NDEBUG
+#ifdef GE_DEBUG_LAYERS_ENABLED
         const vk::DebugReportCallbackCreateInfoEXT create_info
         (
             vk::DebugReportFlagBitsEXT::eError |
@@ -85,36 +88,54 @@ namespace ge
 
         return vk::UniqueDebugReportCallbackEXT{std::move(callback), {instance}};
 #else
-        return nullptr;
+        return vk::UniqueDebugReportCallbackEXT{};
 #endif
     }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugReportCallbackEXT
 (
-    VkInstance                                  instance
-  , const VkDebugReportCallbackCreateInfoEXT*   pCreateInfo
-  , const VkAllocationCallbacks*                pAllocator
-  , VkDebugReportCallbackEXT*                   pCallback
+    VkInstance instance,
+    const VkDebugReportCallbackCreateInfoEXT* create_info,
+    const VkAllocationCallbacks* allocator,
+    VkDebugReportCallbackEXT* callback
 )
 {
-    static const auto func = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>
-    (
-        vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT")
-    );
-    return func(instance, pCreateInfo, pAllocator, pCallback);
+    static const auto func = [&instance] () noexcept
+    {
+        const auto result = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>
+        (
+            vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT")
+        );
+        if (result == nullptr)
+        {
+            std::cerr << "Func ptr vkCreateDebugReportCallbackEXT is null" << std::endl;
+        }
+        return result;
+    }();
+    assert(func != nullptr);
+    return func(instance, create_info, allocator, callback);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT
 (
-    VkInstance                   instance
-  , VkDebugReportCallbackEXT     callback
-  , const VkAllocationCallbacks* pAllocator
+    VkInstance instance,
+    VkDebugReportCallbackEXT callback,
+    const VkAllocationCallbacks* allocator
 )
 {
-    static const auto func = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>
-    (
-        vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")
-    );
-    return func(instance, callback, pAllocator);
+    static const auto func = [instance] () noexcept
+    {
+        const auto result = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>
+        (
+            vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT")
+        );
+        if (result == nullptr)
+        {
+            std::cerr << "Func ptr vkDestroyDebugReportCallbackEXT is null" << std::endl;
+        }
+        return result;
+    }();
+    assert(func != nullptr);
+    return func(instance, callback, allocator);
 }

@@ -252,6 +252,7 @@ target_link_libraries(ge_shader_compiler
 define_source_group(ge_shader_compiler)
 
 file(GLOB shaders_sources src/ge/render/shaders/*)
+# TODO compile each shader into separate file
 set(generated_shaders_sources
     "${CMAKE_CURRENT_BINARY_DIR}/generated_shaders/generated_shaders.h"
     "${CMAKE_CURRENT_BINARY_DIR}/generated_shaders/generated_shaders.cpp"
@@ -378,6 +379,14 @@ install(
         PATTERN "*.h"
         PATTERN "*.hpp"
 )
+if (${GE_ENABLE_DEBUG_LAYERS})
+    install(
+        FILES
+            "${CONAN_LIB_DIRS_VULKAN-VALIDATIONLAYERS}/libVkLayer_khronos_validation.so"
+        DESTINATION
+            lib
+    )
+endif()
 # TODO: install deps too (it is not usable now)
 install(
     EXPORT

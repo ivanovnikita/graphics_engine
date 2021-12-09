@@ -1,3 +1,4 @@
+#include "ge/common/logger.hpp"
 #include "ge/geometry/cs_square_flat.hpp"
 #include "ge/geometry/cs_square_pointy.hpp"
 #include "ge/render/render.h"
@@ -148,6 +149,16 @@ int main(int /*argc*/, char* /*argv*/[])
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
+    const Logger logger
+    {
+        Flags<LogType>
+        {
+            LogType::Error,
+            LogType::ErrorDetails,
+            LogType::SystemInfo
+        }
+    };
+
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
     constexpr DynamicSize size
@@ -159,7 +170,7 @@ int main(int /*argc*/, char* /*argv*/[])
 //    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
     constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
 
-    auto window = Window::create(size, background_color);
+    auto window = Window::create(size, background_color, logger);
 
     Render render
     (
@@ -173,7 +184,8 @@ int main(int /*argc*/, char* /*argv*/[])
             , .height = height
             , .background_color = background_color
         },
-        ge::DrawMode::POLYGONS
+        ge::DrawMode::POLYGONS,
+        logger
     );
 
     window->start_display();

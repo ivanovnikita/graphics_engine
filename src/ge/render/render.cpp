@@ -8,14 +8,16 @@ namespace ge
     Render::Render
     (
         const SurfaceParams& surface_params,
-        const DrawMode draw_mode
+        const DrawMode draw_mode,
+        const Logger& logger
     )
         : impl_
         (
             new RenderImpl
             (
                 surface_params,
-                draw_mode
+                draw_mode,
+                logger
             )
         )
     {

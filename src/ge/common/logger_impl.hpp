@@ -12,6 +12,7 @@ namespace ge
         if (enabled(log_type))
         {
             std::fprintf(stdout, fmt, args...);
+            std::fflush(stdout);
         }
     }
 }

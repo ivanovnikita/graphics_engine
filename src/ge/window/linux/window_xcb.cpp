@@ -18,75 +18,84 @@ namespace ge
     {
         enum WindowPropertyFormat
         {
-            BIT_8 = 8
-            , BIT_16 = 16
-            , BIT_32 = 32
+            BIT_8 = 8,
+            BIT_16 = 16,
+            BIT_32 = 32
         };
 
         enum InternAtom
         {
-            CREATE_IF_NOT_EXISTS = 0
-            , ONLY_IF_EXISTS = 1
+            CREATE_IF_NOT_EXISTS = 0,
+            ONLY_IF_EXISTS = 1
         };
 
-        xcb_intern_atom_reply_t& subscribe_to_close_event
+        std::unique_ptr<xcb_intern_atom_reply_t, void(*)(void*)> subscribe_to_close_event
         (
-            xcb_connection_t& connection
-            , const xcb_window_t& handle
-        )
+            xcb_connection_t& connection,
+            const xcb_window_t& handle
+        ) noexcept
         {
             constexpr std::string_view name_protocols("WM_PROTOCOLS");
             const xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom
             (
-                &connection
-                , InternAtom::ONLY_IF_EXISTS
-                , name_protocols.length()
-                , name_protocols.data()
+                &connection,
+                InternAtom::ONLY_IF_EXISTS,
+                name_protocols.length(),
+                name_protocols.data()
             );
-            xcb_intern_atom_reply_t* const protocols_reply = xcb_intern_atom_reply
-            (
-                &connection
-                , protocols_cookie
-                , nullptr
-            );
+            const std::unique_ptr<xcb_intern_atom_reply_t, void(*)(void*)> protocols_reply
+            {
+                xcb_intern_atom_reply
+                (
+                    &connection,
+                    protocols_cookie,
+                    nullptr
+                ),
+                &free
+            };
+            assert(protocols_reply != nullptr);
             constexpr std::string_view delete_window("WM_DELETE_WINDOW");
             const xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom
             (
-                &connection
-                , InternAtom::CREATE_IF_NOT_EXISTS
-                , delete_window.length()
-                , delete_window.data()
+                &connection,
+                InternAtom::CREATE_IF_NOT_EXISTS,
+                delete_window.length(),
+                delete_window.data()
             );
-            xcb_intern_atom_reply_t* delete_reply = xcb_intern_atom_reply
-            (
-                &connection
-                , delete_cookie
-                , nullptr
-            );
+            std::unique_ptr<xcb_intern_atom_reply_t, void(*)(void*)> delete_reply
+            {
+                xcb_intern_atom_reply
+                (
+                    &connection,
+                    delete_cookie,
+                    nullptr
+                ),
+                &free
+            };
+            assert(delete_reply != nullptr);
             xcb_change_property
             (
-                &connection
-                , XCB_PROP_MODE_REPLACE
-                , handle
-                , protocols_reply->atom
-                , 4
-                , 32
-                , 1
-                , &delete_reply->atom
+                &connection,
+                XCB_PROP_MODE_REPLACE,
+                handle,
+                protocols_reply->atom,
+                4,
+                32,
+                1,
+                &delete_reply->atom
             );
-            free(protocols_reply);
 
-            return *delete_reply;
+            return delete_reply;
         }
 
         void set_min_max_sizes
         (
-            xcb_connection_t& connection
-            , const xcb_window_t& handle
-            , const Size& current_size
-            , const std::optional<Size>& min_size
-            , const std::optional<Size>& max_size
-        )
+            xcb_connection_t& connection,
+            const xcb_window_t& handle,
+            const Size& current_size,
+            const std::optional<Size>& min_size,
+            const std::optional<Size>& max_size
+        ) noexcept
         {
             assert(min_size.has_value() or max_size.has_value());
 
@@ -107,7 +116,7 @@ namespace ge
             xcb_icccm_set_wm_normal_hints(&connection, handle, &hints);
         }
 
-        ModifiersState parse_modifiers(uint16_t state)
+        ModifiersState parse_modifiers(uint16_t state) noexcept
         {
             const auto extract_state_to = [&state] (bool& field, uint8_t& counter)
             {
@@ -142,16 +151,16 @@ namespace ge
 
         std::string error_event_to_string
         (
-            xcb_errors_context_t* errors_ctx,
+            xcb_errors_context_t& errors_ctx,
             const xcb_generic_error_t& e
         )
         {
             std::string result{"X error: request="};
 
-            const char* major = xcb_errors_get_name_for_major_code(errors_ctx, e.major_code);
-            const char* minor = xcb_errors_get_name_for_minor_code(errors_ctx, e.major_code, e.minor_code);
+            const char* major = xcb_errors_get_name_for_major_code(&errors_ctx, e.major_code);
+            const char* minor = xcb_errors_get_name_for_minor_code(&errors_ctx, e.major_code, e.minor_code);
             const char* extension = nullptr;
-            const char* error = xcb_errors_get_name_for_error(errors_ctx, e.error_code, &extension);
+            const char* error = xcb_errors_get_name_for_error(&errors_ctx, e.error_code, &extension);
 
             assert(major != nullptr);
             result += major;
@@ -181,7 +190,7 @@ namespace ge
         }
 
         template <ButtonEvent button_event>
-        std::optional<WindowEvent> handle_mouse_button_event(const xcb_button_press_event_t& event)
+        std::optional<WindowEvent> handle_mouse_button_event(const xcb_button_press_event_t& event) noexcept
         {
             const glm::vec2 pos{event.event_x, event.event_y};
             const ModifiersState modifiers{parse_modifiers(event.state)};
@@ -221,7 +230,7 @@ namespace ge
             return std::nullopt;
         }
 
-        WindowEvent handle_mouse_motion_event(const xcb_motion_notify_event_t& event)
+        WindowEvent handle_mouse_motion_event(const xcb_motion_notify_event_t& event) noexcept
         {
             const glm::vec2 pos{event.event_x, event.event_y};
             const ModifiersState modifiers{parse_modifiers(event.state)};
@@ -231,7 +240,7 @@ namespace ge
         }
 
         template <CrossEvent cross_event>
-        WindowEvent handle_cross_window_border_event(const xcb_enter_notify_event_t& event)
+        WindowEvent handle_cross_window_border_event(const xcb_enter_notify_event_t& event) noexcept
         {
             const glm::vec2 pos{event.event_x, event.event_y};
             const ModifiersState modifiers{parse_modifiers(event.state)};
@@ -239,9 +248,9 @@ namespace ge
 
             return MouseCrossWindowBorderEvent<cross_event>
             {
-                pos
-                , modifiers
-                , timestamp
+                pos,
+                modifiers,
+                timestamp
             };
         }
 
@@ -252,7 +261,7 @@ namespace ge
             KeypadServiceKey,
             KeypadLatinKey,
             uint32_t
-        > match_key(const xcb_keysym_t sym)
+        > match_key(const xcb_keysym_t sym) noexcept
         {
             switch (sym)
             {
@@ -460,7 +469,7 @@ namespace ge
             return sym;
         }
 
-        [[ maybe_unused ]] std::string_view get_name(const ServiceKey k)
+        [[ maybe_unused ]] std::string_view get_name(const ServiceKey k) noexcept
         {
             switch (k)
             {
@@ -587,25 +596,25 @@ namespace ge
     }
 
     template <>
-    void WindowXCB::init_window_size<StaticSize>(const StaticSize& size)
+    void WindowXCB::init_window_size<StaticSize>(const StaticSize& size) noexcept
     {
         current_size_ = size;
     }
 
     template <>
-    void WindowXCB::init_window_size<DynamicSize>(const DynamicSize& size)
+    void WindowXCB::init_window_size<DynamicSize>(const DynamicSize& size) noexcept
     {
         current_size_ = size.default_size;
     }
 
     template <>
-    void WindowXCB::init_window_size_constraints(const StaticSize& size)
+    void WindowXCB::init_window_size_constraints(const StaticSize& size) noexcept
     {
         set_min_max_sizes(*connection_, handle_, size, size, size);
     }
 
     template <>
-    void WindowXCB::init_window_size_constraints(const DynamicSize& size)
+    void WindowXCB::init_window_size_constraints(const DynamicSize& size) noexcept
     {
         if (size.min_size.has_value() or size.max_size.has_value())
         {
@@ -613,7 +622,7 @@ namespace ge
         }
     }
 
-    void WindowXCB::init_key_mapping(const xcb_setup_t& /*setup*/)
+    void WindowXCB::init_key_mapping(const xcb_setup_t& /*setup*/) noexcept
     {
 //        xcb_generic_error_t* error;
 
@@ -724,13 +733,13 @@ namespace ge
 //            std::cout << std::endl;
 //        }
 
-        key_syms_ = xcb_key_symbols_alloc(connection_);
+        key_syms_ = {xcb_key_symbols_alloc(connection_.get()), &xcb_key_symbols_free};
     }
 
     template <ButtonEvent button_event>
     WindowEvent handle_key_event
     (
-        xcb_key_symbols_t* key_syms,
+        xcb_key_symbols_t& key_syms,
         xcb_key_press_event_t& event
     )
     {
@@ -744,7 +753,7 @@ namespace ge
             col = 1;
         }
 
-        xcb_keysym_t sym = xcb_key_press_lookup_keysym(key_syms, &event, col);
+        xcb_keysym_t sym = xcb_key_press_lookup_keysym(&key_syms, &event, col);
 
         std::variant
         <
@@ -814,28 +823,38 @@ namespace ge
 
     WindowXCB::WindowXCB
     (
-        const WindowSize& size
-        , const std::array<uint8_t, 4> background_color
+        const WindowSize& size,
+        const std::array<uint8_t, 4> background_color,
+        const Logger& logger
     )
-        : delete_reply_(nullptr)
+        : logger_{logger}
+        , connection_{nullptr, &xcb_disconnect}
+        , errors_ctx_{nullptr, &xcb_errors_context_free}
+        , key_syms_{nullptr, &xcb_key_symbols_free}
+        , delete_reply_{nullptr, &free}
     {
         std::visit([this] (const auto& s) { this->init_window_size(s); }, size);
 
         int screen_index = 0;
-        connection_ = xcb_connect(nullptr, &screen_index);
-        handle_ = xcb_generate_id(connection_);
+        connection_ = {xcb_connect(nullptr, &screen_index), &xcb_disconnect};
+        handle_ = xcb_generate_id(connection_.get());
 
-        if (xcb_connection_has_error(connection_))
+        if (xcb_connection_has_error(connection_.get()))
         {
-            throw std::runtime_error("Connection to xcb failed");
+            throw std::runtime_error("Connection to xcb failed"); // TODO log error
         }
 
-        if (xcb_errors_context_new(connection_, &errors_ctx_) != 0)
+        xcb_errors_context_t* errors_ctx = nullptr;
+        if (xcb_errors_context_new(connection_.get(), &errors_ctx) == 0)
         {
-            throw std::runtime_error("Failed to initialize xcb-errors");
+            errors_ctx_ = {errors_ctx, &xcb_errors_context_free};
+        }
+        else
+        {
+            throw std::runtime_error("Failed to initialize xcb-errors"); // TODO log error
         }
 
-        const xcb_setup_t* const setup = xcb_get_setup(connection_);
+        const xcb_setup_t* const setup = xcb_get_setup(connection_.get());
 
         init_key_mapping(*setup);
 
@@ -851,29 +870,29 @@ namespace ge
         // NOTE: order of values must be the same as order of values in xcb_cw_t enum
         const uint32_t value_list[] =
         {
-            *reinterpret_cast<const uint32_t*>(background_color.data())
+            *reinterpret_cast<const uint32_t*>(background_color.data()),
 
-            , XCB_BACKING_STORE_WHEN_MAPPED
+            XCB_BACKING_STORE_WHEN_MAPPED,
 
             // TODO: configure by option
-            , XCB_EVENT_MASK_EXPOSURE
-            | XCB_EVENT_MASK_STRUCTURE_NOTIFY
+            XCB_EVENT_MASK_EXPOSURE |
+            XCB_EVENT_MASK_STRUCTURE_NOTIFY |
 
-            | XCB_EVENT_MASK_BUTTON_PRESS
-            | XCB_EVENT_MASK_BUTTON_RELEASE
+            XCB_EVENT_MASK_BUTTON_PRESS |
+            XCB_EVENT_MASK_BUTTON_RELEASE |
 
-            | XCB_EVENT_MASK_POINTER_MOTION
+            XCB_EVENT_MASK_POINTER_MOTION |
 
-            | XCB_EVENT_MASK_BUTTON_MOTION
-            | XCB_EVENT_MASK_BUTTON_1_MOTION
-            | XCB_EVENT_MASK_BUTTON_2_MOTION
-            | XCB_EVENT_MASK_BUTTON_3_MOTION
+            XCB_EVENT_MASK_BUTTON_MOTION |
+            XCB_EVENT_MASK_BUTTON_1_MOTION |
+            XCB_EVENT_MASK_BUTTON_2_MOTION |
+            XCB_EVENT_MASK_BUTTON_3_MOTION |
 
-            | XCB_EVENT_MASK_KEY_PRESS
-            | XCB_EVENT_MASK_KEY_RELEASE
+            XCB_EVENT_MASK_KEY_PRESS |
+            XCB_EVENT_MASK_KEY_RELEASE |
 
-            | XCB_EVENT_MASK_ENTER_WINDOW
-            | XCB_EVENT_MASK_LEAVE_WINDOW
+            XCB_EVENT_MASK_ENTER_WINDOW |
+            XCB_EVENT_MASK_LEAVE_WINDOW
         };
 
         constexpr int16_t x = 20;
@@ -882,67 +901,58 @@ namespace ge
 
         xcb_create_window
         (
-            connection_
-          , XCB_COPY_FROM_PARENT
-          , handle_
-          , screen->root
-          , x
-          , y
-          , current_size_.width
-          , current_size_.height
-          , border_width
-          , XCB_WINDOW_CLASS_INPUT_OUTPUT
-          , screen->root_visual
-          , XCB_CW_BACK_PIXEL
-          | XCB_CW_BACKING_STORE
-          | XCB_CW_EVENT_MASK
-          , value_list
+            connection_.get(),
+            XCB_COPY_FROM_PARENT,
+            handle_,
+            screen->root,
+            x,
+            y,
+            current_size_.width,
+            current_size_.height,
+            border_width,
+            XCB_WINDOW_CLASS_INPUT_OUTPUT,
+            screen->root_visual,
+            XCB_CW_BACK_PIXEL |
+            XCB_CW_BACKING_STORE |
+            XCB_CW_EVENT_MASK,
+            value_list
         );
 
-        xcb_flush(connection_);
+        xcb_flush(connection_.get());
 
         constexpr std::string_view title{"window"};
         set_window_title(title);
 
-        delete_reply_ = &subscribe_to_close_event(*connection_, handle_);
+        delete_reply_ = subscribe_to_close_event(*connection_, handle_);
 
         std::visit([this] (const auto& s) { this->init_window_size_constraints(s); }, size);
 
-        xcb_flush(connection_);
+        xcb_flush(connection_.get());
     }
 
     WindowXCB::~WindowXCB()
     {
-        if (delete_reply_ != nullptr)
-        {
-            free(delete_reply_);
-        }
-
-        xcb_destroy_window(connection_, handle_);
-        xcb_key_symbols_free(key_syms_);
-        xcb_errors_context_free(errors_ctx_);
-        xcb_disconnect(connection_);
+        xcb_destroy_window(connection_.get(), handle_); // TODO: use smart handler for this
     }
 
     vk::UniqueSurfaceKHR WindowXCB::create_surface(const vk::Instance& instance)
     {
-        vk::XcbSurfaceCreateInfoKHR create_info(vk::XcbSurfaceCreateFlagsKHR(), connection_, handle_);
+        vk::XcbSurfaceCreateInfoKHR create_info(vk::XcbSurfaceCreateFlagsKHR(), connection_.get(), handle_);
 
         return vk::UniqueSurfaceKHR(instance.createXcbSurfaceKHRUnique(create_info));
     }
 
     void WindowXCB::start_display()
     {
-        xcb_map_window(connection_, handle_);
-        xcb_flush(connection_);
+        xcb_map_window(connection_.get(), handle_);
+        xcb_flush(connection_.get());
 
         auto wait_event = [this] (const int event_type)
         {
             while (true)
             {
-                xcb_generic_event_t* const event = xcb_wait_for_event(connection_);
+                const std::unique_ptr<xcb_generic_event_t, void(*)(void*)> event{xcb_wait_for_event(connection_.get()), &free};
                 const auto received_event_type = event->response_type & ~0x80;
-                free(event);
                 if (received_event_type == event_type)
                 {
                     break;
@@ -959,16 +969,16 @@ namespace ge
     {
         xcb_change_property
         (
-            connection_
-          , XCB_PROP_MODE_REPLACE
-          , handle_
-          , XCB_ATOM_WM_NAME
-          , XCB_ATOM_STRING
-          , WindowPropertyFormat::BIT_8
-          , static_cast<uint32_t>(title.length())
-          , title.data()
+            connection_.get(),
+            XCB_PROP_MODE_REPLACE,
+            handle_,
+            XCB_ATOM_WM_NAME,
+            XCB_ATOM_STRING,
+            WindowPropertyFormat::BIT_8,
+            static_cast<uint32_t>(title.length()),
+            title.data()
         );
-        xcb_flush(connection_);
+        xcb_flush(connection_.get());
     }
 
     std::vector<WindowEvent> WindowXCB::grab_events()
@@ -978,36 +988,36 @@ namespace ge
         std::optional<WindowEventResize> last_resize_event;
         std::optional<std::string> error_message;
 
-        xcb_generic_event_t* event = xcb_poll_for_event(connection_);
+        std::unique_ptr<xcb_generic_event_t, void(*)(void*)> event{xcb_poll_for_event(connection_.get()), &free};
         while (event != nullptr)
         {
             switch (event->response_type & 0x7f)
             {
             case 0:
             {
-                const auto error_event = reinterpret_cast<const xcb_generic_error_t*>(event);
-                error_message.emplace(error_event_to_string(errors_ctx_, *error_event));
+                const auto error_event = reinterpret_cast<const xcb_generic_error_t*>(event.get());
+                error_message.emplace(error_event_to_string(*errors_ctx_, *error_event));
                 break;
             }
             case XCB_EXPOSE:
             {
-                [[ maybe_unused ]] const auto expose_event = reinterpret_cast<const xcb_expose_event_t*>(event);
+                [[ maybe_unused ]] const auto expose_event = reinterpret_cast<const xcb_expose_event_t*>(event.get());
                 events.emplace_back(WindowExposed{});
                 break;
             }
             case XCB_CLIENT_MESSAGE:
             {
-                if (reinterpret_cast<xcb_client_message_event_t*>(event)->data.data32[0] == delete_reply_->atom)
+                assert(delete_reply_ != nullptr);
+                if (reinterpret_cast<xcb_client_message_event_t*>(event.get())->data.data32[0] == delete_reply_->atom)
                 {
-                    free(delete_reply_);
-                    delete_reply_ = nullptr;
+                    delete_reply_ = {nullptr, &free};
                     events.emplace_back(WindowEventClose{});
                 }
                 break;
             }
             case XCB_CONFIGURE_NOTIFY:
             {
-                const auto resize_event = reinterpret_cast<const xcb_configure_notify_event_t*>(event);
+                const auto resize_event = reinterpret_cast<const xcb_configure_notify_event_t*>(event.get());
                 if
                 (
                     resize_event->width != current_size_.width
@@ -1025,7 +1035,7 @@ namespace ge
             }
             case XCB_BUTTON_PRESS:
             {
-                const auto button_press_event = reinterpret_cast<const xcb_button_press_event_t*>(event);
+                const auto button_press_event = reinterpret_cast<const xcb_button_press_event_t*>(event.get());
                 if
                 (
                     auto converted_event = handle_mouse_button_event<ButtonEvent::PRESS>(*button_press_event);
@@ -1038,7 +1048,7 @@ namespace ge
             }
             case XCB_BUTTON_RELEASE:
             {
-                const auto button_release_event = reinterpret_cast<const xcb_button_release_event_t*>(event);
+                const auto button_release_event = reinterpret_cast<const xcb_button_release_event_t*>(event.get());
                 if
                 (
                     auto converted_event = handle_mouse_button_event<ButtonEvent::RELEASE>(*button_release_event);
@@ -1051,44 +1061,44 @@ namespace ge
             }
             case XCB_MOTION_NOTIFY:
             {
-                const auto motion_event = reinterpret_cast<const xcb_motion_notify_event_t*>(event);
+                const auto motion_event = reinterpret_cast<const xcb_motion_notify_event_t*>(event.get());
                 events.emplace_back(handle_mouse_motion_event(*motion_event));
                 break;
             }
             case XCB_ENTER_NOTIFY:
             {
-                const auto enter_event = reinterpret_cast<const xcb_enter_notify_event_t*>(event);
+                const auto enter_event = reinterpret_cast<const xcb_enter_notify_event_t*>(event.get());
                 events.emplace_back(handle_cross_window_border_event<CrossEvent::ENTER>(*enter_event));
                 break;
             }
             case XCB_LEAVE_NOTIFY:
             {
-                const auto leave_event = reinterpret_cast<const xcb_leave_notify_event_t*>(event);
+                const auto leave_event = reinterpret_cast<const xcb_leave_notify_event_t*>(event.get());
                 events.emplace_back(handle_cross_window_border_event<CrossEvent::LEAVE>(*leave_event));
                 break;
             }
             case XCB_KEY_PRESS:
             {
-                auto key_press_event = reinterpret_cast<xcb_key_press_event_t*>(event);
-                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(key_syms_, *key_press_event));
+                assert(key_syms_ != nullptr);
+                auto key_press_event = reinterpret_cast<xcb_key_press_event_t*>(event.get());
+                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(*key_syms_, *key_press_event));
                 break;
             }
             case XCB_KEY_RELEASE:
             {
-                auto key_release_event = reinterpret_cast<xcb_key_release_event_t*>(event);
-                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(key_syms_, *key_release_event));
+                assert(key_syms_ != nullptr);
+                auto key_release_event = reinterpret_cast<xcb_key_release_event_t*>(event.get());
+                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(*key_syms_, *key_release_event));
                 break;
             }
             }
 
-            free(event);
-
             if (error_message.has_value())
             {
-                throw std::runtime_error(*std::move(error_message));
+                throw std::runtime_error(*std::move(error_message)); // TODO log error
             }
 
-            event = xcb_poll_for_event(connection_);
+            event = {xcb_poll_for_event(connection_.get()), &free};
         }
 
         if (last_resize_event.has_value())
@@ -1107,13 +1117,13 @@ namespace ge
             const uint32_t values[] = {size.width, size.height};
             xcb_configure_window
             (
-                connection_
-                , handle_
-                , XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT
-                , values
+                connection_.get(),
+                handle_,
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                values
             );
-            xcb_flush(connection_);
-            xcb_aux_sync(connection_);
+            xcb_flush(connection_.get());
+            xcb_aux_sync(connection_.get());
         }
     }
 }

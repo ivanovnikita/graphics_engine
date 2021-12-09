@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/common/logger.hpp"
 #include "ge/window/window_events.h"
 #include "ge/window/window_size.h"
 
@@ -30,8 +31,9 @@ namespace ge
 
         static std::unique_ptr<Window> create
         (
-            const WindowSize&
-            , const std::array<uint8_t, 4> background_color
+            const WindowSize&,
+            const std::array<uint8_t, 4> background_color,
+            const Logger&
         );
 
         virtual vk::UniqueSurfaceKHR create_surface(const vk::Instance& instance) = 0;

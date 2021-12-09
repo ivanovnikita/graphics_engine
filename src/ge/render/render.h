@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/common/logger.hpp"
 #include "ge/render/2d_graph/2d_graph.h"
 #include "ge/render/vertex.h"
 #include "ge/render/surface_params.h"
@@ -21,7 +22,8 @@ namespace ge
         Render
         (
             const SurfaceParams&,
-            DrawMode
+            DrawMode,
+            const Logger&
         );
         ~Render();
 

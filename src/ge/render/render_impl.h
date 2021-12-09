@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/common/logger.hpp"
 #include "ge/render/render.h"
 #include "ge/render/queue.h"
 #include "ge/render/storage/shaders.h"
@@ -16,7 +17,8 @@ namespace ge
         RenderImpl
         (
             const SurfaceParams&,
-            DrawMode
+            DrawMode,
+            const Logger&
         );
         ~RenderImpl();
 
@@ -35,7 +37,6 @@ namespace ge
         glm::vec2 proj_to_model_space(const glm::vec2&) const;
 
     private:
-        vk::UniqueDebugReportCallbackEXT create_debug_callback() const;
         void create_uniform_buffers();
         void create_descriptor_sets();
         void create_graphics_pipeline();

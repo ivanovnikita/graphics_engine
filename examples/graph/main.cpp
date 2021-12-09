@@ -182,18 +182,6 @@ int main(/*int argc, char* argv[]*/)
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
-    constexpr uint16_t width = 1024;
-    constexpr uint16_t height = 768;
-    constexpr DynamicSize size
-    {
-        .default_size = Size{width, height}
-        , .min_size = Size{100, 100}
-        , .max_size = std::nullopt
-    };
-    constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
-
-    auto window = Window::create(size, background_color);
-
     try
     {
         const Logger logger
@@ -205,6 +193,18 @@ int main(/*int argc, char* argv[]*/)
                 LogType::SystemInfo
             }
         };
+
+        constexpr uint16_t width = 1024;
+        constexpr uint16_t height = 768;
+        constexpr DynamicSize size
+        {
+            .default_size = Size{width, height}
+            , .min_size = Size{100, 100}
+            , .max_size = std::nullopt
+        };
+        constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
+        auto window = Window::create(size, background_color, logger);
+
         Render2dGraph render
         (
             ge::SurfaceParams

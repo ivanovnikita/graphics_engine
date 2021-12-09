@@ -1,3 +1,4 @@
+#include "ge/common/logger.hpp"
 #include "ge/render/render.h"
 #include "ge/window/window.h"
 #include "ge/render_loop/render_loop.h"
@@ -170,14 +171,26 @@ namespace
 
 int main(int argc, char* /*argv*/[])
 {
+    using namespace ge;
+
 #ifdef GE_DEBUG_LAYERS_ENABLED
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
+    const Logger logger
+    {
+        Flags<LogType>
+        {
+            LogType::Error,
+            LogType::ErrorDetails,
+            LogType::SystemInfo
+        }
+    };
+
     constexpr uint16_t width = 500;
     constexpr uint16_t height = 500;
-    constexpr ge::DynamicSize size
+    constexpr DynamicSize size
     {
         .default_size = ge::Size{width, height}
         , .min_size = ge::Size{100, 100}
@@ -186,9 +199,9 @@ int main(int argc, char* /*argv*/[])
 //    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
     constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
 
-    auto window = ge::Window::create(size, background_color);
+    auto window = Window::create(size, background_color, logger);
 
-    ge::Render render
+    Render render
     (
         ge::SurfaceParams
         {
@@ -200,14 +213,15 @@ int main(int argc, char* /*argv*/[])
             , .height = height
             , .background_color = background_color
         },
-        ge::DrawMode::POLYGONS
+        DrawMode::POLYGONS,
+        logger
     );
 
     window->start_display();
 
     if (argc == 1)
     {
-        const ge::Polygons polygons
+        const Polygons polygons
         {
             hex::points,
             hex::triangles,
@@ -223,7 +237,7 @@ int main(int argc, char* /*argv*/[])
         values.emplace_back(move_object(polygons, {0, 4}));
         values.emplace_back(move_object(polygons, {0, -4}));
 
-        const ge::Polygons p_l_1
+        const Polygons p_l_1
         {
             hex::points,
             hex::triangles,
@@ -236,7 +250,7 @@ int main(int argc, char* /*argv*/[])
         values.emplace_back(move_object(p_l_1, {3, 10}));
         values.emplace_back(move_object(p_l_1, {-3, 10}));
 
-        const ge::Polygons p_l_2
+        const Polygons p_l_2
         {
             hex::points,
             hex::triangles,
@@ -263,7 +277,7 @@ int main(int argc, char* /*argv*/[])
         values.emplace_back(move_object(p_l_2, {-27, -2}));
         values.emplace_back(move_object(p_l_2, {-30, 0}));
 
-        const ge::Polygons p_l_3
+        const Polygons p_l_3
         {
             hex::points,
             hex::triangles,
@@ -297,7 +311,7 @@ int main(int argc, char* /*argv*/[])
         values.emplace_back(move_object(p_l_3, {-18, 8}));
         values.emplace_back(move_object(p_l_3, {-21, 6}));
 
-        const ge::Polygons p_l_4
+        const Polygons p_l_4
         {
             hex::points,
             hex::triangles,
@@ -342,7 +356,7 @@ int main(int argc, char* /*argv*/[])
 
     render.draw_frame();
 
-    ge::RenderLoop render_loop(*window, render);
+    RenderLoop render_loop(*window, render);
     while (not render_loop.stopped())
     {
         render_loop.handle_window_events();
