@@ -2,6 +2,20 @@
 
 namespace ge
 {
+    namespace
+    {
+        ZoomDirection map_zoom_direction(const ScrollButton direction)
+        {
+            switch (direction)
+            {
+            case ScrollButton::UP: return ZoomDirection::In;
+            case ScrollButton::DOWN: return ZoomDirection::Out;
+            }
+
+            __builtin_unreachable();
+        }
+    }
+
     template <typename T>
     void RenderLoop::handle_window_event(const T&)
     {
@@ -24,56 +38,28 @@ namespace ge
     {
         render_.resize(event.new_size.width, event.new_size.height);
         need_redraw_= NeedRedraw::Yes;
-
-        prev_move_mouse_pos_.reset();
     }
 
     template <>
     void RenderLoop::handle_window_event(const WheelEvent& event)
     {
-        Camera2d camera = render_.get_camera();
-
-        const ProjVec2 normalized_event_pos = camera.normalize_in_proj_space(event.pos);
-        const ModelVec2 model_space_event_pos = camera.proj_to_model_space(normalized_event_pos);
-
-        constexpr float SCALE_STEP = 0.1f;
-        float new_scale = camera.get_scale();
-        switch (event.direction)
-        {
-        case ScrollButton::UP:
-        {
-            new_scale *= (1 - SCALE_STEP);
-            break;
-        }
-        case ScrollButton::DOWN:
-        {
-            new_scale *= (1 + SCALE_STEP);
-            break;
-        }
-        }
-        camera.set_scale(new_scale);
-
-        // We know that mouse cursor must save the same coords in model and projection space,
-        // so we jsut need to calculate new camera position.
-        const ModelVec2 new_camera_pos = model_space_event_pos -
-                (camera.proj_to_model_space(normalized_event_pos) - camera.get_pos());
-        camera.set_pos(new_camera_pos);
-
-        render_.set_camera(std::move(camera));
-
+        camera_mover_.zoom(event.pos, map_zoom_direction(event.direction));
         need_redraw_= NeedRedraw::Yes;
 
-        prev_move_mouse_pos_.reset();
+        if (active_states_.test(InputState::CameraDragMove))
+        {
+            camera_mover_.drag_move_end();
+            active_states_.reset(InputState::CameraDragMove);
+        }
     }
 
     template <>
     void RenderLoop::handle_window_event(const MouseButtonPress& event)
     {
-        const Camera2d& camera = render_.get_camera();
-
         // TODO: rewrite copy-pasted code
         if (mouse_press_callback_ != nullptr)
         {
+            const Camera2d& camera = render_.get_camera();
             MouseButtonPress event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_press_callback_(event_model_space_pos));
@@ -83,7 +69,8 @@ namespace ge
         {
         case MouseButton::LEFT:
         {
-            prev_move_mouse_pos_ = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
+            camera_mover_.drag_move_start(event.pos);
+            active_states_.set(InputState::CameraDragMove);
             break;
         }
         case MouseButton::RIGHT:
@@ -100,11 +87,10 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseButtonRelease& event)
     {
-        const Camera2d& camera = render_.get_camera();
-
         // TODO: rewrite copy-pasted code
         if (mouse_release_callback_ != nullptr)
         {
+            const Camera2d& camera = render_.get_camera();
             MouseButtonRelease event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_release_callback_(event_model_space_pos));
@@ -114,7 +100,11 @@ namespace ge
         {
         case MouseButton::LEFT:
         {
-            prev_move_mouse_pos_.reset();
+            if (active_states_.test(InputState::CameraDragMove))
+            {
+                camera_mover_.drag_move_end();
+                active_states_.reset(InputState::CameraDragMove);
+            }
             break;
         }
         case MouseButton::RIGHT:
@@ -131,33 +121,20 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseMoveEvent& event)
     {
-        Camera2d camera = render_.get_camera();
-
         // TODO: rewrite copy-pasted code
         if (mouse_move_callback_ != nullptr)
         {
+            const Camera2d& camera = render_.get_camera();
             MouseMoveEvent event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_move_callback_(event_model_space_pos));
         }
 
-        if (not prev_move_mouse_pos_.has_value() or not event.modifiers.mouse_left)
+        if (active_states_.test(InputState::CameraDragMove))
         {
-            prev_move_mouse_pos_.reset();
-            return;
+            camera_mover_.drag_move(event.pos);
+            need_redraw_= NeedRedraw::Yes;
         }
-
-        const ProjVec2 normalized_mouse_pos = camera.normalize_in_proj_space(event.pos);
-        const ModelVec2 mouse_pos = camera.proj_to_model_space(normalized_mouse_pos);
-        const ModelVec2 mouse_pos_delta = mouse_pos - *prev_move_mouse_pos_;
-
-        camera.set_pos(camera.get_pos() - mouse_pos_delta);
-
-        render_.set_camera(camera);
-
-        need_redraw_= NeedRedraw::Yes;
-
-        prev_move_mouse_pos_ = camera.proj_to_model_space(normalized_mouse_pos);
     }
 
     template <>
@@ -168,14 +145,19 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseLeaveWindow&)
     {
-        prev_move_mouse_pos_.reset();
+        if (active_states_.test(InputState::CameraDragMove))
+        {
+            camera_mover_.drag_move_end();
+            active_states_.reset(InputState::CameraDragMove);
+        }
     }
 
     RenderLoop::RenderLoop(WindowI& window, RenderI& render)
-        : window_(window)
-        , render_(render)
-        , stopped_(false)
-        , need_redraw_(NeedRedraw::No)
+        : window_{window}
+        , render_{render}
+        , stopped_{false}
+        , camera_mover_{render_}
+        , need_redraw_{NeedRedraw::No}
     {
     }
 

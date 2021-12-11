@@ -40,18 +40,4 @@ namespace ge
         uint32_t surface_width_;
         uint32_t surface_height_;
     };
-
-    // TODO implement Camera2dMover
-    /*
-    class Camera2dMover final
-    {
-    public:
-        void zoom_in(speed);
-        void zoom_out(speed);
-        void move(direction, speed);
-        void drag_move_start(drag_point);
-        void drag_move(drag_point);
-        void drag_move_end();
-    }
-    */
 }

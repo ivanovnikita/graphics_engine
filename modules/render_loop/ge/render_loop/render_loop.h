@@ -1,6 +1,8 @@
 #pragma once
 
+#include "ge/common/flags.hpp"
 #include "ge/render/render_i.h"
+#include "ge/render/camera_2d_mover.h"
 #include "ge/window/window_i.h"
 
 #include <optional>
@@ -8,6 +10,11 @@
 
 namespace ge
 {
+    enum class InputState
+    {
+        CameraDragMove = 1
+    };
+
     class RenderLoop final
     {
     public:
@@ -43,7 +50,10 @@ namespace ge
         RenderI& render_;
         bool stopped_;
 
-        std::optional<ProjVec2> prev_move_mouse_pos_;
+        Flags<InputState> active_states_;
+
+        Camera2dMover camera_mover_;
+
         NeedRedraw need_redraw_;
 
         MouseButtonPressCallback mouse_press_callback_;

@@ -7,6 +7,11 @@
 namespace ge
 {
     template <typename EnumFlags>
+    constexpr Flags<EnumFlags>::Flags() noexcept
+    {
+    }
+
+    template <typename EnumFlags>
     template <typename... Fs>
     constexpr Flags<EnumFlags>::Flags(Fs... flags) noexcept
     {
