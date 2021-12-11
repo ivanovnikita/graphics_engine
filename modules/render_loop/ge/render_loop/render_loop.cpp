@@ -46,11 +46,7 @@ namespace ge
         camera_mover_.zoom(event.pos, map_zoom_direction(event.direction));
         need_redraw_= NeedRedraw::Yes;
 
-        if (active_states_.test(InputState::CameraDragMove))
-        {
-            camera_mover_.drag_move_end();
-            active_states_.reset(InputState::CameraDragMove);
-        }
+        deactivate_state(InputState::CameraDragMove);
     }
 
     template <>
@@ -100,11 +96,7 @@ namespace ge
         {
         case MouseButton::LEFT:
         {
-            if (active_states_.test(InputState::CameraDragMove))
-            {
-                camera_mover_.drag_move_end();
-                active_states_.reset(InputState::CameraDragMove);
-            }
+            deactivate_state(InputState::CameraDragMove);
             break;
         }
         case MouseButton::RIGHT:
@@ -145,11 +137,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const MouseLeaveWindow&)
     {
-        if (active_states_.test(InputState::CameraDragMove))
-        {
-            camera_mover_.drag_move_end();
-            active_states_.reset(InputState::CameraDragMove);
-        }
+        deactivate_state(InputState::CameraDragMove);
     }
 
     RenderLoop::RenderLoop(WindowI& window, RenderI& render)
@@ -199,6 +187,22 @@ namespace ge
     void RenderLoop::combine_need_redraw(NeedRedraw v)
     {
         need_redraw_ = static_cast<NeedRedraw>(static_cast<uint8_t>(need_redraw_) | static_cast<uint8_t>(v));
+    }
+
+    void RenderLoop::deactivate_state(const InputState state)
+    {
+        switch (state)
+        {
+        case InputState::CameraDragMove:
+        {
+            if (active_states_.test(InputState::CameraDragMove))
+            {
+                camera_mover_.drag_move_end();
+                active_states_.reset(InputState::CameraDragMove);
+            }
+            break;
+        }
+        }
     }
 
     void RenderLoop::set_mouse_press_callback(MouseButtonPressCallback callback)
