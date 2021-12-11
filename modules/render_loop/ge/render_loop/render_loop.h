@@ -46,6 +46,8 @@ namespace ge
 
         void combine_need_redraw(NeedRedraw);
 
+        void deactivate_state(InputState);
+
         WindowI& window_;
         RenderI& render_;
         bool stopped_;
