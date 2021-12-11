@@ -1,6 +1,6 @@
 #include "ge/render/2d_graph/render_2d_graph.h"
 #include "ge/render/exception.h"
-#include "ge/window/window.h"
+#include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
@@ -203,47 +203,21 @@ int main(/*int argc, char* argv[]*/)
             , .max_size = std::nullopt
         };
         constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
-        auto window = Window::create(size, background_color, logger);
+        auto window = WindowXCB(size, background_color, logger);
 
         Render2dGraph render
         (
             ge::SurfaceParams
             {
-                .surface_creator = [&window] (const vk::Instance& instance)
-                {
-                    return window->create_surface(instance);
-                }
+                .surface = XcbSurface{window.get_connection(), window.get_window()}
                 , .width = width
                 , .height = height
                 , .background_color = background_color
             },
             logger
         );
-    }
-    catch (const ge::expected_error& e)
-    {
-        std::cerr
-            << "Expected error: [" << e.get_function_name()
-            << "] [" << e.get_line_number()
-            << "]: " << e.what() << std::endl;
-    }
-    catch (const ge::unexpected_error& e)
-    {
-        std::cerr
-            << "Unexpected error: [" << e.get_function_name()
-            << "] [" << e.get_line_number()
-            << "]: " << e.what() << std::endl;
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Unexpected exception: " << e.what() << std::endl;
-    }
-    catch (...)
-    {
-        std::cerr << "Unexpected exception" << std::endl;
-    }
 
-//    window->start_display();
+        window.start_display();
 
 //    if (argc == 1)
 //    {
@@ -286,12 +260,37 @@ int main(/*int argc, char* argv[]*/)
 
 //    render.draw_frame();
 
-//    ge::RenderLoop render_loop(*window, render);
-//    while (not render_loop.stopped())
-//    {
-//        render_loop.handle_window_events();
-//        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-//    }
+        ge::RenderLoop render_loop(window, render);
+        while (not render_loop.stopped())
+        {
+            render_loop.handle_window_events();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+    catch (const ge::expected_error& e)
+    {
+        std::cerr
+            << "Expected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const ge::unexpected_error& e)
+    {
+        std::cerr
+            << "Unexpected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Unexpected exception: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unexpected exception" << std::endl;
+    }
 
     return 0;
 } 

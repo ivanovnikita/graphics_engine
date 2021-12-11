@@ -1,8 +1,8 @@
 #include "ge/common/logger.hpp"
 #include "ge/geometry/cs_square_flat.hpp"
 #include "ge/geometry/cs_square_pointy.hpp"
-#include "ge/render/render.h"
-#include "ge/window/window.h"
+#include "ge/render/render_impl.h"
+#include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
@@ -169,17 +169,13 @@ int main(int /*argc*/, char* /*argv*/[])
     };
 //    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
     constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
+    auto window = WindowXCB(size, background_color, logger);
 
-    auto window = Window::create(size, background_color, logger);
-
-    Render render
+    RenderImpl render
     (
         SurfaceParams
         {
-            .surface_creator = [&window] (const vk::Instance& instance)
-            {
-                return window->create_surface(instance);
-            }
+            .surface = XcbSurface{window.get_connection(), window.get_window()}
             , .width = width
             , .height = height
             , .background_color = background_color
@@ -188,9 +184,9 @@ int main(int /*argc*/, char* /*argv*/[])
         logger
     );
 
-    window->start_display();
+    window.start_display();
 
-    RenderLoop render_loop(*window, render);
+    RenderLoop render_loop(window, render);
 
     const CsSquarePointy cs_square_pointy
     (
@@ -245,7 +241,7 @@ int main(int /*argc*/, char* /*argv*/[])
             Point2dF{event.pos.x, event.pos.y}
         );
 
-        window->set_window_title(print_coords(selected_hex_pos, event.pos));
+        window.set_window_title(print_coords(selected_hex_pos, event.pos));
 
         if (selected_hex_pos == prev_selected_square_pointy)
         {
@@ -263,9 +259,11 @@ int main(int /*argc*/, char* /*argv*/[])
     };
 
     const glm::vec2 camera_pos = camera_on_center(square::points_flat);
-    render.set_camera_pos(camera_pos);
 
-    render.set_camera_scale(1.f / 27.f);
+    Camera2d camera = render.get_camera();
+    camera.set_pos(camera_pos);
+    camera.set_scale(1.f / 27.f);
+    render.set_camera(std::move(camera));
 
     render.draw_frame();
 

@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class GraphicsEngineConan(ConanFile):
     name = "GraphicsEngine"
-    version = "0.1.0"
+    version = "0.2.0"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -12,7 +12,6 @@ class GraphicsEngineConan(ConanFile):
         "enable_debug_layers": [True, False],
         "build_examples": [True, False],
         "build_tests": [True, False],
-        "build_graphics_tests": [True, False],
     }
     default_options = {
         "shared": False,
@@ -20,7 +19,6 @@ class GraphicsEngineConan(ConanFile):
         "enable_debug_layers": False,
         "build_examples": False,
         "build_tests": False,
-        "build_graphics_tests": False
     }
     generators = "cmake"
 
@@ -62,7 +60,6 @@ class GraphicsEngineConan(ConanFile):
         self._cmake.definitions["GE_ENABLE_DEBUG_LAYERS"] = self.options.enable_debug_layers
         self._cmake.definitions["GE_BUILD_EXAMPLES"] = self.options.build_examples
         self._cmake.definitions["GE_BUILD_TESTS"] = self.options.build_tests
-        self._cmake.definitions["GE_BUILD_GRAPHICS_TESTS"] = self.options.build_graphics_tests
         self._cmake.definitions["GE_USE_LIBC++"] = self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"
 
         self._cmake.configure()
