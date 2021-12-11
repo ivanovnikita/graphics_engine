@@ -374,13 +374,83 @@ namespace ge
             process_absent_layers();
         }
 
-        vk::UniqueInstance create_instance
+        uint32_t get_instance_api_version(const Logger& logger)
+        {
+            // vkEnumerateInstanceVersion introduced in api v1.1
+            const auto enumeration_version_func = reinterpret_cast<PFN_vkEnumerateInstanceVersion>
+            (
+                vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion")
+            );
+
+            uint32_t version = VK_API_VERSION_1_0;
+
+            if (enumeration_version_func == nullptr)
+            {
+                logger.log
+                (
+                    LogType::SystemInfo,
+                    "Function ptr 'vkEnumerateInstanceVersion' is null, perhaps api version is 1.0"
+                );
+            }
+            else
+            {
+                const vk::Result result = vk::enumerateInstanceVersion(&version);
+                switch (result)
+                {
+                case vk::Result::eSuccess: break;
+                case vk::Result::eErrorOutOfHostMemory:
+                default:
+                {
+                    if (logger.enabled(LogType::SystemInfo))
+                    {
+                        logger.log
+                        (
+                            LogType::SystemInfo,
+                            "'vkEnumerateInstanceVersion' returned error %s, perhaps api version is 1.0"
+                            , to_string_view(result).data()
+                        );
+                    }
+                }
+                }
+            }
+
+            if (logger.enabled(LogType::SystemInfo))
+            {
+                const uint32_t major = VK_API_VERSION_MAJOR(version);
+                const uint32_t minor = VK_API_VERSION_MINOR(version);
+                const uint32_t patch = VK_API_VERSION_PATCH(version);
+                const uint32_t variant = VK_API_VERSION_VARIANT(version);
+                logger.log
+                (
+                    LogType::SystemInfo,
+                    "Available api version: major = %d, minor = %d, patch = %d, variant = %d"
+                    , major
+                    , minor
+                    , patch
+                    , variant
+                );
+                if (variant != 0)
+                {
+                    logger.log
+                    (
+                        LogType::Error,
+                        "Api variant = %d is not equal 0, perhaps application requires to be modified to use it"
+                        , variant
+                    );
+                }
+            }
+
+            return version;
+        }
+
+        std::pair<vk::UniqueInstance, uint32_t> create_instance
         (
             const std::span<const char*> required_extensions,
-            const std::span<const char*> required_layers
+            const std::span<const char*> required_layers,
+            const Logger& logger
         )
         {
-            // TODO: check available vulkan version by calling vkEnumerateInstanceVersion (from v1.1)
+            const uint32_t available_api_version = get_instance_api_version(logger);
 
             const vk::ApplicationInfo application_info
             {
@@ -388,7 +458,7 @@ namespace ge
                 VK_MAKE_VERSION(1, 0, 0),
                 "no engine",
                 VK_MAKE_VERSION(1, 0, 0),
-                VK_API_VERSION_1_1
+                available_api_version
             };
 
             assert(required_extensions.size() < std::numeric_limits<uint32_t>::max());
@@ -422,7 +492,11 @@ namespace ge
             }
             }
 
-            return vk::UniqueInstance{std::move(instance), {vk::Optional<const vk::AllocationCallbacks>(nullptr)}};
+            return
+            {
+                vk::UniqueInstance{std::move(instance), {vk::Optional<const vk::AllocationCallbacks>(nullptr)}},
+                available_api_version
+            };
         }
     }
 
@@ -452,11 +526,12 @@ namespace ge
             check_required_layers(required_layers, logger);
         }
 
-        vk::UniqueInstance instance = create_instance(required_extensions, required_layers);
+        auto [instance, api_version] = create_instance(required_extensions, required_layers, logger);
         vk::UniqueDebugReportCallbackEXT debug_callback = init_default_debug_callback(*instance, logger);
         return InstanceData
         {
             std::move(instance),
+            api_version,
             std::move(debug_callback)
         };
     }
