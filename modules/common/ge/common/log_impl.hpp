@@ -1,0 +1,62 @@
+#pragma once
+
+#include "log.hpp"
+
+#include <array>
+#include <charconv>
+
+#include <cassert>
+
+namespace ge
+{
+    void log(const LogDestination destination, std::integral auto value) noexcept
+    {
+        // separate func 'void log(LogDestination, bool)' is useless:
+        // cases like "log(..., "some log message")" calls overload with 'bool' param
+        // instead of 'std::string_view' param
+        if constexpr (std::is_same_v<decltype(value), bool>)
+        {
+            log(destination, std::string_view{value ? "true" : "false"});
+        }
+        else
+        {
+            // uint64_t max: 18 446 744 073 709 551 615
+            // int64_t min:  -9 223 372 036 854 775 808
+            constexpr size_t MAX_INTEGER_STRING_LEN = 21;
+            std::array<char, MAX_INTEGER_STRING_LEN> buffer;
+            const std::to_chars_result result = std::to_chars
+            (
+                buffer.data(),
+                buffer.data() + buffer.size(),
+                value
+            );
+            if (result.ec == std::errc())
+            {
+                log(destination, std::string_view{buffer.data(), result.ptr});
+            }
+            assert(result.ec == std::errc());
+        }
+    }
+
+    void log(const LogDestination destination, std::floating_point auto value) noexcept
+    {
+        constexpr size_t MAX_FLOATING_POINT_STRING_LEN = 64;
+        std::array<char, MAX_FLOATING_POINT_STRING_LEN> buffer;
+        const std::to_chars_result result = std::to_chars
+        (
+            buffer.data(),
+            buffer.data() + buffer.size(),
+            value
+        );
+        if (result.ec == std::errc())
+        {
+            log(destination, std::string_view{buffer.data(), result.ptr});
+        }
+        assert(result.ec == std::errc());
+    }
+
+    void log(const LogDestination destination, Loggable auto ... values) noexcept
+    {
+        (log(destination, values), ...);
+    }
+}
