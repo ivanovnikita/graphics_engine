@@ -3,6 +3,9 @@
 #include <gtest/gtest.h>
 
 #include <limits>
+#include <vector>
+#include <array>
+#include <span>
 
 #include <cmath>
 
@@ -195,6 +198,27 @@ TEST(log, bool)
     log(LogDestination::StdOut, " false: ");
     log(LogDestination::StdOut, false);
 
+    log(LogDestination::StdOut, "\n");
+
+    log_flush(LogDestination::StdOut);
+}
+
+
+TEST(log, ranges)
+{
+    using namespace ge;
+
+    log(LogDestination::StdOut, std::vector{1, 2, 3});
+    log(LogDestination::StdOut, "\n");
+
+    log(LogDestination::StdOut, std::array{1, 2, 3});
+    log(LogDestination::StdOut, "\n");
+
+    const std::vector<int> buf{1, 2, 3};
+    log(LogDestination::StdOut, std::span{buf});
+    log(LogDestination::StdOut, "\n");
+
+    log(LogDestination::StdOut, std::string{"must not be printed as range"});
     log(LogDestination::StdOut, "\n");
 
     log_flush(LogDestination::StdOut);

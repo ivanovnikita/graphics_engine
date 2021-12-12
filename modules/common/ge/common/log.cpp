@@ -38,16 +38,6 @@ namespace ge
         }
     }
 
-    void log(const LogDestination destination, char* const c_str) noexcept
-    {
-        log(destination, std::string_view{c_str});
-    }
-
-    void log(const LogDestination destination, const char* const c_str) noexcept
-    {
-        log(destination, std::string_view{c_str});
-    }
-
     void log_flush(const LogDestination destination) noexcept
     {
         switch (destination)

@@ -12,10 +12,10 @@ namespace ge
     std::string_view to_string_view(const vk::Result& result) noexcept;
 
 #define GE_THROW_EXPECTED_RESULT(vk_result, message) \
-    GE_THROW_ERROR(expected_error, message, to_string_view(vk_result))
+    GE_THROW_ERROR(expected_error, message, ::ge::to_string_view(vk_result))
 
 #define GE_THROW_UNEXPECTED_RESULT(vk_result, message) \
-    GE_THROW_ERROR(unexpected_error, message, to_string_view(vk_result))
+    GE_THROW_ERROR(unexpected_error, message, ::ge::to_string_view(vk_result))
 
     #define GE_THROW(exception, message)                            \
         throw exception(std::string("file: ") + __FILE__ + "\n" +   \

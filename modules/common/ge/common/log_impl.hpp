@@ -9,6 +9,13 @@
 
 namespace ge
 {
+    template <typename T>
+        requires std::convertible_to<T, std::string_view>
+    void log(const LogDestination destination, const T& value) noexcept
+    {
+        log(destination, std::string_view{value});
+    }
+
     void log(const LogDestination destination, std::integral auto value) noexcept
     {
         // separate func 'void log(LogDestination, bool)' is useless:
@@ -53,6 +60,30 @@ namespace ge
             log(destination, std::string_view{buffer.data(), result.ptr});
         }
         assert(result.ec == std::errc());
+    }
+
+    template <typename T>
+    requires std::ranges::range<T> and
+            (not std::convertible_to<T, std::string_view>)
+    void log(const LogDestination destination, const T& range) noexcept
+    {
+        log(destination, "[");
+
+        auto it = std::ranges::begin(range);
+        const auto it_end = std::ranges::end(range);
+        if (it != it_end)
+        {
+            log(destination, *it);
+            ++it;
+        }
+
+        while (it != it_end)
+        {
+            log(destination, ", ", *it);
+            ++it;
+        }
+
+        log(destination, "]");
     }
 
     void log(const LogDestination destination, Loggable auto ... values) noexcept
