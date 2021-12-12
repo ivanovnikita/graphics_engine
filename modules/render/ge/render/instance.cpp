@@ -150,7 +150,7 @@ namespace ge
                     logger.log(LogType::ErrorDetails, "Absent extensions:\n");
                     for (size_t i = 0; i < absent_extensions_count; ++i)
                     {
-                        logger.log(LogType::ErrorDetails, "- %s\n", absent_extensions_storage[i]);
+                        logger.log(LogType::ErrorDetails, "- ", absent_extensions_storage[i], "\n");
                     }
                 }
                 GE_THROW_EXPECTED_ERROR("Some required instance extensions are absent");
@@ -207,9 +207,7 @@ namespace ge
                     logger.log
                     (
                         LogType::SystemInfo,
-                        "- [%s] [spec. v. %d]\n",
-                        property.extensionName.data(),
-                        property.specVersion
+                        "- [", property.extensionName.data(), ", ] [spec. v. ", property.specVersion, "]\n"
                     );
                 }
             }
@@ -289,7 +287,7 @@ namespace ge
                     logger.log(LogType::ErrorDetails, "Absent layers:\n");
                     for (size_t i = 0; i < absent_layers_count; ++i)
                     {
-                        logger.log(LogType::ErrorDetails, "- %s\n", absent_layers_storage[i]);
+                        logger.log(LogType::ErrorDetails, "- ", absent_layers_storage[i], "\n");
                     }
                 }
                 GE_THROW_EXPECTED_ERROR("Some required layers are absent");
@@ -344,11 +342,10 @@ namespace ge
                     logger.log
                     (
                         LogType::SystemInfo,
-                        "- [%s] [spec. v. %d] [impl. v. %d] [%s]\n",
-                        property.layerName.data(),
-                        property.specVersion,
-                        property.implementationVersion,
-                        property.description.data()
+                        "- [", property.layerName.data(), "] "
+                          "[spec. v. ", property.specVersion, "] "
+                          "[impl. v. ", property.implementationVersion, "] "
+                          "[", property.description.data(), "]\n"
                     );
                 }
             }
@@ -406,8 +403,8 @@ namespace ge
                         logger.log
                         (
                             LogType::SystemInfo,
-                            "'vkEnumerateInstanceVersion' returned error %s, perhaps api version is 1.0"
-                            , to_string_view(result).data()
+                            "'vkEnumerateInstanceVersion' returned error ", to_string_view(result).data(),
+                            ", perhaps api version is 1.0"
                         );
                     }
                 }
@@ -423,19 +420,14 @@ namespace ge
                 logger.log
                 (
                     LogType::SystemInfo,
-                    "Available api version: major = %d, minor = %d, patch = %d, variant = %d"
-                    , major
-                    , minor
-                    , patch
-                    , variant
+                    "Available api version: ", major, ".", minor, ".", patch, "-", variant, "\n"
                 );
                 if (variant != 0)
                 {
                     logger.log
                     (
                         LogType::Error,
-                        "Api variant = %d is not equal 0, perhaps application requires to be modified to use it"
-                        , variant
+                        "Api variant = ", variant, " is not equal 0, perhaps application requires to be modified to use it"
                     );
                 }
             }
@@ -451,6 +443,13 @@ namespace ge
         )
         {
             const uint32_t available_api_version = get_instance_api_version(logger);
+            const uint32_t version_to_use = VK_MAKE_API_VERSION
+            (
+                0,
+                VK_API_VERSION_MAJOR(available_api_version),
+                VK_API_VERSION_MINOR(available_api_version),
+                0
+            );
 
             const vk::ApplicationInfo application_info
             {
@@ -458,7 +457,7 @@ namespace ge
                 VK_MAKE_VERSION(1, 0, 0),
                 "no engine",
                 VK_MAKE_VERSION(1, 0, 0),
-                available_api_version
+                version_to_use
             };
 
             assert(required_extensions.size() < std::numeric_limits<uint32_t>::max());
@@ -495,7 +494,7 @@ namespace ge
             return
             {
                 vk::UniqueInstance{std::move(instance), {vk::Optional<const vk::AllocationCallbacks>(nullptr)}},
-                available_api_version
+                version_to_use
             };
         }
     }

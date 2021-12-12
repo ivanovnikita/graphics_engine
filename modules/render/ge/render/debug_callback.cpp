@@ -48,12 +48,9 @@ namespace ge
             logger.log
             (
                 LogType::Error,
-                "Type: %s\n"
-                "Layer: %s\n"
-                "Message: %s\n",
-                type,
-                layer_prefix,
-                message
+                "Type: ", type, "\n"
+                "Layer: ", layer_prefix, "\n"
+                "Message: ", message, "\n"
             );
         }
 

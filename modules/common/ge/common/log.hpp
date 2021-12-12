@@ -28,10 +28,6 @@ namespace ge
         std::integral<T> or
         std::floating_point<T> or
         std::convertible_to<T, std::string_view>;
-//        std::is_same_v<std::remove_cvref_t<T>, std::string_view> or
-//        std::is_same_v<std::remove_cvref_t<T>, std::string> or
-//        std::is_same_v<std::remove_extent_t<std::remove_cvref_t<T>>, char*> or
-//        std::is_same_v<std::remove_extent_t<std::remove_cvref_t<T>>, const char*>;
 
     void log(LogDestination, Loggable auto ...) noexcept;
 }

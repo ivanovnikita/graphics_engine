@@ -19,7 +19,7 @@ namespace ge
         bool enabled(LogType) const noexcept;
 
         template <typename... Args>
-        void log(LogType, const char* fmt, const Args&...) const noexcept;
+        void log(LogType, const Args&...) const noexcept;
 
 
     private:
