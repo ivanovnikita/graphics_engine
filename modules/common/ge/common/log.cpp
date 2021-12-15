@@ -2,39 +2,42 @@
 
 namespace ge
 {
-    namespace
+    namespace detail
     {
-        void log(FILE& file, const std::string_view str) noexcept
+        namespace
         {
-            fwrite
-            (
-                str.data(),
-                sizeof(std::string_view::value_type),
-                str.size(),
-                &file
-            );
+            void log(FILE& file, const std::string_view str) noexcept
+            {
+                fwrite
+                (
+                    str.data(),
+                    sizeof(std::string_view::value_type),
+                    str.size(),
+                    &file
+                );
+            }
+
+            void log_flush(FILE& file) noexcept
+            {
+                fflush(&file);
+            }
         }
 
-        void log_flush(FILE& file) noexcept
+        void log(const LogDestination destination, const std::string_view str) noexcept
         {
-            fflush(&file);
-        }
-    }
-
-    void log(const LogDestination destination, const std::string_view str) noexcept
-    {
-        switch (destination)
-        {
-        case LogDestination::StdOut:
-        {
-            log(*stdout, str);
-            break;
-        }
-        case LogDestination::StdErr:
-        {
-            log(*stderr, str);
-            break;
-        }
+            switch (destination)
+            {
+            case LogDestination::StdOut:
+            {
+                log(*stdout, str);
+                break;
+            }
+            case LogDestination::StdErr:
+            {
+                log(*stderr, str);
+                break;
+            }
+            }
         }
     }
 
@@ -44,12 +47,12 @@ namespace ge
         {
         case LogDestination::StdOut:
         {
-            log_flush(*stdout);
+            detail::log_flush(*stdout);
             break;
         }
         case LogDestination::StdErr:
         {
-            log_flush(*stderr);
+            detail::log_flush(*stderr);
             break;
         }
         }
