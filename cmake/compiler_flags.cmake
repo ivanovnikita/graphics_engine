@@ -13,6 +13,7 @@ endif()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
+    list(APPEND cxx_flags -fconcepts-diagnostics-depth=2)
     list(APPEND std_libs -lstdc++fs)
     #list(APPEND cxx_flags -fanalyzer)
 
