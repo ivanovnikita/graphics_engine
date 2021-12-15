@@ -14,10 +14,17 @@ namespace ge
         void log(LogDestination, std::string_view) noexcept;
 
         template <typename T>
-            requires std::convertible_to<T, std::string_view>
+            requires ConvertibleToStringView<T>
         void log(const LogDestination destination, const T& value) noexcept
         {
-            log(destination, std::string_view{value});
+            if constexpr (std::convertible_to<T, std::string_view>)
+            {
+                log(destination, std::string_view{value});
+            }
+            else
+            {
+                log(destination, to_string_view(value));
+            }
         }
 
         void log(const LogDestination destination, std::integral auto value) noexcept
@@ -77,7 +84,7 @@ namespace ge
         template <typename T>
         requires std::ranges::range<T> and
                 (not std::convertible_to<T, std::string_view>)
-        void log(const LogDestination destination, const T& range) noexcept
+        void log(const LogDestination destination, T&& range) noexcept
         {
             log(destination, "[");
 

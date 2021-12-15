@@ -1,4 +1,5 @@
 #include "ge/common/log.hpp"
+#include "ge/common/bits_range.hpp"
 
 #include <gtest/gtest.h>
 
@@ -230,5 +231,51 @@ TEST(log, variadic)
 
     log(LogDestination::StdOut, 1, " ", 2.3f, "\n");
 
+    log_flush(LogDestination::StdOut);
+}
+
+namespace
+{
+    enum class BitFlags : uint8_t
+    {
+        Foo = 1,
+        Bar = 2,
+        Baz = 4
+    };
+
+    std::string_view to_string_view(const BitFlags flags)
+    {
+        switch (flags)
+        {
+        case BitFlags::Foo: return "Foo";
+        case BitFlags::Bar: return "Bar";
+        case BitFlags::Baz: return "Baz";
+        }
+
+        __builtin_unreachable();
+    }
+}
+
+TEST(log, enums)
+{
+    using namespace ge;
+
+    BitFlags flag = BitFlags::Foo;
+
+    log(LogDestination::StdOut, flag);
+    log(LogDestination::StdOut, "\n");
+    log_flush(LogDestination::StdOut);
+}
+
+TEST(log, bit_flags)
+{
+    using namespace ge;
+
+    const uint8_t flags =
+        static_cast<uint8_t>(BitFlags::Foo) |
+        static_cast<uint8_t>(BitFlags::Baz);
+
+    log(LogDestination::StdOut, to_enum_bits_range<BitFlags>(flags));
+    log(LogDestination::StdOut, "\n");
     log_flush(LogDestination::StdOut);
 }

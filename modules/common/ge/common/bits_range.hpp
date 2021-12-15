@@ -18,7 +18,7 @@ namespace ge
         using difference_type = int;
         using value_type = T;
 
-        explicit BitsIterator() noexcept;
+        BitsIterator() noexcept;
         explicit BitsIterator(const T&) noexcept;
         explicit BitsIterator(const T&, uint8_t bit_number) noexcept;
 
@@ -42,6 +42,10 @@ namespace ge
 
     template <typename T>
     auto to_bits_range(const T&) noexcept;
+
+    template <typename E, typename T>
+        requires std::is_enum_v<E> and std::is_same_v<std::underlying_type_t<E>, T>
+    auto to_enum_bits_range(const T&) noexcept;
 
     static_assert(std::input_or_output_iterator<BitsIterator<int>>);
     static_assert(std::sentinel_for<BitsIteratorSentinel<int>, BitsIterator<int>>);

@@ -98,4 +98,13 @@ namespace ge
     {
         return std::ranges::subrange{BitsIterator<T>{value}, BitsIteratorSentinel<T>{}};
     }
+
+    template <typename E, typename T>
+        requires std::is_enum_v<E> and std::is_same_v<std::underlying_type_t<E>, T>
+    auto to_enum_bits_range(const T& bits) noexcept
+    {
+        return to_bits_range(bits)
+            | std::views::filter([] (const auto v) { return v != 0; } )
+            | std::views::transform([] (const auto v) { return static_cast<E>(v); } );
+    }
 }
