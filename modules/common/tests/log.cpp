@@ -304,3 +304,49 @@ TEST(log, non_trivial)
     log(LogDestination::StdOut, "\n");
     log_flush(LogDestination::StdOut);
 }
+
+namespace
+{
+    struct Foo final
+    {
+        int integer = 1;
+        std::string_view string = "text";
+    };
+
+    struct Bar final
+    {
+        float floating = 2.3f;
+        Foo foo = {};
+    };
+
+    constexpr auto register_members(const Foo*) noexcept
+    {
+        using namespace ge;
+        return std::tuple
+        {
+            Member<&Foo::integer>{"integer"},
+            Member<&Foo::string>{"string"},
+        };
+    }
+
+    constexpr auto register_members(const Bar*) noexcept
+    {
+        using namespace ge;
+        return std::tuple
+        {
+            Member<&Bar::floating>{"floating"},
+            Member<&Bar::foo>{"foo"},
+        };
+    }
+}
+
+TEST(log, reflection)
+{
+    using namespace ge;
+
+    const Bar bar;
+
+    log(LogDestination::StdOut, bar);
+    log(LogDestination::StdOut, "\n");
+    log_flush(LogDestination::StdOut);
+}

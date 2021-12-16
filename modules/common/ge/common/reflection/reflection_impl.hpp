@@ -13,7 +13,7 @@ namespace ge
         return register_members(static_cast<const std::remove_cvref_t<T>*>(nullptr));
     }
 
-    namespace detail
+    namespace refl::detail
     {
         template <typename... Members, typename F, size_t... Ids>
         constexpr void for_each_member(const std::tuple<Members...>& members, F&& func, std::index_sequence<Ids...>)
@@ -32,6 +32,6 @@ namespace ge
         requires RegisteredMembers<T>
     constexpr void for_each_member(F&& func)
     {
-        detail::for_each_member(get_members<T>(), std::forward<F>(func));
+        refl::detail::for_each_member(get_members<T>(), std::forward<F>(func));
     }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "reflection/reflection.hpp"
+
 #include <concepts>
 #include <functional>
 #include <string>
@@ -36,6 +38,7 @@ namespace ge
         std::floating_point<T> or
         ConvertibleToStringView<T> or
         NonTrivialLoggable<T> or
+        RegisteredMembers<T> or
         std::ranges::range<T>;
 
     void log(LogDestination, Loggable auto ...) noexcept;

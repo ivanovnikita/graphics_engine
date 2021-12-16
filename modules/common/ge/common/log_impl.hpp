@@ -82,10 +82,39 @@ namespace ge
         }
 
         template <typename T>
-            requires NonTrivialLoggable<T>
+            requires NonTrivialLoggable<T> or
+                RegisteredMembers<T>
         void log(const LogDestination destination, const T& value) noexcept
         {
-            log_non_trivial(destination, value);
+            if constexpr (NonTrivialLoggable<T>)
+            {
+                log_non_trivial(destination, value);
+            }
+            else if constexpr (RegisteredMembers<T>)
+            {
+                for_each_member<T>
+                (
+                    [&destination, &value] (const auto& member) noexcept
+                    {
+                        const auto& member_value = member.get(value);
+
+                        if constexpr (RegisteredMembers<decltype(member_value)>)
+                        {
+                            log
+                            (
+                                destination,
+                                "<", member.name, ">:\n",
+                                member_value,
+                                "</", member.name, ">\n"
+                            );
+                        }
+                        else
+                        {
+                            log(destination, member.name, ": ", member_value, "\n");
+                        }
+                    }
+                );
+            }
         }
 
         template <typename T>
