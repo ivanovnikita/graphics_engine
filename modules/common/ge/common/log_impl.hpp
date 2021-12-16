@@ -82,7 +82,14 @@ namespace ge
         }
 
         template <typename T>
-        requires std::ranges::range<T> and
+            requires NonTrivialLoggable<T>
+        void log(const LogDestination destination, const T& value) noexcept
+        {
+            log_non_trivial(destination, value);
+        }
+
+        template <typename T>
+            requires std::ranges::range<T> and
                 (not std::convertible_to<T, std::string_view>)
         void log(const LogDestination destination, T&& range) noexcept
         {

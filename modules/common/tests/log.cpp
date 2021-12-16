@@ -279,3 +279,28 @@ TEST(log, bit_flags)
     log(LogDestination::StdOut, "\n");
     log_flush(LogDestination::StdOut);
 }
+
+namespace
+{
+    struct SomeStruct final
+    {
+        int value;
+    };
+
+    void log_non_trivial(const ge::LogDestination destination, const SomeStruct& value) noexcept
+    {
+        using namespace ge;
+
+        log(destination, "SomeStruct: ", value.value);
+    }
+}
+
+TEST(log, non_trivial)
+{
+    using namespace ge;
+
+    const SomeStruct non_trivial_value{1};
+    log(LogDestination::StdOut, non_trivial_value);
+    log(LogDestination::StdOut, "\n");
+    log_flush(LogDestination::StdOut);
+}

@@ -25,10 +25,17 @@ namespace ge
         };
 
     template <typename T>
+    concept NonTrivialLoggable = requires(T t, LogDestination destination)
+    {
+        log_non_trivial(destination, t);
+    };
+
+    template <typename T>
     concept Loggable =
         std::integral<T> or
         std::floating_point<T> or
         ConvertibleToStringView<T> or
+        NonTrivialLoggable<T> or
         std::ranges::range<T>;
 
     void log(LogDestination, Loggable auto ...) noexcept;
