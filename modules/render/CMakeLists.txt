@@ -64,6 +64,24 @@ target_include_directories(render
 add_library(GE::render ALIAS render)
 define_source_group(render)
 
+if (${GE_BUILD_TESTS})
+    enable_testing()
+
+    include(GoogleTest)
+
+    sources_in_dir_recurse(tests tests_sources)
+    add_executable(tests_render ${tests_sources})
+    target_link_libraries(tests_render
+        CONAN_PKG::gtest
+        GE::render
+        ${std_libs}
+    )
+    target_compile_options(tests_render PRIVATE ${GE_COMPILE_OPTIONS})
+    set_target_properties(tests_render PROPERTIES ${GE_TARGET_PROPERTIES})
+    define_source_group(tests_render)
+    gtest_discover_tests(tests_render)
+endif()
+
 install(
     TARGETS
         render
