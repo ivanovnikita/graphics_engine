@@ -32,6 +32,8 @@ namespace ge
         log_non_trivial(destination, t);
     };
 
+    // TODO: log unions
+
     template <typename T>
     concept Loggable =
         std::integral<T> or

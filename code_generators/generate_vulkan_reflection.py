@@ -5,10 +5,11 @@ import xml.etree.ElementTree as ET
 
 
 class Type:
-    def __init__(self, base_name, qualifier, is_ptr):
+    def __init__(self, base_name, qualifier, is_ptr, array):
         self.base_name = base_name
         self.qualifier = qualifier
         self.is_ptr = is_ptr
+        self.array = array
 
         self.full_name = ''
         if qualifier:
@@ -102,7 +103,8 @@ def collect_structs(root):
             member_type_node = member_node.find("type")
             is_ptr = member_type_node.tail and (member_type_node.tail.strip() == '*')
 
-            type = Type(member_type_node.text, type_qualifier, is_ptr)
+            # TODO: parse array with size (see VkPhysicalDeviceProperties::deviceName)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array = None)
 
             member = Member(type, member_node.find("name").text)
             members.append(member)
@@ -110,9 +112,6 @@ def collect_structs(root):
         struct = Struct(type_node.attrib["name"], members)
 
         structs[struct.name] = struct
-
-        #print_struct(struct)
-        #print('')
 
     return structs
 
@@ -256,7 +255,8 @@ def collect_functions(root):
 
                 param_name = param.find('name').text
                 
-                params.append(Member(Type(param_type, type_qualifier, is_ptr), param_name))
+                # TODO: parse array with size (see vkCmdSetFragmentShadingRateEnumNV combinerOps)
+                params.append(Member(Type(param_type, type_qualifier, is_ptr, array = None), param_name))
 
             success_codes = []
             if 'successcodes' in command_node.attrib:
@@ -281,12 +281,47 @@ def collect_functions(root):
 
     return result
 
-# TODO: unions, handles
+
+def collect_unions(root):
+    result = {}
+
+    for type_node in root.findall('./types/type[@category="union"]'):
+        
+        members = []
+        for member_node in type_node.findall('member'):
+            type_qualifier = None
+            if member_node.text:
+                type_qualifier = member_node.text.strip()
+
+            member_type_node = member_node.find("type")
+            is_ptr = member_type_node.tail and (member_type_node.tail.strip() == '*')
+
+            # TODO: parse array with size (see VkClearColorValue::float32)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array = None)
+
+            member = Member(type, member_node.find("name").text)
+            members.append(member)
+
+        union = Struct(type_node.attrib["name"], members)
+
+        result[union.name] = union
+
+    return result
+
+# TODO: handles
 
 def print_struct(struct):
     print(f'struct {struct.name}')
     print('{')
     for member in struct.members:
+        print(f'    {member.type.full_name} {member.name};')
+    print('};')
+
+
+def print_union(union):
+    print(f'union {union.name}')
+    print('{')
+    for member in union.members:
         print(f'    {member.type.full_name} {member.name};')
     print('};')
 
@@ -340,14 +375,19 @@ def parse_xml_file(input_xml_file_path):
 
     #structs = collect_structs(root)
     
-    enums = collect_enums(root)
-    add_extensions_to_enum(root, enums)
+    #enums = collect_enums(root)
+    #add_extensions_to_enum(root, enums)
 
-    for enum_name, enum in enums.items():
-        print_enum(enum)
+    #for enum_name, enum in enums.items():
+    #    print_enum(enum)
 
     #bitmasks = collect_bitmasks(root)
     #functions = collect_functions(root)
+
+    unions = collect_unions(root)
+
+    for union_name, union in unions.items():
+        print_union(union)
 
 
 if __name__ == '__main__':
