@@ -103,10 +103,18 @@ def collect_structs(root):
             member_type_node = member_node.find("type")
             is_ptr = member_type_node.tail and (member_type_node.tail.strip() == '*')
 
-            # TODO: parse array with size (see VkPhysicalDeviceProperties::deviceName)
-            type = Type(member_type_node.text, type_qualifier, is_ptr, array = None)
+            name_node = member_node.find("name")
+            array = None
+            if name_node.tail:
+                if name_node.tail == '[':
+                    array_size_node = member_node.find("enum")
+                    array = f'[{array_size_node.text}]'
+                else:
+                    array = name_node.tail
 
-            member = Member(type, member_node.find("name").text)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array)
+
+            member = Member(type, name_node.text)
             members.append(member)
 
         struct = Struct(type_node.attrib["name"], members)
@@ -296,10 +304,18 @@ def collect_unions(root):
             member_type_node = member_node.find("type")
             is_ptr = member_type_node.tail and (member_type_node.tail.strip() == '*')
 
-            # TODO: parse array with size (see VkClearColorValue::float32)
-            type = Type(member_type_node.text, type_qualifier, is_ptr, array = None)
+            name_node = member_node.find("name")
+            array = None
+            if name_node.tail:
+                if name_node.tail == '[':
+                    array_size_node = member_node.find("enum")
+                    array = f'[{array_size_node.text}]'
+                else:
+                    array = name_node.tail
 
-            member = Member(type, member_node.find("name").text)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array)
+
+            member = Member(type, name_node.text)
             members.append(member)
 
         union = Struct(type_node.attrib["name"], members)
@@ -314,16 +330,22 @@ def print_struct(struct):
     print(f'struct {struct.name}')
     print('{')
     for member in struct.members:
-        print(f'    {member.type.full_name} {member.name};')
-    print('};')
+        array = ''
+        if member.type.array:
+            array = member.type.array
+        print(f'    {member.type.full_name} {member.name}{array};')
+    print('};\n')
 
 
 def print_union(union):
     print(f'union {union.name}')
     print('{')
     for member in union.members:
-        print(f'    {member.type.full_name} {member.name};')
-    print('};')
+        array = ''
+        if member.type.array:
+            array = member.type.array
+        print(f'    {member.type.full_name} {member.name}{array};')
+    print('};\n')
 
 
 def print_enum(enum):
