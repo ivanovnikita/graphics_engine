@@ -27,9 +27,18 @@ class Member:
 
 
 class Struct:
-    def __init__(self, name, members):
+    def __init__(self, name, members, alias, protect):
         self.name = name
         self.members = members
+        self.alias = alias
+        self.protect = protect
+
+
+    def get_cpp_name(self):
+        if self.name.startswith('Vk'):
+            return self.name[2:]
+        else:
+            return self.name
 
 
 class EnumEntry:
@@ -40,6 +49,68 @@ class EnumEntry:
         self.is_bit = is_bit
         self.protect = protect
 
+    def transform_name_part(self, name_part):
+        if name_part.lower() == 'bit':
+            return ''
+
+        if name_part.lower() in [
+            'ext', 
+            'khr', 
+            'qcom', 
+        ]:
+            return name_part.upper()
+
+        result = ''
+        is_first = True
+        for char in name_part:
+            if is_first:
+                result += str(char).upper()
+
+                if not str(char).isdigit():
+                    is_first = False
+            else:
+                result += str(char).lower()
+
+        return result
+
+
+    def get_cpp_name(self, enum_name):
+        result = ''
+
+        enum_name_parts = enum_name.lower()
+
+        is_first = True
+        name_part = ''
+        for char in self.name:
+            if is_first:
+                is_first = False
+                name_part += char
+                continue
+
+            if char == '_':
+                is_first = True
+                if name_part.lower() != 'flag' and enum_name_parts.startswith(name_part.lower()):
+                    enum_name_parts = enum_name_parts[len(name_part):]
+                elif name_part.lower() != 'flag' and enum_name_parts.endswith(name_part.lower()):
+                    enum_name_parts = enum_name_parts[:-len(name_part)]
+                else:
+                    result += self.transform_name_part(name_part)
+                name_part = ''
+                continue
+
+            name_part += str(char).lower()
+
+        if name_part.lower() != 'flag' and enum_name_parts.startswith(name_part.lower()):
+            enum_name_parts = enum_name_parts[len(name_part):]
+        elif name_part.lower() != 'flag' and enum_name_parts.endswith(name_part.lower()):
+            enum_name_parts = enum_name_parts[:-len(name_part)]
+        else:
+            result += self.transform_name_part(name_part)
+
+        result = 'e' + result
+        
+        return result
+
 
 class Enum:
     def __init__(self, name, entries, alias, is_bitmask):
@@ -47,6 +118,13 @@ class Enum:
         self.entries = entries
         self.alias = alias
         self.is_bitmask = is_bitmask
+
+
+    def get_cpp_name(self):
+        if self.name.startswith('Vk'):
+            return self.name[2:]
+        else:
+            return self.name
 
 
 class Bitmask:
@@ -98,10 +176,15 @@ def collect_type_categories(root):
 
     return types
 
+
 def collect_structs(root):
     structs = {}
 
     for type_node in root.findall('./types/type[@category="struct"]'):
+
+        alias = None
+        if 'alias' in type_node.attrib:
+            alias = type_node.attrib['alias']
         
         members = []
         for member_node in type_node.findall('member'):
@@ -126,7 +209,7 @@ def collect_structs(root):
             member = Member(type, name_node.text)
             members.append(member)
 
-        struct = Struct(type_node.attrib["name"], members)
+        struct = Struct(type_node.attrib["name"], members, alias, protect = None)
 
         structs[struct.name] = struct
 
@@ -191,16 +274,28 @@ def add_extensions_to_enum(root, enums):
         enum = enums[feature_node.attrib["extends"]]
 
         value = None
+
+        is_alias = False
+        if 'alias' in feature_node.attrib:
+            is_alias = True
+            value = feature_node.attrib['alias']
+
         is_bit = False
         if 'bitpos' in feature_node.attrib:
             value = feature_node.attrib['bitpos']
             is_bit = True
 
-        enum_entry = EnumEntry(feature_node.attrib["name"], value, is_alias = False, is_bit = is_bit, protect = None)
+        enum_entry = EnumEntry(feature_node.attrib["name"], value, is_alias, is_bit = is_bit, protect = None)
         enum.entries.append(enum_entry)
 
-    for extension_node in root.findall('./extensions/extension/require/enum[@extends]'):
+    # TODO: process implicit protection (see VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT, protected by win32)
+    for extension_node in root.findall('./extensions/extension[@supported!="disabled"]/require/enum[@extends]'):
         enum = enums[extension_node.attrib["extends"]]
+
+        is_alias = False
+        if 'alias' in extension_node.attrib:
+            is_alias = True
+            value = extension_node.attrib['alias']
 
         protect = None
         if 'protect' in extension_node.attrib:
@@ -212,7 +307,7 @@ def add_extensions_to_enum(root, enums):
             value = extension_node.attrib['bitpos']
             is_bit = True
 
-        enum_entry = EnumEntry(extension_node.attrib["name"], value, is_alias = False, is_bit = is_bit, protect = protect)
+        enum_entry = EnumEntry(extension_node.attrib["name"], value, is_alias, is_bit = is_bit, protect = protect)
         enum.entries.append(enum_entry)
 
     return
@@ -322,11 +417,33 @@ def collect_unions(root):
             member = Member(type, name_node.text)
             members.append(member)
 
-        union = Struct(type_node.attrib["name"], members)
+        union = Struct(type_node.attrib["name"], members, alias = None, protect = None)
 
         result[union.name] = union
 
     return result
+
+def add_platform_protection(root, api):
+    platforms = {}
+    for platform_node in root.findall('./platforms/platform'):
+        platforms[platform_node.attrib['name']] = platform_node.attrib['protect']
+
+    for extension_node in root.findall('./extensions/extension[@platform]'):
+        platform = extension_node.attrib['platform']
+        protect = platforms[platform]
+
+        for enum_node in extension_node.findall('./require/enum'):
+            enum_name = enum_node.attrib['extends']
+            entry_name = enum_node.attrib['name']
+            # TODO: add protect
+
+        for type_node in extension_node.findall('./require/type'):
+            type_name = type_node.attrib['name']
+            # TODO: add protect
+
+        for command_node in extension_node.findall('./require/command'):
+            command_name = command_node.attrib['name']
+            # TODO: add protect
 
 # TODO: handles
 
@@ -341,10 +458,18 @@ def collect_api(root):
 
     functions = collect_functions(root)
 
-    return VulkanApi(structs, unions, enums, bitmasks, functions)
+    api = VulkanApi(structs, unions, enums, bitmasks, functions)
+
+    add_platform_protection(root, api)
+
+    return api
 
 
 def print_struct(struct):
+    if struct.alias:
+        print(f'using {struct.name} = {struct.alias};\n')
+        return
+
     print(f'struct {struct.name}')
     print('{')
     for member in struct.members:
@@ -428,14 +553,17 @@ def generate_reflection_structs(structs):
     result = ''
 
     for struct in structs.values():
-        result += f'    constexpr auto register_members(const {struct.name}*) noexcept\n'
+        if struct.alias:
+            continue
+
+        result += f'    constexpr auto register_members(const {struct.get_cpp_name()}*) noexcept\n'
         result += '    {\n'
         result += '        using namespace ge;\n'
         result += '        return std::tuple\n'
         result += '        {\n'
         
         for member in struct.members:
-            result += f'            Member<&{struct.name}::{member.name}>{{"{member.name}"}},\n'
+            result += f'            Member<&{struct.get_cpp_name()}::{member.name}>{{"{member.name}"}},\n'
          
         # remove last comma
         if len(struct.members) > 0:
@@ -453,7 +581,7 @@ def generate_reflection(api):
 
     result += '#pragma once\n\n'
 
-    result += '#include "ge/common/reflection/member.h"\n\n'
+    result += '#include "ge/common/reflection/member.hpp"\n\n'
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
 
@@ -481,7 +609,10 @@ def generate_enum_to_string_view_decl(enums):
     result += '{\n'
 
     for enum in enums.values():
-        result += f'    std::string_view to_string_view({enum.name}) noexcept;\n'
+        if enum.alias:
+            continue
+
+        result += f'    std::string_view to_string_view({enum.get_cpp_name()}) noexcept;\n'
 
     result += '}\n'
 
@@ -495,18 +626,35 @@ def generate_enum_to_string_view_def(enums):
     result += 'namespace vk\n'
     result += '{\n'
 
+    # TODO: add defines for protected entries
     for enum in enums.values():
-        result += f'    std::string_view to_string_view(const {enum.name} flags) noexcept\n'
-        result += '    {\n'
-        result += '        switch (flags)\n'
-        result += '        {\n'
+        if enum.alias:
+            continue
 
-        for entry in enum.entries:
-            result += f'            case {enum.name}::{entry.name}: return "{entry.name}";\n'
-        
-        result += f'            default: return "unknown value of {enum.name}";\n'
-        result += '        }\n'
-        result += '        __builtin_unreachable();\n'
+        enum_name = enum.get_cpp_name()
+
+        if len(enum.entries) == 0:
+            result += f'    std::string_view to_string_view({enum_name}) noexcept\n'
+            result += '    {\n'
+            result += f'        return "unknown value of {enum_name}";\n'
+        else:
+            result += f'    std::string_view to_string_view(const {enum_name} flags) noexcept\n'
+            result += '    {\n'
+            result += f'        const {enum.name} c_flags = static_cast<{enum.name}>(flags);\n'
+            result += '        switch (c_flags)\n'
+            result += '        {\n'
+
+            for entry in enum.entries:
+                if entry.is_alias:
+                    continue
+
+                entry_name = entry.get_cpp_name(enum.name)
+
+                result += f'            case {entry.name}: return "{entry_name}";\n'
+            
+            result += f'            default: return "unknown value of {enum_name}";\n'
+            result += '        }\n'
+            result += '        __builtin_unreachable();\n'
         result += '    }\n\n'
 
     result += '}\n'
@@ -523,8 +671,8 @@ def parse_xml_file(input_xml_file_path):
     api = collect_api(root)
     #print_api(api)
 
-    refl = generate_reflection(api)
-    print(refl)
+    #refl = generate_reflection(api)
+    #print(refl)
 
     #str_view = generate_enum_to_string_view_decl(api.enums)
     #str_view = generate_enum_to_string_view_def(api.enums)
