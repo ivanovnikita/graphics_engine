@@ -72,6 +72,15 @@ class Function:
         self.alias = alias
 
 
+class VulkanApi:
+    def __init__(self, structs, unions, enums, bitmasks, functions):
+        self.structs = structs
+        self.unions = unions
+        self.enums = enums
+        self.bitmasks = bitmasks
+        self.functions = functions
+
+
 def get_parser_cla_result():
     parser = argparse.ArgumentParser()
 
@@ -228,8 +237,6 @@ def collect_bitmasks(root):
         bitmask = Bitmask(name, bits_type, alias)
         result['name'] = bitmask
 
-        print_bitmask(bitmask)
-
     return result
 
 
@@ -284,9 +291,6 @@ def collect_functions(root):
             )
             result[name] = function
 
-    for func_name, function in result.items():
-        print_function(function)
-
     return result
 
 
@@ -325,6 +329,20 @@ def collect_unions(root):
     return result
 
 # TODO: handles
+
+def collect_api(root):
+    structs = collect_structs(root)
+    unions = collect_unions(root)
+    
+    enums = collect_enums(root)
+    add_extensions_to_enum(root, enums)
+
+    bitmasks = collect_bitmasks(root)
+
+    functions = collect_functions(root)
+
+    return VulkanApi(structs, unions, enums, bitmasks, functions)
+
 
 def print_struct(struct):
     print(f'struct {struct.name}')
@@ -389,27 +407,31 @@ def print_function(function):
     print('')
 
 
+def print_api(api):
+    for struct in api.structs.values():
+        print_struct(struct)
+
+    for union in api.unions.values():
+        print_union(union)
+
+    for enum in api.enums.values():
+        print_enum(enum)
+
+    for bitmask in api.bitmasks.values():
+        print_bitmask(bitmask)
+    
+    for function in api.functions.values():
+        print_function(function)
+
+
 def parse_xml_file(input_xml_file_path):
     tree = ET.parse(input_xml_file_path)
     root = tree.getroot()
 
     #print(collect_type_categories(root))
 
-    #structs = collect_structs(root)
-    
-    #enums = collect_enums(root)
-    #add_extensions_to_enum(root, enums)
-
-    #for enum_name, enum in enums.items():
-    #    print_enum(enum)
-
-    #bitmasks = collect_bitmasks(root)
-    #functions = collect_functions(root)
-
-    unions = collect_unions(root)
-
-    for union_name, union in unions.items():
-        print_union(union)
+    api = collect_api(root)
+    print_api(api)
 
 
 if __name__ == '__main__':
