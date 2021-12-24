@@ -424,6 +424,96 @@ def print_api(api):
         print_function(function)
 
 
+def generate_reflection_structs(structs):
+    result = ''
+
+    for struct in structs.values():
+        result += f'    constexpr auto register_members(const {struct.name}*) noexcept\n'
+        result += '    {\n'
+        result += '        using namespace ge;\n'
+        result += '        return std::tuple\n'
+        result += '        {\n'
+        
+        for member in struct.members:
+            result += f'            Member<&{struct.name}::{member.name}>{{"{member.name}"}},\n'
+         
+        # remove last comma
+        if len(struct.members) > 0:
+            result = result[:-2]
+            result += '\n'
+        
+        result += '        };\n'
+        result += '    }\n\n'
+
+    return result
+
+
+def generate_reflection(api):
+    result = ''
+
+    result += '#pragma once\n\n'
+
+    result += '#include "ge/common/reflection/member.h"\n\n'
+
+    result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += 'namespace vk\n'
+    result += '{\n'    
+
+    result += generate_reflection_structs(api.structs)
+    result += generate_reflection_structs(api.unions)
+
+    result += '}\n'
+
+    return result
+
+
+def generate_enum_to_string_view_decl(enums):
+    result = ''
+
+    result += '#pragma once\n\n'
+
+    result += '#include <string_view>\n\n'
+
+    result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += 'namespace vk\n'
+    result += '{\n'
+
+    for enum in enums.values():
+        result += f'    std::string_view to_string_view({enum.name}) noexcept;\n'
+
+    result += '}\n'
+
+    return result
+
+def generate_enum_to_string_view_def(enums):
+    result = ''
+
+    result += '#include "to_string_view_enum.h"\n\n'
+
+    result += 'namespace vk\n'
+    result += '{\n'
+
+    for enum in enums.values():
+        result += f'    std::string_view to_string_view(const {enum.name} flags) noexcept\n'
+        result += '    {\n'
+        result += '        switch (flags)\n'
+        result += '        {\n'
+
+        for entry in enum.entries:
+            result += f'            case {enum.name}::{entry.name}: return "{entry.name}";\n'
+        
+        result += f'            default: return "unknown value of {enum.name}";\n'
+        result += '        }\n'
+        result += '        __builtin_unreachable();\n'
+        result += '    }\n\n'
+
+    result += '}\n'
+
+    return result
+
+
 def parse_xml_file(input_xml_file_path):
     tree = ET.parse(input_xml_file_path)
     root = tree.getroot()
@@ -431,7 +521,14 @@ def parse_xml_file(input_xml_file_path):
     #print(collect_type_categories(root))
 
     api = collect_api(root)
-    print_api(api)
+    #print_api(api)
+
+    refl = generate_reflection(api)
+    print(refl)
+
+    #str_view = generate_enum_to_string_view_decl(api.enums)
+    #str_view = generate_enum_to_string_view_def(api.enums)
+    #print(str_view)
 
 
 if __name__ == '__main__':
