@@ -5,11 +5,12 @@ import xml.etree.ElementTree as ET
 
 
 class Type:
-    def __init__(self, base_name, qualifier, is_ptr, array):
+    def __init__(self, base_name, qualifier, is_ptr, array, bitfield):
         self.base_name = base_name
         self.qualifier = qualifier
         self.is_ptr = is_ptr
         self.array = array
+        self.bitfield = bitfield
 
         self.full_name = ''
         if qualifier:
@@ -141,13 +142,14 @@ class Argument:
 
 
 class Function:
-    def __init__(self, name, params, return_type, success_codes, error_codes, alias):
+    def __init__(self, name, params, return_type, success_codes, error_codes, alias, protect):
         self.name = name
         self.params = params
         self.return_type = return_type
         self.success_codes = success_codes
         self.error_codes = error_codes
         self.alias = alias
+        self.protect = protect
 
 
 class VulkanApi:
@@ -197,14 +199,17 @@ def collect_structs(root):
 
             name_node = member_node.find("name")
             array = None
+            bitfield = None
             if name_node.tail:
                 if name_node.tail == '[':
                     array_size_node = member_node.find("enum")
                     array = f'[{array_size_node.text}]'
-                else:
+                elif name_node.tail.startswith('['):
                     array = name_node.tail
+                elif name_node.tail.startswith(':'):
+                    bitfield = name_node.tail
 
-            type = Type(member_type_node.text, type_qualifier, is_ptr, array)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array, bitfield)
 
             member = Member(type, name_node.text)
             members.append(member)
@@ -344,7 +349,7 @@ def collect_functions(root):
         if 'alias' in command_node.attrib:
             alias = command_node.attrib['alias']
             name = command_node.attrib['name']
-            function = Function(name, [], None, [], [], alias)
+            function = Function(name, [], None, [], [], alias, protect = None)
             result[name] = function
             continue
         else:
@@ -366,7 +371,7 @@ def collect_functions(root):
                 param_name = param.find('name').text
                 
                 # TODO: parse array with size (see vkCmdSetFragmentShadingRateEnumNV combinerOps)
-                params.append(Member(Type(param_type, type_qualifier, is_ptr, array = None), param_name))
+                params.append(Member(Type(param_type, type_qualifier, is_ptr, array = None, bitfield = None), param_name))
 
             success_codes = []
             if 'successcodes' in command_node.attrib:
@@ -382,7 +387,8 @@ def collect_functions(root):
                 return_type,
                 success_codes,
                 error_codes,
-                None
+                alias = None,
+                protect = None
             )
             result[name] = function
 
@@ -412,7 +418,7 @@ def collect_unions(root):
                 else:
                     array = name_node.tail
 
-            type = Type(member_type_node.text, type_qualifier, is_ptr, array)
+            type = Type(member_type_node.text, type_qualifier, is_ptr, array, bitfield = None)
 
             member = Member(type, name_node.text)
             members.append(member)
@@ -433,17 +439,30 @@ def add_platform_protection(root, api):
         protect = platforms[platform]
 
         for enum_node in extension_node.findall('./require/enum'):
+            if not 'extends' in enum_node.attrib:
+                continue
             enum_name = enum_node.attrib['extends']
             entry_name = enum_node.attrib['name']
-            # TODO: add protect
+
+            enum = api.enums[enum_name]
+            for entry in enum.entries:
+                if entry.name == entry_name:
+                    entry.protect = protect
+                    break
 
         for type_node in extension_node.findall('./require/type'):
             type_name = type_node.attrib['name']
-            # TODO: add protect
+            if type_name in api.structs:
+                struct = api.structs[type_name]
+                struct.protect = protect
+            if type_name in api.unions:
+                union = api.unions[type_name]
+                union.protect = protect
 
         for command_node in extension_node.findall('./require/command'):
             command_name = command_node.attrib['name']
-            # TODO: add protect
+            function = api.functions[command_name]
+            function.protect = protect
 
 # TODO: handles
 
@@ -556,6 +575,9 @@ def generate_reflection_structs(structs):
         if struct.alias:
             continue
 
+        if struct.protect:
+            result += f'#ifdef {struct.protect}\n\n'
+
         result += f'    constexpr auto register_members(const {struct.get_cpp_name()}*) noexcept\n'
         result += '    {\n'
         result += '        using namespace ge;\n'
@@ -563,6 +585,8 @@ def generate_reflection_structs(structs):
         result += '        {\n'
         
         for member in struct.members:
+            if member.type.bitfield:
+                continue
             result += f'            Member<&{struct.get_cpp_name()}::{member.name}>{{"{member.name}"}},\n'
          
         # remove last comma
@@ -572,6 +596,9 @@ def generate_reflection_structs(structs):
         
         result += '        };\n'
         result += '    }\n\n'
+
+        if struct.protect:
+            result += '#endif\n\n'
 
     return result
 
@@ -671,8 +698,8 @@ def parse_xml_file(input_xml_file_path):
     api = collect_api(root)
     #print_api(api)
 
-    #refl = generate_reflection(api)
-    #print(refl)
+    refl = generate_reflection(api)
+    print(refl)
 
     #str_view = generate_enum_to_string_view_decl(api.enums)
     #str_view = generate_enum_to_string_view_def(api.enums)
