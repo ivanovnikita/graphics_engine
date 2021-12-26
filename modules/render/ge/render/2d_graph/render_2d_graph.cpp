@@ -13,6 +13,12 @@ namespace ge
             surface_params.height
         }
     {
+        DeviceData::create_default
+        (
+            factory::options::Instance::create_default().debug.validation_layers,
+            instance_data_,
+            logger
+        );
     }
 
     Render2dGraph::~Render2dGraph() = default;

@@ -1,11 +1,15 @@
 #pragma once
 
 #include "ge/common/logger.hpp"
+
+#include "ge/render/render_i.h"
+
 #include "ge/render/instance.h"
 #include "ge/render/surface.h"
-#include "ge/render/vertex.h"
+#include "ge/render/device.h"
 #include "ge/render/queue.h"
-#include "ge/render/render_i.h"
+
+#include "ge/render/vertex.h"
 #include "ge/render/2d_graph/2d_graph.h"
 
 #include <vulkan/vulkan.hpp>
