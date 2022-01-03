@@ -675,9 +675,15 @@ def generate_enum_to_string_view_def(enums):
                 if entry.is_alias:
                     continue
 
+                if entry.protect:
+                    result += f'#ifdef {entry.protect}\n\n'
+
                 entry_name = entry.get_cpp_name(enum.name)
 
                 result += f'            case {entry.name}: return "{entry_name}";\n'
+
+                if entry.protect:
+                    result += f'#indif\n\n'
             
             result += f'            default: return "unknown value of {enum_name}";\n'
             result += '        }\n'
@@ -698,12 +704,12 @@ def parse_xml_file(input_xml_file_path):
     api = collect_api(root)
     #print_api(api)
 
-    refl = generate_reflection(api)
-    print(refl)
+    #refl = generate_reflection(api)
+    #print(refl)
 
     #str_view = generate_enum_to_string_view_decl(api.enums)
-    #str_view = generate_enum_to_string_view_def(api.enums)
-    #print(str_view)
+    str_view = generate_enum_to_string_view_def(api.enums)
+    print(str_view)
 
 
 if __name__ == '__main__':
