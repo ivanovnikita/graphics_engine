@@ -114,11 +114,12 @@ class EnumEntry:
 
 
 class Enum:
-    def __init__(self, name, entries, alias, is_bitmask):
+    def __init__(self, name, entries, alias, is_bitmask, protect):
         self.name = name
         self.entries = entries
         self.alias = alias
         self.is_bitmask = is_bitmask
+        self.protect = protect
 
 
     def get_cpp_name(self):
@@ -229,7 +230,7 @@ def collect_enums(root):
         if 'alias' in enum_node.attrib:
             alias = enum_node.attrib['alias']
         
-        enum = Enum(enum_node.attrib["name"], [], alias, False)
+        enum = Enum(enum_node.attrib["name"], [], alias, is_bitmask = False, protect = None)
         result[enum.name] = enum
 
     for enum_node in root.findall('./enums[@type="enum"]'):
@@ -458,6 +459,9 @@ def add_platform_protection(root, api):
             if type_name in api.unions:
                 union = api.unions[type_name]
                 union.protect = protect
+            if type_name in api.enums:
+                enum = api.enums[type_name]
+                enum.protect = protect
 
         for command_node in extension_node.findall('./require/command'):
             command_name = command_node.attrib['name']
@@ -639,7 +643,13 @@ def generate_enum_to_string_view_decl(enums):
         if enum.alias:
             continue
 
+        if enum.protect:
+            result += f'#ifdef {enum.protect}\n\n'
+
         result += f'    std::string_view to_string_view({enum.get_cpp_name()}) noexcept;\n'
+
+        if enum.protect:
+            result += '#endif\n\n'            
 
     result += '}\n'
 
@@ -657,6 +667,9 @@ def generate_enum_to_string_view_def(enums):
     for enum in enums.values():
         if enum.alias:
             continue
+
+        if enum.protect:
+            result += f'#ifdef {enum.protect}\n\n'
 
         enum_name = enum.get_cpp_name()
 
@@ -689,6 +702,9 @@ def generate_enum_to_string_view_def(enums):
             result += '        }\n'
             result += '        __builtin_unreachable();\n'
         result += '    }\n\n'
+
+        if enum.protect:
+            result += '#endif\n\n'  
 
     result += '}\n'
 
