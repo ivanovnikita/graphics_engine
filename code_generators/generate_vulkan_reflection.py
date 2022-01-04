@@ -2,6 +2,7 @@
 
 import argparse
 import xml.etree.ElementTree as ET 
+from os import path
 
 
 class Type:
@@ -166,6 +167,7 @@ def get_parser_cla_result():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', help = 'Input xml file')
+    parser.add_argument('-o', '--output', help = 'Output directory for generated files')
 
     return parser.parse_args()
 
@@ -711,7 +713,12 @@ def generate_enum_to_string_view_def(enums):
     return result
 
 
-def parse_xml_file(input_xml_file_path):
+def write_file(text, dirpath, filename):
+    with open(path.join(dirpath, filename), 'w') as file:
+        file.write(text)
+
+
+def generate_code(input_xml_file_path, output_dir):
     tree = ET.parse(input_xml_file_path)
     root = tree.getroot()
 
@@ -720,14 +727,16 @@ def parse_xml_file(input_xml_file_path):
     api = collect_api(root)
     #print_api(api)
 
-    #refl = generate_reflection(api)
-    #print(refl)
+    refl = generate_reflection(api)
+    write_file(refl, output_dir, "vulkan_refl.hpp")
 
-    #str_view = generate_enum_to_string_view_decl(api.enums)
-    str_view = generate_enum_to_string_view_def(api.enums)
-    print(str_view)
+    str_view_decl = generate_enum_to_string_view_decl(api.enums)
+    write_file(str_view_decl, output_dir, "to_string_view_enum.h")
+
+    str_view_def = generate_enum_to_string_view_def(api.enums)
+    write_file(str_view_def, output_dir, "to_string_view_enum.cpp")
 
 
 if __name__ == '__main__':
     settings = get_parser_cla_result()
-    zones = parse_xml_file(settings.input)
+    generate_code(settings.input, settings.output)
