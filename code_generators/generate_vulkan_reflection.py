@@ -121,6 +121,7 @@ class Enum:
         self.alias = alias
         self.is_bitmask = is_bitmask
         self.protect = protect
+        self.bitwidth = 32
 
 
     def get_cpp_name(self):
@@ -236,8 +237,8 @@ def collect_enums(root):
         result[enum.name] = enum
 
     for enum_node in root.findall('./enums[@type="enum"]'):
-        enum = result[enum_node.attrib["name"]]
-        
+        enum = result[enum_node.attrib['name']]
+
         for enum_value_node in enum_node.findall('./enum'):
             value = ''
             if 'value' in enum_value_node.attrib:
@@ -254,6 +255,10 @@ def collect_enums(root):
     for enum_node in root.findall('./enums[@type="bitmask"]'):
         enum = result[enum_node.attrib["name"]]
         enum.is_bitmask = True
+        
+        if 'bitwidth' in enum_node.attrib:
+            assert enum_node.attrib['bitwidth'] == '64'
+            enum.bitwidth = 64
 
         for enum_value_node in enum_node.findall('./enum'):
             value = ''
@@ -651,7 +656,7 @@ def generate_enum_to_string_view_decl(enums):
         result += f'    std::string_view to_string_view({enum.get_cpp_name()}) noexcept;\n'
 
         if enum.protect:
-            result += '#endif\n\n'            
+            result += '#endif\n\n'
 
     result += '}\n'
 
@@ -713,6 +718,52 @@ def generate_enum_to_string_view_def(enums):
     return result
 
 
+def generate_fwds(api):
+    result = ''
+
+    result += '#pragma once\n\n'
+
+    result += '#include <cstdint>\n\n'
+
+    result += 'namespace vk\n'
+    result += '{\n'
+
+    for struct in api.structs.values():
+        if struct.alias:
+            continue
+
+        if struct.protect:
+            result += f'#ifdef {struct.protect}\n\n'
+
+        result += f'    struct {struct.get_cpp_name()};\n'
+
+        if struct.protect:
+            result += '#endif\n\n'
+
+    for enum in api.enums.values():
+        if enum.alias:
+            continue
+
+        if enum.protect:
+            result += f'#ifdef {enum.protect}\n\n'
+
+        underlying_type = ''
+        if enum.is_bitmask:
+            bitwidth = 'uint32_t'
+            if enum.bitwidth == 64:
+                bitwidth = 'uint64_t'
+            underlying_type = f' : {bitwidth}'
+
+        result += f'    enum class {enum.get_cpp_name()}{underlying_type};\n'
+
+        if enum.protect:
+            result += '#endif\n\n'
+
+    result += '}\n'
+
+    return result
+
+
 def write_file(text, dirpath, filename):
     with open(path.join(dirpath, filename), 'w') as file:
         file.write(text)
@@ -735,6 +786,9 @@ def generate_code(input_xml_file_path, output_dir):
 
     str_view_def = generate_enum_to_string_view_def(api.enums)
     write_file(str_view_def, output_dir, "to_string_view_enum.cpp")
+
+    fwds = generate_fwds(api)
+    write_file(fwds, output_dir, "vulkan_fwds.h")
 
 
 if __name__ == '__main__':
