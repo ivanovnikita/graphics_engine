@@ -278,6 +278,14 @@ def collect_enums(root):
             enum_entry = EnumEntry(enum_value_node.attrib["name"], value, is_alias, is_bit, protect = None)
             enum.entries.append(enum_entry)
 
+    for enum in result.values():
+        enum.entries.sort(key = lambda entry: entry.name)
+        unique_entries = []
+        for entry in enum.entries:
+            if len(unique_entries) == 0 or unique_entries[-1].name != entry.name:
+                unique_entries.append(entry)
+        enum.entries = unique_entries
+
     return result
 
 
@@ -322,6 +330,14 @@ def add_extensions_to_enum(root, enums):
 
         enum_entry = EnumEntry(extension_node.attrib["name"], value, is_alias, is_bit = is_bit, protect = protect)
         enum.entries.append(enum_entry)
+
+    for enum in enums.values():
+        enum.entries.sort(key = lambda entry: entry.name)
+        unique_entries = []
+        for entry in enum.entries:
+            if len(unique_entries) == 0 or unique_entries[-1].name != entry.name:
+                unique_entries.append(entry)
+        enum.entries = unique_entries
 
     return
 
@@ -474,6 +490,8 @@ def add_platform_protection(root, api):
             command_name = command_node.attrib['name']
             function = api.functions[command_name]
             function.protect = protect
+
+    api.enums['VkImageFormatConstraintsFlagBitsFUCHSIA'].protect = platforms['fuchsia']
 
 # TODO: handles
 
@@ -703,7 +721,7 @@ def generate_enum_to_string_view_def(enums):
                 result += f'            case {entry.name}: return "{entry_name}";\n'
 
                 if entry.protect:
-                    result += f'#indif\n\n'
+                    result += f'#endif\n\n'
             
             result += f'            default: return "unknown value of {enum_name}";\n'
             result += '        }\n'
