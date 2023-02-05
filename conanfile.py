@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -32,15 +32,15 @@ class GraphicsEngineConan(ConanFile):
         self.build_requires("shaderc/2021.1")
 
     def requirements(self):
-        self.requires.add("vulkan-headers/1.2.182", private=False)
-        self.requires.add("vulkan-loader/1.2.182", private=False)
+        self.requires.add("vulkan-headers/1.3.236.0", private=False)
+        self.requires.add("vulkan-loader/1.3.236.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
         if self.settings.os == "Linux":
             self.requires.add("xorg/system", private=False)
 
         if self.options.enable_debug_layers:
-            self.requires.add("vulkan-validationlayers/1.2.182", private=False)
+            self.requires.add("vulkan-validationlayers/1.3.236.0", private=False)
 
         if self.options.build_tests or self.options.build_graphics_tests:
             self.requires.add("gtest/1.10.0", private=True)

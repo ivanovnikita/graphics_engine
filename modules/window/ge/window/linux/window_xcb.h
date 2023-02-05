@@ -10,6 +10,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <memory>
+
 namespace ge
 {
     class WindowXCB final : public WindowI
