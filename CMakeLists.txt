@@ -13,6 +13,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 option(GE_ENABLE_LTO "Enable LTO?" ${default_lto})
+# NOTE: add path to validation dir from conan to LD_LIBRARY_PATH
 option(GE_ENABLE_DEBUG_LAYERS "Enable vulkan debug layers?" ${default_debug_layers})
 option(GE_BUILD_EXAMPLES "Build examples?" ON)
 option(GE_BUILD_TESTS "Build tests?" ON)

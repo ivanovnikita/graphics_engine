@@ -16,7 +16,7 @@ class GraphicsEngineConan(ConanFile):
     default_options = {
         "shared": False,
         "enable_lto": False,
-        "enable_debug_layers": False,
+        "enable_debug_layers": True,
         "build_examples": False,
         "build_tests": False,
     }
