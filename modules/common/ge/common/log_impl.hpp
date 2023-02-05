@@ -140,7 +140,7 @@ namespace ge
                 ++it;
             }
 
-            log(destination, "]");
+            log(destination, "]\n");
         }
     }
 
