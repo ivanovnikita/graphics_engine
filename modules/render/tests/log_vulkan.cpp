@@ -2,21 +2,6 @@
 
 #include <gtest/gtest.h>
 
-namespace vk
-{
-    std::string_view to_string_view(const vk::MemoryHeapFlagBits bits);
-
-    std::string_view to_string_view(const vk::MemoryHeapFlagBits bits)
-    {
-        switch (bits)
-        {
-        case vk::MemoryHeapFlagBits::eDeviceLocal: return "DeviceLocal";
-        case vk::MemoryHeapFlagBits::eMultiInstance: return "MultiInstance";
-        }
-        __builtin_unreachable();
-    }
-}
-
 TEST(log_vulkan, flags)
 {
     using namespace ge;

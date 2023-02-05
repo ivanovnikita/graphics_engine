@@ -3,6 +3,9 @@
 #include "log_vulkan.hpp"
 #include "ge/common/bits_range.hpp"
 
+#include "vulkan_refl.hpp"
+#include "to_string_view_enum.h"
+
 namespace ge
 {
     template <typename T>

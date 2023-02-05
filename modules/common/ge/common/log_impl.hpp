@@ -92,6 +92,7 @@ namespace ge
             }
             else if constexpr (RegisteredMembers<T>)
             {
+                log(destination, "\n{\n");
                 for_each_member<T>
                 (
                     [&destination, &value] (const auto& member) noexcept
@@ -110,10 +111,11 @@ namespace ge
                         }
                         else
                         {
-                            log(destination, member.name, ": ", member_value, "\n");
+                            log(destination, "    ", member.name, ": ", member_value, "\n");
                         }
                     }
                 );
+                log(destination, "}\n");
             }
         }
 

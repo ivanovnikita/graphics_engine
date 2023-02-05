@@ -1,6 +1,7 @@
 #include "instance.h"
 #include "exception.h"
 #include "debug_callback.h"
+#include "log_vulkan.hpp"
 
 #include <array>
 #include <limits>
@@ -201,15 +202,7 @@ namespace ge
 
             if (logger.enabled(LogType::SystemInfo))
             {
-                logger.log(LogType::SystemInfo, "Available extensions:\n");
-                for (const vk::ExtensionProperties& property : properties)
-                {
-                    logger.log
-                    (
-                        LogType::SystemInfo,
-                        "- [", property.extensionName.data(), ", ] [spec. v. ", property.specVersion, "]\n"
-                    );
-                }
+                logger.log(LogType::SystemInfo, "Available extensions:\n", properties);
             }
 
             for (const char* required_extension : required_extensions)
@@ -336,18 +329,7 @@ namespace ge
 
             if (logger.enabled(LogType::SystemInfo))
             {
-                logger.log(LogType::SystemInfo, "Available layers:\n");
-                for (const vk::LayerProperties& property : properties)
-                {
-                    logger.log
-                    (
-                        LogType::SystemInfo,
-                        "- [", property.layerName.data(), "] "
-                          "[spec. v. ", property.specVersion, "] "
-                          "[impl. v. ", property.implementationVersion, "] "
-                          "[", property.description.data(), "]\n"
-                    );
-                }
+                logger.log(LogType::SystemInfo, "Available layers:\n", properties);
             }
 
             for (const char* required_layer : required_layers)
@@ -403,7 +385,7 @@ namespace ge
                         logger.log
                         (
                             LogType::SystemInfo,
-                            "'vkEnumerateInstanceVersion' returned error ", to_string_view(result).data(),
+                            "'vkEnumerateInstanceVersion' returned error ",result,
                             ", perhaps api version is 1.0"
                         );
                     }
