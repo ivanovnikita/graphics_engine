@@ -18,14 +18,36 @@ add_custom_command(
         ${shaders_sources}
 )
 
+set(generated_sources_dir "${CMAKE_CURRENT_BINARY_DIR}/generated_src")
+set(generated_vulkan_sources
+    "${generated_sources_dir}/to_string_view_enum.h"
+    "${generated_sources_dir}/to_string_view_enum.cpp"
+    "${generated_sources_dir}/vulkan_fwds.h"
+    "${generated_sources_dir}/vulkan_refl.hpp"
+)
+set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
+add_custom_command(
+    OUTPUT
+        ${generated_vulkan_sources}
+    COMMAND
+        "${refl_generator_script}"
+            -i
+                "${CONAN_RES_DIRS_VULKAN-HEADERS}/vulkan/registry/vk.xml"
+            -o
+                "${generated_sources_dir}"
+    DEPENDS
+        ${refl_generator_script}
+)
+
 sources_in_dir_recurse(ge/render render_sources)
 if (${GE_ENABLE_DEBUG_LAYERS})
     set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/res/vulkan/explicit_layer.d")
     set(template "ge/render/vk_layer_path.h.in")
-    set(generated "${CMAKE_CURRENT_BINARY_DIR}/generated_include/vk_layer_path.h")
+    set(generated "${generated_sources_dir}/vk_layer_path.h")
     configure_file(${template} ${generated})
     list(APPEND render_sources ${template} ${generated})
 endif()
+list(APPEND render_sources ${generated_vulkan_sources})
 add_library(render ${render_sources} ${shaders_sources} ${generated_shaders_sources})
 target_compile_options(render PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(render PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_render)
@@ -58,7 +80,7 @@ target_include_directories(render
     SYSTEM INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_shaders>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_include>
+        $<BUILD_INTERFACE:${generated_sources_dir}>
         $<INSTALL_INTERFACE:include>
 )
 add_library(GE::render ALIAS render)
