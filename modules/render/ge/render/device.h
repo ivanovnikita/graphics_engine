@@ -16,14 +16,22 @@ namespace ge
         std::optional<vk::PhysicalDeviceFeatures2> features2;
         vk::PhysicalDeviceMemoryProperties memory;
         // TODO: format properties?
+        std::vector<vk::QueueFamilyProperties> queue_properties;
+        // TODO: vk::QueueFamilyProperties2 ?
+        std::optional<size_t> graphics_queue_index;
+        std::optional<size_t> present_queue_index;
+        std::optional<size_t> compute_queue_index;
+        std::optional<size_t> transfer_queue_index;
     };
 
+    // TODO: add enum for required extensions and layers; save enabled extensions and layers
     struct DeviceData final
     {
         static void create_default
         (
             const factory::options::ValidationLayers&,
             const InstanceData&,
+            std::optional<std::reference_wrapper<const vk::SurfaceKHR>>,
             const Logger&
         );
 

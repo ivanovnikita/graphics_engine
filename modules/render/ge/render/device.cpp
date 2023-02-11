@@ -1,7 +1,9 @@
 #include "device.h"
 #include "log_vulkan.hpp"
-#include "invoke_for_downcasted.h"
+//#include "invoke_for_downcasted.h"
 #include "ge/render/exception.h"
+
+#include <limits>
 
 #include <cinttypes>
 
@@ -15,46 +17,48 @@ namespace ge
         constexpr size_t MAX_REQUIRED_LAYERS = 1;
         using RequiredLayers = std::array<const char*, MAX_REQUIRED_LAYERS>;
 
-        template <typename F>
-        void for_each_in_chain(const vk::BaseInStructure& in, F&& func)
-        {
-            const vk::BaseInStructure* current = &in;
-            while (current != nullptr)
-            {
-                invoke_for_downcasted(*current, func);
-                current = current->pNext;
-            }
-        }
+//        template <typename F>
+//        void for_each_in_chain(const vk::BaseInStructure& in, F&& func)
+//        {
+//            const vk::BaseInStructure* current = &in;
+//            while (current != nullptr)
+//            {
+//                invoke_for_downcasted(*current, func);
+//                current = current->pNext;
+//            }
+//        }
 
-        void log_device_properties2(const vk::PhysicalDeviceProperties2& properties, const Logger& logger) noexcept
-        {
-            if (properties.pNext != nullptr)
-            {
-                for_each_in_chain
-                (
-                    *reinterpret_cast<vk::BaseInStructure*>(properties.pNext),
-                    [&logger] (const auto& structure)
-                    {
-                        logger.log(LogType::SystemInfo, structure);
-                    }
-                );
-            }
-        }
+        // RIP compilation time and binary size
+//        void log_device_properties2(const vk::PhysicalDeviceProperties2& properties, const Logger& logger) noexcept
+//        {
+//            if (properties.pNext != nullptr)
+//            {
+//                for_each_in_chain
+//                (
+//                    *reinterpret_cast<vk::BaseInStructure*>(properties.pNext),
+//                    [&logger] (const auto& structure)
+//                    {
+//                        logger.log(LogType::SystemInfo, structure);
+//                    }
+//                );
+//            }
+//        }
 
-        void log_device_features2(const vk::PhysicalDeviceFeatures2& features, const Logger& logger) noexcept
-        {
-            if (features.pNext != nullptr)
-            {
-                for_each_in_chain
-                (
-                    *reinterpret_cast<vk::BaseInStructure*>(features.pNext),
-                    [&logger] (const auto& structure)
-                    {
-                        logger.log(LogType::SystemInfo, structure);
-                    }
-                );
-            }
-        }
+        // RIP compilation time and binary size
+//        void log_device_features2(const vk::PhysicalDeviceFeatures2& features, const Logger& logger) noexcept
+//        {
+//            if (features.pNext != nullptr)
+//            {
+//                for_each_in_chain
+//                (
+//                    *reinterpret_cast<vk::BaseInStructure*>(features.pNext),
+//                    [&logger] (const auto& structure)
+//                    {
+//                        logger.log(LogType::SystemInfo, structure);
+//                    }
+//                );
+//            }
+//        }
 
         void log_device_details
         (
@@ -74,14 +78,16 @@ namespace ge
 
             if (device.properties2.has_value())
             {
-                log_device_properties2(*device.properties2, logger);
+                // RIP compilation time and binary size
+                //log_device_properties2(*device.properties2, logger);
             }
 
             logger.log(LogType::SystemInfo, "Device features:\n", device.features);
 
             if (device.features2.has_value())
             {
-                log_device_features2(*device.features2, logger);
+                // RIP compilation time and binary size
+                //log_device_features2(*device.features2, logger);
             }
 
             logger.log(LogType::SystemInfo, "Device memory:\n", device.memory);
@@ -175,10 +181,109 @@ namespace ge
             return devices;
         }
 
+        std::vector<vk::QueueFamilyProperties> get_queue_family_properties(const vk::PhysicalDevice& device)
+        {
+            uint32_t queue_family_count = 0;
+            device.getQueueFamilyProperties(&queue_family_count, nullptr);
+
+            std::vector<vk::QueueFamilyProperties> result;
+            try
+            {
+                result.resize(queue_family_count);
+            }
+            catch (const std::bad_alloc& e)
+            {
+                GE_THROW_EXPECTED_ERROR("Allocation for physical devices failed");
+            }
+
+            device.getQueueFamilyProperties(&queue_family_count, result.data());
+
+            return result;
+        }
+
+        std::optional<size_t> select_queue_family_index
+        (
+            const std::span<vk::QueueFamilyProperties>& queues,
+            const vk::QueueFlagBits required_bit
+        )
+        {
+            // TODO: do we really need to select queues in a such way?
+            if (required_bit == vk::QueueFlagBits::eCompute)
+            {
+                for (size_t i = 0; i < queues.size(); ++i)
+                {
+                    if
+                    (
+                        queues[i].queueFlags & required_bit and
+                        queues[i].queueCount > 0 and
+                        not (queues[i].queueFlags & vk::QueueFlagBits::eGraphics)
+                    )
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            if (required_bit == vk::QueueFlagBits::eTransfer)
+            {
+                for (size_t i = 0; i < queues.size(); ++i)
+                {
+                    if
+                    (
+                        queues[i].queueFlags & required_bit and
+                        queues[i].queueCount > 0 and
+                        not (queues[i].queueFlags & vk::QueueFlagBits::eGraphics) and
+                        not (queues[i].queueFlags & vk::QueueFlagBits::eCompute)
+                    )
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            for (size_t i = 0; i < queues.size(); ++i)
+            {
+                if
+                (
+                    queues[i].queueFlags & required_bit and
+                    queues[i].queueCount > 0
+                )
+                {
+                    return i;
+                }
+            }
+
+            return std::nullopt;
+        }
+
+        std::optional<uint32_t> select_presentation_queue_family_index
+        (
+            const vk::PhysicalDevice& device,
+            const std::span<vk::QueueFamilyProperties>& queues,
+            const vk::SurfaceKHR& surface
+        )
+        {
+            assert(queues.size() <= std::numeric_limits<uint32_t>::max());
+            for (size_t i = 0; i < queues.size(); ++i)
+            {
+                if
+                (
+                    device.getSurfaceSupportKHR(static_cast<uint32_t>(i), surface) == VK_TRUE and
+                    queues[i].queueCount > 0
+                )
+                {
+                    return i;
+                }
+            }
+
+            return std::nullopt;
+        }
+
         PhysicalDeviceData get_physical_device_data
         (
             const InstanceData& instance,
-            const vk::PhysicalDevice& device
+            const vk::PhysicalDevice& device,
+            std::optional<std::reference_wrapper<const vk::SurfaceKHR>> surface
         )
         {
             PhysicalDeviceData result
@@ -188,8 +293,27 @@ namespace ge
                 .properties2 = std::nullopt,
                 .features = device.getFeatures(),
                 .features2 = std::nullopt,
-                .memory = device.getMemoryProperties()
+                .memory = device.getMemoryProperties(),
+                .queue_properties = get_queue_family_properties(device),
+                .graphics_queue_index = std::nullopt,
+                .present_queue_index = std::nullopt,
+                .compute_queue_index = std::nullopt,
+                .transfer_queue_index = std::nullopt
             };
+            result.graphics_queue_index = select_queue_family_index(result.queue_properties, vk::QueueFlagBits::eGraphics);
+            result.compute_queue_index = select_queue_family_index(result.queue_properties, vk::QueueFlagBits::eCompute);
+            result.transfer_queue_index = select_queue_family_index(result.queue_properties, vk::QueueFlagBits::eTransfer);
+
+            if (surface.has_value())
+            {
+                // TODO: check that VK_KHR_surface is enabled in Instance
+                result.present_queue_index = select_presentation_queue_family_index
+                (
+                    device,
+                    result.queue_properties,
+                    *surface
+                );
+            }
 
             const Version device_api_version = Version::from_vulkan_version(result.properties.apiVersion);
 
@@ -494,6 +618,7 @@ namespace ge
     (
         const factory::options::ValidationLayers&,
         const InstanceData& instance,
+        std::optional<std::reference_wrapper<const vk::SurfaceKHR>> surface,
         const Logger& logger
     )
     {
@@ -503,7 +628,7 @@ namespace ge
         std::optional<PhysicalDeviceData> best_fit_device;
         for (const vk::PhysicalDevice& device : devices)
         {
-            PhysicalDeviceData device_data = get_physical_device_data(instance, device);
+            PhysicalDeviceData device_data = get_physical_device_data(instance, device, surface);
 
             if (logger.enabled(LogType::SystemInfo))
             {
@@ -528,7 +653,10 @@ namespace ge
             (
                 not best_fit_device.has_value() and
                 all_required_ext_available and
-                all_required_layers_available
+                all_required_layers_available and
+                // TODO
+                device_data.graphics_queue_index.has_value() and
+                device_data.present_queue_index.has_value()
             )
             {
                 best_fit_device.emplace(std::move(device_data));

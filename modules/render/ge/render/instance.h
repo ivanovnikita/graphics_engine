@@ -8,6 +8,7 @@
 
 namespace ge
 {
+    // TODO: add enum for required extensions and layers; save enabled extensions and layers
     struct InstanceData final
     {
         static InstanceData create_default(const factory::options::Instance&, const Logger&);

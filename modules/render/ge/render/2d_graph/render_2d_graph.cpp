@@ -17,6 +17,7 @@ namespace ge
         (
             factory::options::Instance::create_default().debug.validation_layers,
             instance_data_,
+            *surface_data_.surface,
             logger
         );
     }
