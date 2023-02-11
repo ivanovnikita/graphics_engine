@@ -29,11 +29,12 @@ class Member:
 
 
 class Struct:
-    def __init__(self, name, members, alias, protect):
+    def __init__(self, name, members, alias, protect, enum_type):
         self.name = name
         self.members = members
         self.alias = alias
         self.protect = protect
+        self.enum_type = enum_type
 
 
     def get_cpp_name(self):
@@ -192,6 +193,7 @@ def collect_structs(root):
         if 'alias' in type_node.attrib:
             alias = type_node.attrib['alias']
         
+        enum_type = None
         members = []
         for member_node in type_node.findall('member'):
             type_qualifier = None
@@ -200,6 +202,9 @@ def collect_structs(root):
 
             member_type_node = member_node.find("type")
             is_ptr = member_type_node.tail and (member_type_node.tail.strip() == '*')
+
+            if member_type_node.text == "VkStructureType" and 'values' in member_node.attrib:
+                enum_type = member_node.attrib['values']
 
             name_node = member_node.find("name")
             array = None
@@ -218,7 +223,7 @@ def collect_structs(root):
             member = Member(type, name_node.text)
             members.append(member)
 
-        struct = Struct(type_node.attrib["name"], members, alias, protect = None)
+        struct = Struct(type_node.attrib["name"], members, alias, protect = None, enum_type = enum_type)
 
         structs[struct.name] = struct
 
@@ -447,7 +452,8 @@ def collect_unions(root):
             member = Member(type, name_node.text)
             members.append(member)
 
-        union = Struct(type_node.attrib["name"], members, alias = None, protect = None)
+        # TODO: is there enum type for union?
+        union = Struct(type_node.attrib["name"], members, alias = None, protect = None, enum_type = None)
 
         result[union.name] = union
 
@@ -526,6 +532,8 @@ def print_struct(struct):
             array = member.type.array
         print(f'    {member.type.full_name} {member.name}{array};')
     print('};\n')
+    if struct.enum_type:
+        print(f'VkStructureType = {struct.enum_type}')
 
 
 def print_union(union):
@@ -782,6 +790,88 @@ def generate_fwds(api):
     return result
 
 
+def generate_invoke_for_downcasted(api):
+    result = ''
+
+    result += '#pragma once\n\n'
+
+    result += '#include <string_view>\n\n'
+
+    result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += 'namespace ge\n'
+    result += '{\n'
+
+    enum_structure_type = api.enums['VkStructureType']
+    enum_structure_type_entries = {}
+    for entry in enum_structure_type.entries:
+        enum_structure_type_entries[entry.name] = entry
+
+    result += '    template <typename F>\n'
+    result += '    void invoke_for_downcasted(const vk::BaseInStructure& in, F&& func)\n'
+    result += '    {\n'
+    result += '        const VkStructureType c_type = static_cast<VkStructureType>(in.sType);\n'
+    result += '        switch (c_type)\n'
+    result += '        {\n'
+
+    for struct in api.structs.values():
+        if not struct.enum_type:
+            continue;
+
+        enum_type_entry = None
+        if struct.enum_type in enum_structure_type_entries:
+            enum_type_entry = enum_structure_type_entries[struct.enum_type]
+            enum_structure_type_entries.pop(struct.enum_type)
+
+        if not enum_type_entry:
+            #print(f'enum entry not found for {struct.enum_type}')
+            # perhaps it is absent because extension support is disabled
+            continue
+
+        if enum_type_entry.is_alias:
+            continue
+
+        if enum_type_entry.protect and enum_type_entry.protect == 'VK_ENABLE_BETA_EXTENSIONS':
+            result += f'#ifdef {enum_type_entry.protect}\n\n'
+
+        result += f'        case {enum_type_entry.name}:\n'
+        result += '        {\n'
+
+        if enum_type_entry.protect:
+            result += f'#ifdef {enum_type_entry.protect}\n\n'
+        
+        result += f'            const vk::{struct.get_cpp_name()}& downcasted = reinterpret_cast<const vk::{struct.get_cpp_name()}&>(in);\n'
+        result += '            func(downcasted);\n'
+
+        if enum_type_entry.protect:
+            result += f'#endif\n\n'
+
+        result += '            break;\n'
+        result += '        }\n'
+
+        if enum_type_entry.protect and enum_type_entry.protect == 'VK_ENABLE_BETA_EXTENSIONS':
+            result += f'#endif\n\n'
+
+    for entry in enum_structure_type_entries.values():
+        if entry.is_alias:
+            continue
+
+        result += f'        case {entry.name}:\n'
+
+    result += '        case VK_STRUCTURE_TYPE_MAX_ENUM:\n'
+    result += '        {\n'
+    result += '            break;\n'
+    result += '        }\n'
+
+
+    result += '        }\n'
+    result += '    }\n'
+
+    result += '}\n'
+
+    return result
+
+
 def write_file(text, dirpath, filename):
     with open(path.join(dirpath, filename), 'w') as file:
         file.write(text)
@@ -807,6 +897,9 @@ def generate_code(input_xml_file_path, output_dir):
 
     fwds = generate_fwds(api)
     write_file(fwds, output_dir, "vulkan_fwds.h")
+
+    downcasted = generate_invoke_for_downcasted(api)
+    write_file(downcasted, output_dir, "invoke_for_downcasted.h")
 
 
 if __name__ == '__main__':
