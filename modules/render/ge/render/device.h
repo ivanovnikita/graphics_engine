@@ -7,8 +7,16 @@
 
 namespace ge
 {
-    // iterate over pNext: https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap3.html#fundamentals-validusage-pNext
-    // grab VkPhysicalDeviceProperties and, if available, VkPhysicalDeviceProperties2
+    struct PhysicalDeviceData final
+    {
+        vk::PhysicalDevice physical_device;
+        vk::PhysicalDeviceProperties properties;
+        std::optional<vk::PhysicalDeviceProperties2> properties2;
+        vk::PhysicalDeviceFeatures features;
+        std::optional<vk::PhysicalDeviceFeatures2> features2;
+        vk::PhysicalDeviceMemoryProperties memory;
+        // TODO: format properties?
+    };
 
     struct DeviceData final
     {
@@ -19,7 +27,7 @@ namespace ge
             const Logger&
         );
 
-        vk::PhysicalDevice physical_device;
+        PhysicalDeviceData physical_device_data;
         vk::UniqueDevice logical_device;
         uint32_t graphics_queue_family_index;
         uint32_t present_queue_family_index;

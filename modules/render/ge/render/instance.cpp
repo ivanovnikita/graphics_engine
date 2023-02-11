@@ -97,25 +97,25 @@ namespace ge
         void check_required_extensions(const std::span<const char*> required_extensions, const Logger& logger)
         {
             constexpr char* layer_name = nullptr;
-            uint32_t property_count = 0;
-            const vk::Result prop_count_enumeration_result = vk::enumerateInstanceExtensionProperties
+            uint32_t ext_count = 0;
+            const vk::Result ext_count_enumeration_result = vk::enumerateInstanceExtensionProperties
             (
                 layer_name,
-                &property_count,
+                &ext_count,
                 nullptr
             );
-            switch (prop_count_enumeration_result)
+            switch (ext_count_enumeration_result)
             {
             case vk::Result::eSuccess:
             case vk::Result::eIncomplete:
-                 break;
+                break;
             case vk::Result::eErrorOutOfHostMemory:
             case vk::Result::eErrorOutOfDeviceMemory:
             case vk::Result::eErrorLayerNotPresent:
-                GE_THROW_EXPECTED_RESULT(prop_count_enumeration_result, "Counting instance extensions failed");
+                GE_THROW_EXPECTED_RESULT(ext_count_enumeration_result, "Counting instance extensions failed");
             default:
             {
-                GE_THROW_UNEXPECTED_RESULT(prop_count_enumeration_result, "Counting instance extensions failed");
+                GE_THROW_UNEXPECTED_RESULT(ext_count_enumeration_result, "Counting instance extensions failed");
             }
             }
 
@@ -157,7 +157,7 @@ namespace ge
                 GE_THROW_EXPECTED_ERROR("Some required instance extensions are absent");
             };
 
-            if (property_count == 0)
+            if (ext_count == 0)
             {
                 if (required_extensions.empty())
                 {
@@ -169,23 +169,23 @@ namespace ge
                 return;
             }
 
-            std::vector<vk::ExtensionProperties> properties;
+            std::vector<vk::ExtensionProperties> extensions;
             try
             {
-                properties.resize(property_count);
+                extensions.resize(ext_count);
             }
             catch (const std::bad_alloc& e)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for instance extension properties failed");
             }
 
-            const vk::Result prop_enumeration_result = vk::enumerateInstanceExtensionProperties
+            const vk::Result ext_enumeration_result = vk::enumerateInstanceExtensionProperties
             (
                 layer_name,
-                &property_count,
-                properties.data()
+                &ext_count,
+                extensions.data()
             );
-            switch (prop_enumeration_result)
+            switch (ext_enumeration_result)
             {
             case vk::Result::eSuccess:
             case vk::Result::eIncomplete:
@@ -193,25 +193,25 @@ namespace ge
             case vk::Result::eErrorOutOfHostMemory:
             case vk::Result::eErrorOutOfDeviceMemory:
             case vk::Result::eErrorLayerNotPresent:
-                GE_THROW_EXPECTED_RESULT(prop_enumeration_result, "Enumeration instance extensions failed");
+                GE_THROW_EXPECTED_RESULT(ext_enumeration_result, "Enumeration instance extensions failed");
             default:
             {
-                GE_THROW_UNEXPECTED_RESULT(prop_enumeration_result, "Enumeration instance extensions failed");
+                GE_THROW_UNEXPECTED_RESULT(ext_enumeration_result, "Enumeration instance extensions failed");
             }
             }
 
             if (logger.enabled(LogType::SystemInfo))
             {
-                logger.log(LogType::SystemInfo, "Available extensions:\n", properties);
+                logger.log(LogType::SystemInfo, "Available instance extensions:\n", extensions);
             }
 
             for (const char* required_extension : required_extensions)
             {
                 bool found = false;
                 const std::string_view required{required_extension};
-                for (const vk::ExtensionProperties& property : properties)
+                for (const vk::ExtensionProperties& extention : extensions)
                 {
-                    if (std::string_view{property.extensionName.data()} == required)
+                    if (std::string_view{extention.extensionName.data()} == required)
                     {
                         found = true;
                         break;
@@ -298,10 +298,10 @@ namespace ge
                 return;
             }
 
-            std::vector<vk::LayerProperties> properties;
+            std::vector<vk::LayerProperties> layers;
             try
             {
-                properties.resize(layer_count);
+                layers.resize(layer_count);
             }
             catch (const std::bad_alloc& e)
             {
@@ -311,7 +311,7 @@ namespace ge
             const vk::Result layer_enumeration_result = vk::enumerateInstanceLayerProperties
             (
                 &layer_count,
-                properties.data()
+                layers.data()
             );
             switch (layer_enumeration_result)
             {
@@ -329,16 +329,16 @@ namespace ge
 
             if (logger.enabled(LogType::SystemInfo))
             {
-                logger.log(LogType::SystemInfo, "Available layers:\n", properties);
+                logger.log(LogType::SystemInfo, "Available instance layers:\n", layers);
             }
 
             for (const char* required_layer : required_layers)
             {
                 bool found = false;
                 const std::string_view required{required_layer};
-                for (const vk::LayerProperties& property : properties)
+                for (const vk::LayerProperties& layer : layers)
                 {
-                    if (std::string_view{property.layerName.data()} == required)
+                    if (std::string_view{layer.layerName.data()} == required)
                     {
                         found = true;
                         break;
