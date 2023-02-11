@@ -353,7 +353,7 @@ namespace ge
             process_absent_layers();
         }
 
-        uint32_t get_instance_api_version(const Logger& logger)
+        Version get_instance_api_version(const Logger& logger)
         {
             // vkEnumerateInstanceVersion introduced in api v1.1
             const auto enumeration_version_func = reinterpret_cast<PFN_vkEnumerateInstanceVersion>
@@ -393,45 +393,43 @@ namespace ge
                 }
             }
 
+            const Version result = Version::from_vulkan_version(version);
+
             if (logger.enabled(LogType::SystemInfo))
             {
-                const uint32_t major = VK_API_VERSION_MAJOR(version);
-                const uint32_t minor = VK_API_VERSION_MINOR(version);
-                const uint32_t patch = VK_API_VERSION_PATCH(version);
-                const uint32_t variant = VK_API_VERSION_VARIANT(version);
                 logger.log
                 (
                     LogType::SystemInfo,
-                    "Available api version: ", major, ".", minor, ".", patch, "-", variant, "\n"
+                    "Available api version: ", result, "\n"
                 );
-                if (variant != 0)
+                if (result.variant != 0)
                 {
                     logger.log
                     (
                         LogType::Error,
-                        "Api variant = ", variant, " is not equal 0, perhaps application requires to be modified to use it"
+                        "Api variant = ", result.variant, " is not equal 0, perhaps application requires to be modified to use it"
                     );
                 }
             }
 
-            return version;
+            return result;
         }
 
-        std::pair<vk::UniqueInstance, uint32_t> create_instance
+        std::pair<vk::UniqueInstance, Version> create_instance
         (
             const std::span<const char*> required_extensions,
             const std::span<const char*> required_layers,
             const Logger& logger
         )
         {
-            const uint32_t available_api_version = get_instance_api_version(logger);
-            const uint32_t version_to_use = VK_MAKE_API_VERSION
-            (
-                0,
-                VK_API_VERSION_MAJOR(available_api_version),
-                VK_API_VERSION_MINOR(available_api_version),
-                0
-            );
+            const Version available_api_version = get_instance_api_version(logger);
+            const Version version_to_use
+            {
+                .major = available_api_version.major,
+                .minor = available_api_version.minor,
+                .patch = 0,
+                .variant = 0
+            };
 
             const vk::ApplicationInfo application_info
             {
@@ -439,7 +437,7 @@ namespace ge
                 VK_MAKE_VERSION(1, 0, 0),
                 "no engine",
                 VK_MAKE_VERSION(1, 0, 0),
-                version_to_use
+                version_to_use.to_vulkan_version()
             };
 
             assert(required_extensions.size() < std::numeric_limits<uint32_t>::max());

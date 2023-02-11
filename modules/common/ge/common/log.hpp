@@ -43,6 +43,10 @@ namespace ge
         RegisteredMembers<T> or
         std::ranges::range<T>;
 
+    template <typename T>
+        requires (std::is_pointer_v<T> and not ConvertibleToStringView<T>)
+    void log_non_trivial(LogDestination, T) noexcept;
+
     void log(LogDestination, Loggable auto ...) noexcept;
 
     void log_flush(LogDestination) noexcept;

@@ -7,7 +7,7 @@
 
 namespace ge
 {
-    // iterate over pNext: https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/chap3.html#fundamentals-validusage-pNext
+    // iterate over pNext: https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap3.html#fundamentals-validusage-pNext
     // grab VkPhysicalDeviceProperties and, if available, VkPhysicalDeviceProperties2
 
     struct DeviceData final

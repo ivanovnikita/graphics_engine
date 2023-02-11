@@ -24,6 +24,7 @@ set(generated_vulkan_sources
     "${generated_sources_dir}/to_string_view_enum.cpp"
     "${generated_sources_dir}/vulkan_fwds.h"
     "${generated_sources_dir}/vulkan_refl.hpp"
+    "${generated_sources_dir}/invoke_for_downcasted.h"
 )
 set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
 add_custom_command(

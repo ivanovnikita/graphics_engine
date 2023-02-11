@@ -15,4 +15,18 @@ namespace ge
         const auto bits = static_cast<typename vk::Flags<T>::MaskType>(flags);
         log(destination, to_enum_bits_range<T>(bits));
     }
+
+    template <typename T>
+        requires (not ConvertibleToStringView<T>)
+    void log_non_trivial(const LogDestination destination, const vk::Flags<T>&) noexcept
+    {
+        log(destination, "<bits are unknown>");
+    }
+
+    template <typename T>
+        requires vk::isVulkanHandleType<T>::value
+    void log_non_trivial(const LogDestination destination, const T&) noexcept
+    {
+        log(destination, "<handle>");
+    }
 }

@@ -144,6 +144,13 @@ namespace ge
         }
     }
 
+    template <typename T>
+        requires (std::is_pointer_v<T> and not ConvertibleToStringView<T>)
+    void log_non_trivial(const LogDestination destination, T) noexcept
+    {
+        log(destination, "<pointer>");
+    }
+
     void log(const LogDestination destination, Loggable auto ... values) noexcept
     {
         (detail::log(destination, values), ...);
