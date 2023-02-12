@@ -39,6 +39,12 @@ namespace ge
             {
                 DeviceExtension::VkKhrSwapchain
             },
+            DeviceFeaturesFlags
+            {
+                DeviceFeatures::SamplerAnisotropy,
+                DeviceFeatures::FillModeNonSolid,
+                DeviceFeatures::WideLines
+            },
             instance_data_,
             *surface_data_.surface,
             logger

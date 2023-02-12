@@ -3,6 +3,7 @@
 #include "ge/render/instance.h"
 #include "ge/render/device_layers.h"
 #include "ge/render/device_extensions.h"
+#include "ge/render/device_features.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -32,6 +33,7 @@ namespace ge
         (
             DeviceLayerFlags,
             DeviceExtensionFlags,
+            DeviceFeaturesFlags,
             const InstanceData&,
             const vk::SurfaceKHR&,
             const Logger&
@@ -41,6 +43,7 @@ namespace ge
         vk::UniqueDevice logical_device;
         DeviceLayerFlags enabled_layers;
         DeviceExtensionFlags enabled_extensions;
+        DeviceFeaturesFlags enabled_features;
         uint32_t graphics_queue_family_index;
         uint32_t present_queue_family_index;
         vk::Queue graphics_queue;

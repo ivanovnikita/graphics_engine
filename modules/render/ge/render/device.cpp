@@ -1,6 +1,7 @@
 #include "device.h"
 #include "log_vulkan.hpp"
 //#include "invoke_for_downcasted.h"
+#include "ge/common/bits_range.hpp"
 #include "ge/render/exception.h"
 
 #include <limits>
@@ -335,14 +336,14 @@ namespace ge
 
         bool is_all_required_extensions_available
         (
-            const vk::PhysicalDevice& device,
+            const PhysicalDeviceData& device,
             const std::span<const char*> required_extensions,
             const Logger& logger
         )
         {
             constexpr char* layer_name = nullptr;
             uint32_t ext_count = 0;
-            const vk::Result ext_count_enumeration_result = device.enumerateDeviceExtensionProperties
+            const vk::Result ext_count_enumeration_result = device.physical_device.enumerateDeviceExtensionProperties
             (
                 layer_name,
                 &ext_count,
@@ -382,7 +383,8 @@ namespace ge
             [
                 &absent_extensions_count,
                 &absent_extensions_storage,
-                &logger
+                &logger,
+                &device
             ]
             {
                 if (absent_extensions_count == 0)
@@ -390,12 +392,16 @@ namespace ge
                     return;
                 }
 
-                if (logger.enabled(LogType::SystemInfo))
+                if (logger.enabled(LogType::ErrorDetails))
                 {
-                    logger.log(LogType::SystemInfo, "Absent extensions:\n");
+                    logger.log
+                    (
+                        LogType::ErrorDetails,
+                        "Absent extensions in device ", device.properties.deviceName, ":\n"
+                    );
                     for (size_t i = 0; i < absent_extensions_count; ++i)
                     {
-                        logger.log(LogType::SystemInfo, "- ", absent_extensions_storage[i], "\n");
+                        logger.log(LogType::ErrorDetails, "- ", absent_extensions_storage[i], "\n");
                     }
                 }
             };
@@ -422,7 +428,7 @@ namespace ge
                 GE_THROW_EXPECTED_ERROR("Allocation for physical device extension properties failed");
             }
 
-            const vk::Result ext_enumeration_result = device.enumerateDeviceExtensionProperties
+            const vk::Result ext_enumeration_result = device.physical_device.enumerateDeviceExtensionProperties
             (
                 layer_name,
                 &ext_count,
@@ -473,13 +479,13 @@ namespace ge
 
         bool is_all_required_layers_available
         (
-            const vk::PhysicalDevice& device,
+            const PhysicalDeviceData& device,
             const std::span<const char*> required_layers,
             const Logger& logger
         )
         {
             uint32_t layer_count = 0;
-            const vk::Result layer_count_enumeration_result = device.enumerateDeviceLayerProperties
+            const vk::Result layer_count_enumeration_result = device.physical_device.enumerateDeviceLayerProperties
             (
                 &layer_count,
                 nullptr
@@ -517,7 +523,8 @@ namespace ge
             [
                 &absent_layers_count,
                 &absent_layers_storage,
-                &logger
+                &logger,
+                &device
             ]
             {
                 if (absent_layers_count == 0)
@@ -525,12 +532,16 @@ namespace ge
                     return;
                 }
 
-                if (logger.enabled(LogType::SystemInfo))
+                if (logger.enabled(LogType::ErrorDetails))
                 {
-                    logger.log(LogType::SystemInfo, "Absent layers:\n");
+                    logger.log
+                    (
+                        LogType::ErrorDetails,
+                        "Absent layers in device ", device.properties.deviceName, ":\n"
+                    );
                     for (size_t i = 0; i < absent_layers_count; ++i)
                     {
-                        logger.log(LogType::SystemInfo, "- ", absent_layers_storage[i], "\n");
+                        logger.log(LogType::ErrorDetails, "- ", absent_layers_storage[i], "\n");
                     }
                 }
             };
@@ -557,7 +568,7 @@ namespace ge
                 GE_THROW_EXPECTED_ERROR("Allocation for physical device layer properties failed");
             }
 
-            const vk::Result layer_enumeration_result = device.enumerateDeviceLayerProperties
+            const vk::Result layer_enumeration_result = device.physical_device.enumerateDeviceLayerProperties
             (
                 &layer_count,
                 layers.data()
@@ -603,12 +614,47 @@ namespace ge
 
             return absent_layers_count == 0;
         }
+
+        bool is_all_required_features_available
+        (
+            const PhysicalDeviceData& device,
+            const DeviceFeaturesFlags& required_features,
+            const Logger& logger
+        )
+        {
+            bool result = true;
+
+            const auto check_feature = [&required_features, &result, &logger, &device]
+            (
+                const DeviceFeatures feature,
+                const vk::Bool32& available_feature
+            )
+            {
+                const bool available = (not required_features.test(feature)) or available_feature == VK_TRUE;
+                result = result and available;
+                if (not available and logger.enabled(LogType::ErrorDetails))
+                {
+                    logger.log
+                    (
+                        LogType::ErrorDetails,
+                        "Device ", device.properties.deviceName," doesn't support feature ", feature, "\n"
+                    );
+                }
+            };
+
+            check_feature(DeviceFeatures::SamplerAnisotropy, device.features.samplerAnisotropy);
+            check_feature(DeviceFeatures::FillModeNonSolid, device.features.fillModeNonSolid);
+            check_feature(DeviceFeatures::WideLines, device.features.wideLines);
+
+            return result;
+        }
     }
 
     void DeviceData::create_default
     (
         DeviceLayerFlags required_layers,
         DeviceExtensionFlags required_extensions,
+        DeviceFeaturesFlags required_features,
         const InstanceData& instance,
         const vk::SurfaceKHR& surface,
         const Logger& logger
@@ -643,15 +689,22 @@ namespace ge
 
             const bool all_required_layers_available = is_all_required_layers_available
             (
-                device,
+                device_data,
                 required_layer_names,
                 logger
             );
 
             const bool all_required_ext_available = is_all_required_extensions_available
             (
-                device,
+                device_data,
                 required_extension_names,
+                logger
+            );
+
+            const bool all_required_features_available = is_all_required_features_available
+            (
+                device_data,
+                required_features,
                 logger
             );
 
@@ -660,6 +713,7 @@ namespace ge
                 not best_fit_device.has_value() and
                 all_required_ext_available and
                 all_required_layers_available and
+                all_required_features_available and
                 device_data.graphics_queue_index.has_value() and
                 device_data.present_queue_index.has_value()
             )
