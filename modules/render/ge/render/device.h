@@ -1,7 +1,8 @@
 #pragma once
 
-#include "ge/render/factory/options.h"
 #include "ge/render/instance.h"
+#include "ge/render/device_layers.h"
+#include "ge/render/device_extensions.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -29,14 +30,17 @@ namespace ge
     {
         static void create_default
         (
-            const factory::options::ValidationLayers&,
+            DeviceLayerFlags,
+            DeviceExtensionFlags,
             const InstanceData&,
-            std::optional<std::reference_wrapper<const vk::SurfaceKHR>>,
+            const vk::SurfaceKHR&,
             const Logger&
         );
 
         PhysicalDeviceData physical_device_data;
         vk::UniqueDevice logical_device;
+        DeviceLayerFlags enabled_layers;
+        DeviceExtensionFlags enabled_extensions;
         uint32_t graphics_queue_family_index;
         uint32_t present_queue_family_index;
         vk::Queue graphics_queue;

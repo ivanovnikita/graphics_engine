@@ -3,7 +3,23 @@
 namespace ge
 {
     Render2dGraph::Render2dGraph(const SurfaceParams& surface_params, const Logger& logger)
-        : instance_data_{InstanceData::create_default(factory::options::Instance::create_default(), logger)}
+        : instance_data_
+        {
+            InstanceData::create_default
+            (
+                InstanceLayerFlags
+                {
+                    InstanceLayer::VkLayerKhronosValidation
+                },
+                InstanceExtensionFlags
+                {
+                    InstanceExtension::VkExtDebugReport,
+                    InstanceExtension::VkKhrSurface,
+                    InstanceExtension::VkKhrXcbSurface
+                },
+                logger
+            )
+        }
         , surface_data_{SurfaceData::create_default(surface_params, *instance_data_.instance)}
         , camera_
         {
@@ -15,7 +31,14 @@ namespace ge
     {
         DeviceData::create_default
         (
-            factory::options::Instance::create_default().debug.validation_layers,
+            DeviceLayerFlags
+            {
+                DeviceLayer::VkLayerKhronosValidation
+            },
+            DeviceExtensionFlags
+            {
+                DeviceExtension::VkKhrSwapchain
+            },
             instance_data_,
             *surface_data_.surface,
             logger

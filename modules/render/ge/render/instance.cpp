@@ -15,85 +15,6 @@ namespace ge
 {
     namespace
     {
-        constexpr size_t MAX_REQUIRED_EXTENSIONS = 3;
-        using RequiredExtenstions = std::array<const char*, MAX_REQUIRED_EXTENSIONS>;
-
-        constexpr size_t MAX_REQUIRED_LAYERS = 1;
-        using RequiredLayers = std::array<const char*, MAX_REQUIRED_LAYERS>;
-
-        std::span<const char*> get_required_extensions
-        (
-            RequiredExtenstions& output,
-            const factory::options::Instance& options
-        ) noexcept
-        {
-            size_t extensions_count = 0;
-
-            const auto add_extension = [&extensions_count, &output] (const char* extension_name) noexcept
-            {
-                assert(extensions_count < output.size());
-                output[extensions_count] = extension_name;
-                ++extensions_count;
-            };
-
-            if (options.debug.debug_callback.enabled)
-            {
-                add_extension(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-            }
-
-            if (options.window.enabled)
-            {
-                add_extension(VK_KHR_SURFACE_EXTENSION_NAME);
-
-                switch (options.window.type)
-                {
-                case factory::options::WindowType::XCB:
-                {
-                    add_extension(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-                    break;
-                }
-                case factory::options::WindowType::WIN32:
-                {
-#ifdef _WIN32
-#if defined(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
-                    add_extension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#else
-    #error Surface extension for WIN32 is absent
-#endif
-#endif
-                     break;
-                }
-                }
-            }
-
-            assert(extensions_count <= output.size());
-            return {output.data(), extensions_count};
-        }
-
-        std::span<const char*> get_required_layers
-        (
-            RequiredLayers& output,
-            const factory::options::Instance& options
-        ) noexcept
-        {
-            size_t layers_count = 0;
-
-            const auto add_layer = [&layers_count, &output] (const char* layer_name) noexcept
-            {
-                assert(layers_count < output.size());
-                output[layers_count] = layer_name;
-                ++layers_count;
-            };
-
-            if (options.debug.validation_layers.enabled)
-            {
-                add_layer("VK_LAYER_KHRONOS_validation");
-            }
-
-            assert(layers_count <= output.size());
-            return {output.data(), layers_count};
-        }
-
         void check_required_extensions(const std::span<const char*> required_extensions, const Logger& logger)
         {
             constexpr char* layer_name = nullptr;
@@ -119,7 +40,7 @@ namespace ge
             }
             }
 
-            RequiredExtenstions absent_extensions_storage;
+            InstanceExtensionStorage absent_extensions_storage;
             assert(absent_extensions_storage.size() >= required_extensions.size());
 
             size_t absent_extensions_count = 0;
@@ -248,7 +169,7 @@ namespace ge
             }
             }
 
-            RequiredExtenstions absent_layers_storage;
+            InstanceLayersStorage absent_layers_storage;
             assert(absent_layers_storage.size() >= required_layers.size());
 
             size_t absent_layers_count = 0;
@@ -479,39 +400,51 @@ namespace ge
         }
     }
 
-    InstanceData InstanceData::create_default(const factory::options::Instance& options, const Logger& logger)
+    InstanceData InstanceData::create_default
+    (
+        InstanceLayerFlags required_layers,
+        InstanceExtensionFlags required_extensions,
+        const Logger& logger
+    )
     {
-        RequiredExtenstions required_extensions_storage;
-        const std::span<const char*> required_extensions = get_required_extensions
+        InstanceExtensionStorage required_extensions_storage;
+        const std::span<const char*> required_extension_names = get_required_extensions
         (
             required_extensions_storage,
-            options
+            required_extensions
         );
 
-        if (not required_extensions.empty())
+        if (not required_extension_names.empty())
         {
-            check_required_extensions(required_extensions, logger);
+            check_required_extensions(required_extension_names, logger);
         }
 
-        RequiredLayers required_layers_storage;
-        const std::span<const char*> required_layers = get_required_layers
+        InstanceLayersStorage required_layers_storage;
+        const std::span<const char*> required_layer_names = get_required_layers
         (
             required_layers_storage,
-            options
+            required_layers
         );
 
-        if (not required_layers.empty())
+        if (not required_layer_names.empty())
         {
-            check_required_layers(required_layers, logger);
+            check_required_layers(required_layer_names, logger);
         }
 
-        auto [instance, api_version] = create_instance(required_extensions, required_layers, logger);
+        auto [instance, api_version] = create_instance
+        (
+            required_extension_names,
+            required_layer_names,
+            logger
+        );
         vk::UniqueDebugReportCallbackEXT debug_callback = init_default_debug_callback(*instance, logger);
         return InstanceData
         {
-            std::move(instance),
-            api_version,
-            std::move(debug_callback)
+            .instance = std::move(instance),
+            .api_version = api_version,
+            .enabled_layers = std::move(required_layers),
+            .enabled_extension = std::move(required_extensions),
+            .debug_callback = std::move(debug_callback)
         };
     }
 }

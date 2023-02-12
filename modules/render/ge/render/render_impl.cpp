@@ -34,7 +34,23 @@ namespace ge
         const Logger& logger
     )
         : draw_mode_{draw_mode}
-        , instance_data_{InstanceData::create_default(factory::options::Instance::create_default(), logger)}
+        , instance_data_
+        {
+            InstanceData::create_default
+            (
+                InstanceLayerFlags
+                {
+                    InstanceLayer::VkLayerKhronosValidation
+                },
+                InstanceExtensionFlags
+                {
+                    InstanceExtension::VkExtDebugReport,
+                    InstanceExtension::VkKhrSurface,
+                    InstanceExtension::VkKhrXcbSurface
+                },
+                logger
+            )
+        }
         , surface_data_{SurfaceData::create_default(surface_params, *instance_data_.instance)}
         , camera_
         {

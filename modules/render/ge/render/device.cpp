@@ -11,12 +11,6 @@ namespace ge
 {
     namespace
     {
-        constexpr size_t MAX_REQUIRED_EXTENSIONS = 1;
-        using RequiredExtenstions = std::array<const char*, MAX_REQUIRED_EXTENSIONS>;
-
-        constexpr size_t MAX_REQUIRED_LAYERS = 1;
-        using RequiredLayers = std::array<const char*, MAX_REQUIRED_LAYERS>;
-
 //        template <typename F>
 //        void for_each_in_chain(const vk::BaseInStructure& in, F&& func)
 //        {
@@ -283,7 +277,7 @@ namespace ge
         (
             const InstanceData& instance,
             const vk::PhysicalDevice& device,
-            std::optional<std::reference_wrapper<const vk::SurfaceKHR>> surface
+            const vk::SurfaceKHR& surface
         )
         {
             PhysicalDeviceData result
@@ -304,16 +298,13 @@ namespace ge
             result.compute_queue_index = select_queue_family_index(result.queue_properties, vk::QueueFlagBits::eCompute);
             result.transfer_queue_index = select_queue_family_index(result.queue_properties, vk::QueueFlagBits::eTransfer);
 
-            if (surface.has_value())
-            {
-                // TODO: check that VK_KHR_surface is enabled in Instance
-                result.present_queue_index = select_presentation_queue_family_index
-                (
-                    device,
-                    result.queue_properties,
-                    *surface
-                );
-            }
+            assert(instance.enabled_extension.test(InstanceExtension::VkKhrSurface));
+            result.present_queue_index = select_presentation_queue_family_index
+            (
+                device,
+                result.queue_properties,
+                surface
+            );
 
             const Version device_api_version = Version::from_vulkan_version(result.properties.apiVersion);
 
@@ -372,7 +363,7 @@ namespace ge
             }
             }
 
-            RequiredExtenstions absent_extensions_storage;
+            DeviceExtensionStorage absent_extensions_storage;
             assert(absent_extensions_storage.size() >= required_extensions.size());
 
             size_t absent_extensions_count = 0;
@@ -507,7 +498,7 @@ namespace ge
             }
             }
 
-            RequiredExtenstions absent_layers_storage;
+            DeviceLayersStorage absent_layers_storage;
             assert(absent_layers_storage.size() >= required_layers.size());
 
             size_t absent_layers_count = 0;
@@ -616,14 +607,29 @@ namespace ge
 
     void DeviceData::create_default
     (
-        const factory::options::ValidationLayers&,
+        DeviceLayerFlags required_layers,
+        DeviceExtensionFlags required_extensions,
         const InstanceData& instance,
-        std::optional<std::reference_wrapper<const vk::SurfaceKHR>> surface,
+        const vk::SurfaceKHR& surface,
         const Logger& logger
     )
     {
         std::vector<vk::PhysicalDevice> devices = get_physical_devices(instance);
         sort_by_type(devices);
+
+        DeviceExtensionStorage required_extensions_storage;
+        const std::span<const char*> required_extension_names = get_required_extensions
+        (
+            required_extensions_storage,
+            required_extensions
+        );
+
+        DeviceLayersStorage required_layers_storage;
+        const std::span<const char*> required_layer_names = get_required_layers
+        (
+            required_layers_storage,
+            required_layers
+        );
 
         std::optional<PhysicalDeviceData> best_fit_device;
         for (const vk::PhysicalDevice& device : devices)
@@ -635,17 +641,17 @@ namespace ge
                 log_device_details(device_data, logger);
             }
 
-            const bool all_required_ext_available = is_all_required_extensions_available
-            (
-                device,
-                {},
-                logger
-            );
-
             const bool all_required_layers_available = is_all_required_layers_available
             (
                 device,
-                {},
+                required_layer_names,
+                logger
+            );
+
+            const bool all_required_ext_available = is_all_required_extensions_available
+            (
+                device,
+                required_extension_names,
                 logger
             );
 
@@ -654,7 +660,6 @@ namespace ge
                 not best_fit_device.has_value() and
                 all_required_ext_available and
                 all_required_layers_available and
-                // TODO
                 device_data.graphics_queue_index.has_value() and
                 device_data.present_queue_index.has_value()
             )
