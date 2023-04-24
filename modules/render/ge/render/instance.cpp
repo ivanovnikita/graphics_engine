@@ -378,7 +378,7 @@ namespace ge
             switch (result)
             {
             case vk::Result::eSuccess:
-                 break;
+                break;
             case vk::Result::eErrorOutOfHostMemory:
             case vk::Result::eErrorOutOfDeviceMemory:
             case vk::Result::eErrorInitializationFailed:

@@ -29,7 +29,7 @@ namespace ge
     // TODO: add enum for required extensions and layers; save enabled extensions and layers
     struct DeviceData final
     {
-        static void create_default
+        static DeviceData create_default
         (
             DeviceLayerFlags,
             DeviceExtensionFlags,

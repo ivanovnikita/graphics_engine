@@ -34,10 +34,6 @@ namespace ge
         InstanceData instance_data_;
         SurfaceData surface_data_;
         Camera2d camera_;
-
-//        vk::PhysicalDevice physical_device_;
-//        QueueFamilyIndices queue_family_indices_;
-//        vk::UniqueDevice logical_device_;
-//        Queues queues_;
+        DeviceData device_data_;
     };
 }

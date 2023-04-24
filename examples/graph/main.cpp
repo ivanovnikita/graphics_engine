@@ -178,6 +178,7 @@ int main(/*int argc, char* argv[]*/)
     using namespace ge;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
+    // NOTE: add path to validation libs to LD_LIBRARY_PATH
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
@@ -190,7 +191,7 @@ int main(/*int argc, char* argv[]*/)
             {
                 LogType::Error,
                 LogType::ErrorDetails,
-                LogType::SystemInfo
+//                LogType::SystemInfo
             }
         };
 
@@ -217,7 +218,7 @@ int main(/*int argc, char* argv[]*/)
             logger
         );
 
-        window.start_display();
+//        window.start_display();
 
 //    if (argc == 1)
 //    {

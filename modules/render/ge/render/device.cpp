@@ -648,9 +648,120 @@ namespace ge
 
             return result;
         }
+
+        [[ maybe_unused ]] constexpr float lowest_queue_priority = 0.0f;
+        [[ maybe_unused ]] constexpr float highest_queue_priority = 1.0f;
+
+        std::span<vk::DeviceQueueCreateInfo> init_queue_create_infos
+        (
+            std::span<vk::DeviceQueueCreateInfo> output,
+            const PhysicalDeviceData& device
+        )
+        {
+            size_t info_count = 0;
+
+            const auto check_add_queue = [&info_count, &output]
+            (
+                const std::optional<size_t>& queue_index
+            ) noexcept
+            {
+                if (not queue_index.has_value())
+                {
+                    return;
+                }
+
+                assert(info_count < output.size());
+
+                for (size_t i = 0; i < info_count; ++i)
+                {
+                    if (output[i].queueFamilyIndex == static_cast<uint32_t>(*queue_index))
+                    {
+                        return;
+                    }
+                }
+
+                vk::DeviceQueueCreateInfo info;
+                info.setQueueFamilyIndex(static_cast<uint32_t>(*queue_index));
+                info.setQueueCount(1);
+                info.setPQueuePriorities(&highest_queue_priority);
+
+                output[info_count] = std::move(info);
+                ++info_count;
+            };
+
+            check_add_queue(device.graphics_queue_index);
+            check_add_queue(device.present_queue_index);
+            check_add_queue(device.compute_queue_index);
+            check_add_queue(device.transfer_queue_index);
+
+            assert(info_count <= output.size());
+            return {output.data(), info_count};
+        }
+
+        vk::UniqueDevice create_logical_device
+        (
+            const PhysicalDeviceData& device,
+            const std::span<const char*> required_layers,
+            const std::span<const char*> required_extensions,
+            const DeviceFeaturesFlags& required_features
+        )
+        {
+            constexpr size_t QUEUE_CREATE_INFO_MAX_COUNT = 4;
+            std::array<vk::DeviceQueueCreateInfo, QUEUE_CREATE_INFO_MAX_COUNT> queue_create_info_storage;
+            const std::span<vk::DeviceQueueCreateInfo> queue_create_infos = init_queue_create_infos
+            (
+                queue_create_info_storage,
+                device
+            );
+
+            const vk::PhysicalDeviceFeatures features = to_vk_physical_device_features(required_features);
+
+            const vk::DeviceCreateInfo device_create_info
+            (
+                {},
+                static_cast<uint32_t>(queue_create_infos.size()),
+                queue_create_infos.data(),
+                static_cast<uint32_t>(required_layers.size()),
+                required_layers.data(),
+                static_cast<uint32_t>(required_extensions.size()),
+                required_extensions.data(),
+                &features
+            );
+
+            vk::Device logical_device;
+            const vk::Result result = device.physical_device.createDevice
+            (
+                &device_create_info,
+                nullptr,
+                &logical_device
+            );
+            switch (result)
+            {
+            case vk::Result::eSuccess:
+                break;
+            case vk::Result::eErrorOutOfHostMemory:
+            case vk::Result::eErrorOutOfDeviceMemory:
+            case vk::Result::eErrorInitializationFailed:
+            case vk::Result::eErrorExtensionNotPresent:
+            case vk::Result::eErrorFeatureNotPresent:
+            case vk::Result::eErrorTooManyObjects:
+            case vk::Result::eErrorDeviceLost:
+                GE_THROW_EXPECTED_RESULT(result, "Device creation failed");
+            default:
+            {
+                GE_THROW_UNEXPECTED_RESULT(result, "Device creation failed");
+            }
+            }
+
+            return vk::UniqueDevice
+            {
+                std::move(logical_device),
+                {vk::Optional<const vk::AllocationCallbacks>(nullptr)}
+            };
+        }
     }
 
-    void DeviceData::create_default
+    DeviceData DeviceData::create_default
     (
         DeviceLayerFlags required_layers,
         DeviceExtensionFlags required_extensions,
@@ -663,18 +774,18 @@ namespace ge
         std::vector<vk::PhysicalDevice> devices = get_physical_devices(instance);
         sort_by_type(devices);
 
-        DeviceExtensionStorage required_extensions_storage;
-        const std::span<const char*> required_extension_names = get_required_extensions
-        (
-            required_extensions_storage,
-            required_extensions
-        );
-
         DeviceLayersStorage required_layers_storage;
         const std::span<const char*> required_layer_names = get_required_layers
         (
             required_layers_storage,
             required_layers
+        );
+
+        DeviceExtensionStorage required_extensions_storage;
+        const std::span<const char*> required_extension_names = get_required_extensions
+        (
+            required_extensions_storage,
+            required_extensions
         );
 
         std::optional<PhysicalDeviceData> best_fit_device;
@@ -726,5 +837,31 @@ namespace ge
         {
             GE_THROW_EXPECTED_ERROR("There is no available physical devices");
         }
+
+        vk::UniqueDevice logical_device = create_logical_device
+        (
+            *best_fit_device,
+            required_layer_names,
+            required_extension_names,
+            required_features
+        );
+
+        const uint32_t graphics_queue_index = static_cast<uint32_t>(best_fit_device->graphics_queue_index.value());
+        const uint32_t present_queue_index = static_cast<uint32_t>(best_fit_device->present_queue_index.value());
+        vk::Queue graphics_queue = logical_device->getQueue(graphics_queue_index, 0);
+        vk::Queue present_queue = logical_device->getQueue(present_queue_index, 0);
+
+        return DeviceData
+        {
+            .physical_device_data = *std::move(best_fit_device),
+            .logical_device = std::move(logical_device),
+            .enabled_layers = required_layers,
+            .enabled_extensions = required_extensions,
+            .enabled_features = required_features,
+            .graphics_queue_family_index = graphics_queue_index,
+            .present_queue_family_index = present_queue_index,
+            .graphics_queue = std::move(graphics_queue),
+            .present_queue = std::move(present_queue)
+        };
     }
 }

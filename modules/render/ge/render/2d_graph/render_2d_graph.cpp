@@ -28,27 +28,30 @@ namespace ge
             surface_params.width,
             surface_params.height
         }
+        , device_data_
+        {
+            DeviceData::create_default
+            (
+                DeviceLayerFlags
+                {
+                    DeviceLayer::VkLayerKhronosValidation
+                },
+                DeviceExtensionFlags
+                {
+                    DeviceExtension::VkKhrSwapchain
+                },
+                DeviceFeaturesFlags
+                {
+                    DeviceFeatures::SamplerAnisotropy,
+                    DeviceFeatures::FillModeNonSolid,
+                    DeviceFeatures::WideLines
+                },
+                instance_data_,
+                *surface_data_.surface,
+                logger
+            )
+        }
     {
-        DeviceData::create_default
-        (
-            DeviceLayerFlags
-            {
-                DeviceLayer::VkLayerKhronosValidation
-            },
-            DeviceExtensionFlags
-            {
-                DeviceExtension::VkKhrSwapchain
-            },
-            DeviceFeaturesFlags
-            {
-                DeviceFeatures::SamplerAnisotropy,
-                DeviceFeatures::FillModeNonSolid,
-                DeviceFeatures::WideLines
-            },
-            instance_data_,
-            *surface_data_.surface,
-            logger
-        );
     }
 
     Render2dGraph::~Render2dGraph() = default;
