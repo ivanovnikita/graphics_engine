@@ -51,6 +51,15 @@ namespace ge
                 logger
             )
         }
+        , swapchain_data_
+        {
+            SwapchainData::create_default
+            (
+                device_data_,
+                surface_data_.extent,
+                *surface_data_.surface
+            )
+        }
     {
     }
 

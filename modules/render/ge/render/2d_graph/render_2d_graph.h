@@ -8,6 +8,7 @@
 #include "ge/render/surface.h"
 #include "ge/render/device.h"
 #include "ge/render/queue.h"
+#include "ge/render/swapchain.h"
 
 #include "ge/render/vertex.h"
 #include "ge/render/2d_graph/2d_graph.h"
@@ -35,5 +36,6 @@ namespace ge
         SurfaceData surface_data_;
         Camera2d camera_;
         DeviceData device_data_;
+        SwapchainData swapchain_data_;
     };
 }
