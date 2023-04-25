@@ -290,7 +290,7 @@ namespace ge
                 GE_THROW_EXPECTED_RESULT(create_result, "Swapchain creation failed");
             default:
             {
-                GE_THROW_EXPECTED_RESULT(create_result, "Swapchain creation failed");
+                GE_THROW_UNEXPECTED_RESULT(create_result, "Swapchain creation failed");
             }
             }
 
@@ -300,28 +300,159 @@ namespace ge
                 vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
             };
         }
+
+        std::vector<vk::Image> get_swapchain_images
+        (
+            const vk::Device& device,
+            const vk::SwapchainKHR& swapchain
+        )
+        {
+            uint32_t images_count = 0;
+            const vk::Result images_enumeration_count_result = device.getSwapchainImagesKHR
+            (
+                swapchain,
+                &images_count,
+                nullptr
+            );
+            switch (images_enumeration_count_result)
+            {
+            case vk::Result::eSuccess:
+            case vk::Result::eIncomplete:
+                break;
+            case vk::Result::eErrorOutOfHostMemory:
+            case vk::Result::eErrorOutOfDeviceMemory:
+                GE_THROW_EXPECTED_RESULT(images_enumeration_count_result, "Counting images in swapchain failed");
+            default:
+            {
+                GE_THROW_UNEXPECTED_RESULT(images_enumeration_count_result, "Counting images in swapchain failed");
+            }
+            }
+
+            if (images_count == 0)
+            {
+                GE_THROW_EXPECTED_ERROR("Swapchain images are absent");
+            }
+
+            std::vector<vk::Image> images;
+            try
+            {
+                images.reserve(images_count);
+            }
+            catch(const std::bad_alloc&)
+            {
+                GE_THROW_EXPECTED_ERROR("Allocation for swapchain images failed");
+            }
+
+            const vk::Result images_enumeration_result = device.getSwapchainImagesKHR
+            (
+                swapchain,
+                &images_count,
+                images.data()
+            );
+            switch (images_enumeration_result)
+            {
+            case vk::Result::eSuccess:
+            case vk::Result::eIncomplete:
+                break;
+            case vk::Result::eErrorOutOfHostMemory:
+            case vk::Result::eErrorOutOfDeviceMemory:
+                GE_THROW_EXPECTED_RESULT(images_enumeration_result, "Enumeration images in swapchain failed");
+            default:
+            {
+                GE_THROW_UNEXPECTED_RESULT(images_enumeration_result, "Enumeration images in swapchain failed");
+            }
+            }
+
+            return images;
+        }
+
+        std::vector<vk::UniqueImageView> create_image_views
+        (
+            const std::vector<vk::Image>& images,
+            const vk::Format format,
+            const vk::Device& device
+        )
+        {
+            std::vector<vk::UniqueImageView> views;
+            try
+            {
+                views.reserve(images.size());
+            }
+            catch(const std::bad_alloc&)
+            {
+                GE_THROW_EXPECTED_ERROR("Allocation for swapchain image views failed");
+            }
+
+            const vk::ImageSubresourceRange subresource_range = vk::ImageSubresourceRange{}
+                .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                .setBaseMipLevel(0)
+                .setLevelCount(1)
+                .setBaseArrayLayer(0)
+                .setLayerCount(1);
+
+            vk::ImageViewCreateInfo create_info = vk::ImageViewCreateInfo{}
+                .setViewType(vk::ImageViewType::e2D)
+                .setFormat(format)
+                .setSubresourceRange(subresource_range);
+
+            for (const vk::Image& image : images)
+            {
+                create_info.setImage(image);
+
+                vk::ImageView view;
+                const vk::Result result = device.createImageView
+                (
+                    &create_info,
+                    nullptr,
+                    &view
+                );
+
+                switch (result)
+                {
+                case vk::Result::eSuccess:
+                    break;
+                case vk::Result::eErrorOutOfHostMemory:
+                case vk::Result::eErrorOutOfDeviceMemory:
+                case vk::Result::eErrorInvalidOpaqueCaptureAddressKHR:
+                    GE_THROW_EXPECTED_RESULT(result, "Swapchain image view creation failed");
+                default:
+                {
+                    GE_THROW_UNEXPECTED_RESULT(result, "Swapchain image view creation failed");
+                }
+                }
+
+                vk::UniqueImageView unique_view
+                {
+                    std::move(view),
+                    vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+                };
+                views.emplace_back(std::move(unique_view));
+            }
+
+            return views;
+        }
     }
 
     SwapchainData SwapchainData::create_default
     (
         const DeviceData& device_data,
-        const vk::Extent2D& surface_extent,
-        const vk::SurfaceKHR& surface
+        SurfaceData& surface_data
     )
     {
         const vk::SurfaceCapabilitiesKHR surface_capabilities = get_surface_capabilities
         (
             device_data.physical_device_data.physical_device,
-            surface
+            *surface_data.surface
         );
 
         const uint32_t image_count = choose_image_count(surface_capabilities);
         const vk::SurfaceFormatKHR format = choose_format
         (
             device_data.physical_device_data.physical_device,
-            surface
+            *surface_data.surface
         );
-        const vk::Extent2D extent = choose_extent(surface_capabilities, surface_extent);
+        const vk::Extent2D extent = choose_extent(surface_capabilities, surface_data.extent);
+        surface_data.extent = extent;
 
         constexpr size_t max_queue_indices = 2;
         std::array<uint32_t, max_queue_indices> queue_indices_storage;
@@ -334,7 +465,7 @@ namespace ge
         const vk::PresentModeKHR present_mode = choose_present_mode
         (
             device_data.physical_device_data.physical_device,
-            surface
+            *surface_data.surface
         );
 
         constexpr uint32_t array_layers_count = 1;
@@ -343,7 +474,7 @@ namespace ge
         const vk::SwapchainCreateInfoKHR create_info
         {
             vk::SwapchainCreateFlagsKHR{},
-            surface,
+            *surface_data.surface,
             image_count,
             format.format,
             format.colorSpace,
@@ -359,11 +490,23 @@ namespace ge
             is_clipped
         };
 
+        vk::UniqueSwapchainKHR swapchain = create_swapchain(create_info, *device_data.logical_device);
+
+        std::vector<vk::Image> images = get_swapchain_images(*device_data.logical_device, *swapchain);
+        std::vector<vk::UniqueImageView> image_views = create_image_views
+        (
+            images,
+            format.format,
+            *device_data.logical_device
+        );
+
         return SwapchainData
         {
-            .swapchain = create_swapchain(create_info, *device_data.logical_device),
+            .swapchain = std::move(swapchain),
             .format = format.format,
-            .extent = extent
+            .extent = extent,
+            .images = std::move(images),
+            .image_views = std::move(image_views)
         };
     }
 }

@@ -226,11 +226,11 @@ namespace ge
         create_descriptor_sets();
 
         render_pass_ = factory::create_render_pass(*logical_device_, format);
-        camera_2d_pipeline_layout_ = factory::camera_2d_pipeline_layout
-        (
-            *logical_device_
-            , *camera_2d_descriptor_set_layout_
-        );
+//        camera_2d_pipeline_layout_ = factory::camera_2d_pipeline_layout
+//        (
+//            *logical_device_
+//            , *camera_2d_descriptor_set_layout_
+//        );
 
         switch (draw_mode_)
         {
