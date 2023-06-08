@@ -28,10 +28,12 @@ class GraphicsEngineConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("GraphicsEngine is only supported for Linux")
 
-    def build_requirements(self):
-        self.build_requires("shaderc/2021.1")
+    #def build_requirements(self):
+        #self.build_requires("shaderc/2021.1")
 
     def requirements(self):
+        self.requires.add("shaderc/2021.1", private=False)
+
         self.requires.add("vulkan-headers/1.3.236.0", private=False)
         self.requires.add("vulkan-loader/1.3.236.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
@@ -41,6 +43,9 @@ class GraphicsEngineConan(ConanFile):
 
         if self.options.enable_debug_layers:
             self.requires.add("vulkan-validationlayers/1.3.236.0", private=False)
+
+            self.requires.add("spirv-tools/1.3.236.0", private=False, override=True)
+            self.requires.add("spirv-headers/1.3.236.0", private=False, override=True)
 
         if self.options.build_tests or self.options.build_graphics_tests:
             self.requires.add("gtest/1.10.0", private=True)
