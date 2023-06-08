@@ -7,15 +7,14 @@
 #include "ge/render/instance.h"
 #include "ge/render/surface.h"
 #include "ge/render/device.h"
-#include "ge/render/queue.h"
 #include "ge/render/swapchain.h"
+#include "ge/render/buffer.h"
 
-#include "ge/render/vertex.h"
 #include "ge/render/2d_graph/2d_graph.h"
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge
+namespace ge::graph
 {
     class Render2dGraph final : public RenderI
     {
@@ -37,5 +36,11 @@ namespace ge
         Camera2d camera_;
         DeviceData device_data_;
         SwapchainData swapchain_data_;
+
+        vk::UniqueDescriptorSetLayout descriptor_set_layout_;
+        vk::UniquePipelineLayout pipeline_layout_;
+        std::vector<BufferData> uniform_buffers_;
+        vk::UniqueDescriptorPool descriptor_pool_;
+        std::vector<vk::UniqueDescriptorSet> descriptor_sets_;
     };
 }

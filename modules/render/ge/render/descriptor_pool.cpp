@@ -6,19 +6,19 @@ namespace ge
     vk::UniqueDescriptorPool create_descriptor_pool
     (
         const vk::Device& device,
-        const uint32_t size
+        const size_t size
     )
     {
         const vk::DescriptorPoolSize pool_size
         {
             vk::DescriptorType::eUniformBuffer,
-            size
+            static_cast<uint32_t>(size)
         };
 
         const vk::DescriptorPoolCreateInfo create_info = vk::DescriptorPoolCreateInfo()
             .setPoolSizeCount(1)
             .setPPoolSizes(&pool_size)
-            .setMaxSets(size);
+            .setMaxSets(static_cast<uint32_t>(size));
 
         vk::DescriptorPool pool;
         const vk::Result result = device.createDescriptorPool(&create_info, nullptr, &pool);

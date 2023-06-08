@@ -1,15 +1,9 @@
 #pragma once
 
-#include <glm/vec2.hpp>
+#include "view_proj_2d.h"
 
 namespace ge
 {
-    struct ViewProj2d final
-    {
-        glm::vec2 pos;
-        glm::vec2 ortho_proj; // https://jsantell.com/3d-projection/#orthographic-projection
-    };
-
     class Camera2d final
     {
     public:

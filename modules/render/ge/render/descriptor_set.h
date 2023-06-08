@@ -11,6 +11,7 @@ namespace ge
     (
         const vk::Device&,
         const vk::DescriptorPool&,
-        std::span<const vk::DescriptorSetLayout>
+        const vk::DescriptorSetLayout&,
+        size_t count
     );
 }

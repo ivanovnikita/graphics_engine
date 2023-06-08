@@ -81,7 +81,7 @@ namespace ge
             std::vector<vk::SurfaceFormatKHR> formats;
             try
             {
-                formats.reserve(formats_count);
+                formats.resize(formats_count);
             }
             catch (const std::bad_alloc&)
             {
@@ -219,7 +219,7 @@ namespace ge
             std::vector<vk::PresentModeKHR> present_modes;
             try
             {
-                present_modes.reserve(present_modes_count);
+                present_modes.resize(present_modes_count);
             }
             catch(const std::bad_alloc&)
             {
@@ -336,7 +336,7 @@ namespace ge
             std::vector<vk::Image> images;
             try
             {
-                images.reserve(images_count);
+                images.resize(images_count);
             }
             catch(const std::bad_alloc&)
             {

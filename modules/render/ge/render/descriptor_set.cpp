@@ -7,9 +7,20 @@ namespace ge
     (
         const vk::Device& device,
         const vk::DescriptorPool& pool,
-        std::span<const vk::DescriptorSetLayout> layouts
+        const vk::DescriptorSetLayout& layout,
+        const size_t count
     )
     {
+        std::vector<vk::DescriptorSetLayout> layouts;
+        try
+        {
+            layouts.resize(count, layout);
+        }
+        catch (const std::bad_alloc&)
+        {
+            GE_THROW_EXPECTED_ERROR("Allocation for descriptor set layouts failed");
+        }
+
         const vk::DescriptorSetAllocateInfo alloc_info
         {
             pool,
@@ -20,7 +31,7 @@ namespace ge
         std::vector<vk::DescriptorSet> sets;
         try
         {
-            sets.reserve(layouts.size());
+            sets.resize(layouts.size());
         }
         catch (const std::bad_alloc&)
         {

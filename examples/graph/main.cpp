@@ -176,6 +176,7 @@ namespace
 int main(/*int argc, char* argv[]*/)
 {
     using namespace ge;
+    using namespace ge::graph;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
     // NOTE: add path to validation libs to LD_LIBRARY_PATH

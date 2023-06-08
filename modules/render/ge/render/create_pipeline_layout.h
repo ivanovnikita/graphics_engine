@@ -4,9 +4,9 @@
 
 namespace ge
 {
-    vk::UniqueDescriptorPool create_descriptor_pool
+    vk::UniquePipelineLayout create_pipeline_layout
     (
         const vk::Device&,
-        size_t size
+        const vk::PipelineLayoutCreateInfo&
     );
 }

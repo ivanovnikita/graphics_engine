@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-namespace ge
+namespace ge//::graph
 {
     struct Graph final
     {

@@ -1,6 +1,11 @@
 #include "render_2d_graph.h"
+#include "uniform_buffers.h"
+#include "descriptor_set_layout.h"
+#include "pipeline_layout.h"
+#include "descriptor_set.h"
+#include "ge/render/descriptor_pool.h"
 
-namespace ge
+namespace ge::graph
 {
     Render2dGraph::Render2dGraph(const SurfaceParams& surface_params, const Logger& logger)
         : instance_data_
@@ -52,6 +57,21 @@ namespace ge
             )
         }
         , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_)}
+        , descriptor_set_layout_{create_descriptor_set_layout(*device_data_.logical_device)}
+        , pipeline_layout_{create_pipeline_layout(*device_data_.logical_device, *descriptor_set_layout_)}
+        , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
+        , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
+        , descriptor_sets_
+        {
+            create_descriptor_sets
+            (
+                *device_data_.logical_device,
+                *descriptor_pool_,
+                *descriptor_set_layout_,
+                swapchain_data_.images.size(),
+                uniform_buffers_
+            )
+        }
     {
     }
 
