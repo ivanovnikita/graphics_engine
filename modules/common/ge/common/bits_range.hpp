@@ -3,6 +3,8 @@
 #include <concepts>
 #include <iterator>
 
+#include <cstdint>
+
 namespace ge
 {
     template <typename T>
