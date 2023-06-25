@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shaders.h"
+
 #include "ge/common/logger.hpp"
 
 #include "ge/render/render_i.h"
@@ -42,5 +44,10 @@ namespace ge::graph
         std::vector<BufferData> uniform_buffers_;
         vk::UniqueDescriptorPool descriptor_pool_;
         std::vector<vk::UniqueDescriptorSet> descriptor_sets_;
+
+        vk::UniqueRenderPass render_pass_;
+        Shaders shaders_;
+        vk::UniquePipeline arcs_pipeline_;
+        vk::UniquePipeline vertices_pipeline_;
     };
 }

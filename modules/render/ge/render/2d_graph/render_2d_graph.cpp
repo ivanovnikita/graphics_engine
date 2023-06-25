@@ -3,7 +3,13 @@
 #include "descriptor_set_layout.h"
 #include "pipeline_layout.h"
 #include "descriptor_set.h"
+#include "render_pass.h"
+#include "pipelines.h"
+
 #include "ge/render/descriptor_pool.h"
+#include "ge/render/shader_module.h"
+
+#include "generated_shaders.h"
 
 namespace ge::graph
 {
@@ -47,7 +53,7 @@ namespace ge::graph
                 },
                 DeviceFeaturesFlags
                 {
-                    DeviceFeatures::SamplerAnisotropy,
+                    DeviceFeatures::SamplerAnisotropy, // ?
                     DeviceFeatures::FillModeNonSolid,
                     DeviceFeatures::WideLines
                 },
@@ -70,6 +76,54 @@ namespace ge::graph
                 *descriptor_set_layout_,
                 swapchain_data_.images.size(),
                 uniform_buffers_
+            )
+        }
+        , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
+        , shaders_
+        {
+            Shaders
+            {
+                .lines_vertex = create_shader_module
+                (
+                    *device_data_.logical_device,
+                    get_shader(ShaderName::line_2d_camera_Vertex)
+                ),
+                .points_vertex = create_shader_module
+                (
+                    *device_data_.logical_device,
+                    get_shader(ShaderName::point_2d_camera_Vertex)
+                ),
+                .fragment = create_shader_module
+                (
+                    *device_data_.logical_device,
+                    get_shader(ShaderName::simple_color_Fragment)
+                )
+            }
+        }
+        , arcs_pipeline_
+        {
+            create_arcs_pipeline
+            (
+                device_data_,
+                *render_pass_,
+                *shaders_.lines_vertex,
+                *shaders_.fragment,
+                swapchain_data_.extent,
+                *pipeline_layout_,
+                logger
+            )
+        }
+        , vertices_pipeline_
+        {
+            create_vertices_pipeline
+            (
+                device_data_,
+                *render_pass_,
+                *shaders_.points_vertex,
+                *shaders_.fragment,
+                swapchain_data_.extent,
+                *pipeline_layout_,
+                logger
             )
         }
     {
