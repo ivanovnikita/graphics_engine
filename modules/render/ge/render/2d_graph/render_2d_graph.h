@@ -49,5 +49,7 @@ namespace ge::graph
         Shaders shaders_;
         vk::UniquePipeline arcs_pipeline_;
         vk::UniquePipeline vertices_pipeline_;
+
+        std::vector<vk::UniqueFramebuffer> framebuffers_;
     };
 }

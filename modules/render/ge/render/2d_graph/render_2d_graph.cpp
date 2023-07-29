@@ -8,6 +8,7 @@
 
 #include "ge/render/descriptor_pool.h"
 #include "ge/render/shader_module.h"
+#include "ge/render/framebuffer.h"
 
 #include "generated_shaders.h"
 
@@ -124,6 +125,15 @@ namespace ge::graph
                 swapchain_data_.extent,
                 *pipeline_layout_,
                 logger
+            )
+        }
+        , framebuffers_
+        {
+            create_framebuffers
+            (
+                *device_data_.logical_device,
+                *render_pass_,
+                swapchain_data_
             )
         }
     {
