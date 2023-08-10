@@ -509,4 +509,11 @@ namespace ge
             .image_views = std::move(image_views)
         };
     }
+
+    void SwapchainData::reset()
+    {
+        image_views.clear();
+        images.clear();
+        swapchain.reset();
+    }
 }

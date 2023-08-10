@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shaders.h"
+#include "graph_in_device_memory.h"
 
 #include "ge/common/logger.hpp"
 
@@ -33,23 +34,37 @@ namespace ge::graph
         void set_object_to_draw(const Graph&);
 
     private:
+        std::reference_wrapper<const Logger> logger_;
+
         InstanceData instance_data_;
         SurfaceData surface_data_;
         Camera2d camera_;
         DeviceData device_data_;
-        SwapchainData swapchain_data_;
 
         vk::UniqueDescriptorSetLayout descriptor_set_layout_;
         vk::UniquePipelineLayout pipeline_layout_;
-        std::vector<BufferData> uniform_buffers_;
+        Shaders shaders_;
+
+        SwapchainData swapchain_data_;
+
+        std::vector<BufferData> uniform_buffers_; // for Camera2D
         vk::UniqueDescriptorPool descriptor_pool_;
         std::vector<vk::UniqueDescriptorSet> descriptor_sets_;
 
         vk::UniqueRenderPass render_pass_;
-        Shaders shaders_;
+
         vk::UniquePipeline arcs_pipeline_;
         vk::UniquePipeline vertices_pipeline_;
-
         std::vector<vk::UniqueFramebuffer> framebuffers_;
+
+        vk::UniqueSemaphore image_available_semaphore_;
+        vk::UniqueSemaphore render_finished_semaphore_;
+        vk::UniqueFence render_finished_fence_;
+        vk::UniqueFence transfer_finished_fence_;
+
+        vk::UniqueCommandPool command_pool_;
+        std::vector<vk::CommandBuffer> command_buffers_;
+
+        std::optional<GraphInDeviceMemory> graph_in_device_memory_;
     };
 }

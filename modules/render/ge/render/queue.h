@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <optional>
 
+#include <span>
+
 namespace ge
 {
 
@@ -24,4 +26,10 @@ namespace ge
         vk::Queue transfer;
     };
 
+    void submit
+    (
+        const vk::Queue&,
+        std::span<const vk::SubmitInfo>,
+        const vk::Fence&
+    );
 }

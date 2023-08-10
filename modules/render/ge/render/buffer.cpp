@@ -1,5 +1,10 @@
 #include "buffer.h"
 #include "exception.h"
+#include "command_buffer.h"
+#include "fence.h"
+#include "queue.h"
+
+#include <limits>
 
 namespace ge
 {
@@ -154,5 +159,82 @@ namespace ge
             .buffer = std::move(buffer),
             .device_memory = std::move(memory)
         };
+    }
+
+    void copy_buffer
+    (
+        const DeviceData& device_data,
+        const vk::CommandPool& command_pool,
+        const vk::Fence& transfer_finished,
+        const vk::Buffer& src,
+        const vk::Buffer& dst,
+        const size_t size
+    )
+    {
+        const vk::UniqueCommandBuffer command_buffer = allocate_command_buffer
+        (
+            *device_data.logical_device,
+            command_pool,
+            vk::CommandBufferLevel::ePrimary
+        );
+
+        const auto begin_info = vk::CommandBufferBeginInfo{}
+            .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+
+        begin(*command_buffer, begin_info);
+
+        const auto copy_region = vk::BufferCopy{}
+            .setSrcOffset(0)
+            .setDstOffset(0)
+            .setSize(size);
+        command_buffer->copyBuffer(src, dst, copy_region);
+
+        end(*command_buffer);
+
+        const std::span fences{&transfer_finished, 1};
+        reset_fences(*device_data.logical_device, fences);
+
+        const auto submit_info = vk::SubmitInfo{}
+            .setCommandBufferCount(1)
+            .setPCommandBuffers(&*command_buffer);
+
+        submit(device_data.graphics_queue, {&submit_info, 1}, transfer_finished);
+
+        wait_for_fences(*device_data.logical_device, fences, true, std::chrono::nanoseconds::max());
+    }
+
+    void* map_memory
+    (
+        const vk::Device& device,
+        const vk::DeviceMemory& memory,
+        const vk::DeviceSize& offset,
+        const vk::DeviceSize& size,
+        const vk::MemoryMapFlags& flags
+    )
+    {
+        void* memory_start = nullptr;
+        const vk::Result map_result = device.mapMemory
+        (
+            memory,
+            offset,
+            size,
+            flags,
+            &memory_start
+        );
+        switch (map_result)
+        {
+            case vk::Result::eSuccess:
+                break;
+            case vk::Result::eErrorOutOfHostMemory:
+            case vk::Result::eErrorOutOfDeviceMemory:
+            case vk::Result::eErrorMemoryMapFailed:
+                GE_THROW_EXPECTED_RESULT(map_result, "Memory mapping failed");
+            default:
+            {
+                GE_THROW_UNEXPECTED_RESULT(map_result, "Memory mapping failed");
+            }
+        }
+
+        return memory_start;
     }
 }

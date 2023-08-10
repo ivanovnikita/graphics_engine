@@ -49,4 +49,6 @@ namespace ge
         vk::Queue graphics_queue;
         vk::Queue present_queue;
     };
+
+    void wait_idle(const vk::Device&);
 }

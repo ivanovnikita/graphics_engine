@@ -9,13 +9,17 @@
 #include "ge/render/descriptor_pool.h"
 #include "ge/render/shader_module.h"
 #include "ge/render/framebuffer.h"
+#include "ge/render/fence.h"
+#include "ge/render/semaphore.h"
+#include "ge/render/command_pool.h"
 
 #include "generated_shaders.h"
 
 namespace ge::graph
 {
     Render2dGraph::Render2dGraph(const SurfaceParams& surface_params, const Logger& logger)
-        : instance_data_
+        : logger_{logger}
+        , instance_data_
         {
             InstanceData::create_default
             (
@@ -29,7 +33,7 @@ namespace ge::graph
                     InstanceExtension::VkKhrSurface,
                     InstanceExtension::VkKhrXcbSurface
                 },
-                logger
+                logger_
             )
         }
         , surface_data_{SurfaceData::create_default(surface_params, *instance_data_.instance)}
@@ -60,26 +64,11 @@ namespace ge::graph
                 },
                 instance_data_,
                 *surface_data_.surface,
-                logger
+                logger_
             )
         }
-        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_)}
         , descriptor_set_layout_{create_descriptor_set_layout(*device_data_.logical_device)}
         , pipeline_layout_{create_pipeline_layout(*device_data_.logical_device, *descriptor_set_layout_)}
-        , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
-        , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
-        , descriptor_sets_
-        {
-            create_descriptor_sets
-            (
-                *device_data_.logical_device,
-                *descriptor_pool_,
-                *descriptor_set_layout_,
-                swapchain_data_.images.size(),
-                uniform_buffers_
-            )
-        }
-        , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
         , shaders_
         {
             Shaders
@@ -101,6 +90,21 @@ namespace ge::graph
                 )
             }
         }
+        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_)}
+        , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
+        , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
+        , descriptor_sets_
+        {
+            create_descriptor_sets
+            (
+                *device_data_.logical_device,
+                *descriptor_pool_,
+                *descriptor_set_layout_,
+                swapchain_data_.images.size(),
+                uniform_buffers_
+            )
+        }
+        , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
         , arcs_pipeline_
         {
             create_arcs_pipeline
@@ -111,7 +115,7 @@ namespace ge::graph
                 *shaders_.fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
-                logger
+                logger_
             )
         }
         , vertices_pipeline_
@@ -124,7 +128,7 @@ namespace ge::graph
                 *shaders_.fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
-                logger
+                logger_
             )
         }
         , framebuffers_
@@ -136,19 +140,15 @@ namespace ge::graph
                 swapchain_data_
             )
         }
+        , image_available_semaphore_{create_semaphore(*device_data_.logical_device)}
+        , render_finished_semaphore_{create_semaphore(*device_data_.logical_device)}
+        , render_finished_fence_{create_fence(*device_data_.logical_device)}
+        , transfer_finished_fence_{create_fence(*device_data_.logical_device)}
+        , command_pool_{create_command_pool(device_data_)}
     {
     }
 
     Render2dGraph::~Render2dGraph() = default;
-
-    void Render2dGraph::draw_frame()
-    {
-    }
-
-    void Render2dGraph::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
-    {
-        camera_.set_surface_sizes(new_surface_width, new_surface_height);
-    }
 
     const Camera2d& Render2dGraph::get_camera() const
     {
@@ -160,7 +160,73 @@ namespace ge::graph
         camera_ = std::move(camera);
     }
 
-    void Render2dGraph::set_object_to_draw(const Graph&)
+    void Render2dGraph::set_object_to_draw(const Graph& graph)
+    {
+        graph_in_device_memory_.emplace
+        (
+            load_graph_to_device
+            (
+                device_data_,
+                *command_pool_,
+                *transfer_finished_fence_,
+                graph
+            )
+        );
+
+        // TODO: create command buffers
+    }
+
+    void Render2dGraph::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
+    {
+        wait_idle(*device_data_.logical_device);
+
+        device_data_.logical_device->freeCommandBuffers
+        (
+            *command_pool_
+            , static_cast<uint32_t>(command_buffers_.size())
+            , command_buffers_.data()
+        );
+        command_buffers_.clear();
+
+        framebuffers_.clear();
+        vertices_pipeline_.reset();
+        arcs_pipeline_.reset();
+        swapchain_data_.reset();
+
+        surface_data_.extent = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
+
+        swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_);
+        arcs_pipeline_ = create_arcs_pipeline
+        (
+            device_data_,
+            *render_pass_,
+            *shaders_.lines_vertex,
+            *shaders_.fragment,
+            swapchain_data_.extent,
+            *pipeline_layout_,
+            logger_
+        );
+        vertices_pipeline_ = create_vertices_pipeline
+        (
+            device_data_,
+            *render_pass_,
+            *shaders_.points_vertex,
+            *shaders_.fragment,
+            swapchain_data_.extent,
+            *pipeline_layout_,
+            logger_
+        );
+        framebuffers_ = create_framebuffers
+        (
+            *device_data_.logical_device,
+            *render_pass_,
+            swapchain_data_
+        );
+
+        camera_.set_surface_sizes(new_surface_width, new_surface_height);
+    }
+
+    void Render2dGraph::draw_frame()
     {
     }
 }

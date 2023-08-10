@@ -864,4 +864,23 @@ namespace ge
             .present_queue = std::move(present_queue)
         };
     }
+
+    void wait_idle(const vk::Device& device)
+    {
+        const vk::Result result = static_cast<vk::Result>(vkDeviceWaitIdle(device));
+
+        switch (result)
+        {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eErrorOutOfHostMemory:
+        case vk::Result::eErrorOutOfDeviceMemory:
+        case vk::Result::eErrorDeviceLost:
+            GE_THROW_EXPECTED_RESULT(result, "Device waiting idle failed");
+        default:
+        {
+            GE_THROW_UNEXPECTED_RESULT(result, "Device waiting idle failed");
+        }
+        }
+    }
 }

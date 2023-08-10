@@ -15,6 +15,8 @@ namespace ge
             SurfaceData&
         );
 
+        void reset();
+
         vk::UniqueSwapchainKHR swapchain;
         vk::Format format;
         vk::Extent2D extent;
