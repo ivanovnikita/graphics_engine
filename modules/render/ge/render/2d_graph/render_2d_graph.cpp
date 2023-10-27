@@ -5,6 +5,7 @@
 #include "descriptor_set.h"
 #include "render_pass.h"
 #include "pipelines.h"
+#include "draw_graph_commands.h"
 
 #include "ge/render/descriptor_pool.h"
 #include "ge/render/shader_module.h"
@@ -12,6 +13,8 @@
 #include "ge/render/fence.h"
 #include "ge/render/semaphore.h"
 #include "ge/render/command_pool.h"
+#include "ge/render/exception.h"
+#include "ge/render/queue.h"
 
 #include "generated_shaders.h"
 
@@ -173,20 +176,17 @@ namespace ge::graph
             )
         );
 
-        // TODO: create command buffers
+        create_command_buffers();
     }
 
     void Render2dGraph::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
     {
         wait_idle(*device_data_.logical_device);
 
-        device_data_.logical_device->freeCommandBuffers
-        (
-            *command_pool_
-            , static_cast<uint32_t>(command_buffers_.size())
-            , command_buffers_.data()
-        );
-        command_buffers_.clear();
+        if (not command_buffers_.empty())
+        {
+            command_buffers_.clear();
+        }
 
         framebuffers_.clear();
         vertices_pipeline_.reset();
@@ -226,7 +226,155 @@ namespace ge::graph
         camera_.set_surface_sizes(new_surface_width, new_surface_height);
     }
 
+    void Render2dGraph::create_command_buffers()
+    {
+        assert(graph_in_device_memory_.has_value());
+
+        if (not command_buffers_.empty())
+        {
+            wait_idle(*device_data_.logical_device);
+            command_buffers_.clear();
+        }
+
+        command_buffers_ = draw_graph_commands
+        (
+            *device_data_.logical_device,
+            *command_pool_,
+            framebuffers_,
+            *render_pass_,
+            swapchain_data_.extent,
+            surface_data_.background_color,
+            *arcs_pipeline_,
+            *vertices_pipeline_,
+            *pipeline_layout_,
+            descriptor_sets_,
+           *graph_in_device_memory_
+        );
+    }
+
+    void Render2dGraph::update_uniform_buffer(const size_t current_image)
+    {
+        assert(current_image < swapchain_data_.images.size());
+
+        constexpr uint32_t offset = 0;
+        void* const data = map_memory
+        (
+            *device_data_.logical_device,
+            *uniform_buffers_[current_image].device_memory,
+            offset,
+            sizeof(ViewProj2d),
+            vk::MemoryMapFlags{}
+        );
+        std::memcpy(data, &camera_.get_view_proj_2d(), sizeof(ViewProj2d));
+        device_data_.logical_device->unmapMemory(*uniform_buffers_[current_image].device_memory);
+    }
+
     void Render2dGraph::draw_frame()
     {
+        assert(not command_buffers_.empty());
+
+        constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+
+        uint32_t image_index = 0;
+        const vk::Result next_image_result = static_cast<vk::Result>
+        (
+            vkAcquireNextImageKHR
+            (
+                *device_data_.logical_device,
+                *swapchain_data_.swapchain,
+                timeout,
+                *image_available_semaphore_,
+                vk::Fence{nullptr},
+                &image_index
+            )
+        );
+
+        switch (next_image_result)
+        {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eTimeout:
+        case vk::Result::eNotReady:
+        case vk::Result::eSuboptimalKHR:
+        case vk::Result::eErrorOutOfDateKHR: // TODO: recreate swapchain now?
+        {
+            return;
+        }
+        case vk::Result::eErrorOutOfHostMemory:
+        case vk::Result::eErrorOutOfDeviceMemory:
+        case vk::Result::eErrorDeviceLost:
+        case vk::Result::eErrorSurfaceLostKHR:
+            GE_THROW_EXPECTED_RESULT(next_image_result, "Next image acquiring failed");
+        default:
+        {
+            GE_THROW_UNEXPECTED_RESULT(next_image_result, "Next image acquiring failed");
+        }
+        }
+
+        update_uniform_buffer(image_index);
+
+        reset_fences(*device_data_.logical_device, {&*render_finished_fence_, 1});
+
+        const std::array<vk::Semaphore, 1> wait_semaphores{*image_available_semaphore_};
+        const std::array<vk::PipelineStageFlags, 1> wait_stages
+        {
+            vk::PipelineStageFlagBits::eColorAttachmentOutput
+        };
+        const std::array<vk::Semaphore, 1> signal_semaphores{*render_finished_semaphore_};
+        const auto submit_info = vk::SubmitInfo{}
+            .setWaitSemaphoreCount(wait_semaphores.size())
+            .setPWaitSemaphores(wait_semaphores.data())
+            .setPWaitDstStageMask(wait_stages.data())
+            .setCommandBufferCount(1)
+            .setPCommandBuffers(&*command_buffers_[image_index])
+            .setSignalSemaphoreCount(signal_semaphores.size())
+            .setPSignalSemaphores(signal_semaphores.data());
+
+        submit(device_data_.graphics_queue, {&submit_info, 1}, *render_finished_fence_);
+
+        const std::array<vk::SwapchainKHR, 1> swapchains{*swapchain_data_.swapchain};
+
+        const auto present_info = vk::PresentInfoKHR{}
+            .setWaitSemaphoreCount(signal_semaphores.size())
+            .setPWaitSemaphores(signal_semaphores.data())
+            .setSwapchainCount(swapchains.size())
+            .setPSwapchains(swapchains.data())
+            .setPImageIndices(&image_index);
+
+        const vk::Result present_result = static_cast<vk::Result>
+        (
+            vkQueuePresentKHR
+            (
+                device_data_.present_queue,
+                reinterpret_cast<const VkPresentInfoKHR*>(&present_info)
+            )
+        );
+        switch (present_result)
+        {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eSuboptimalKHR:
+        case vk::Result::eErrorOutOfDateKHR: // TODO: recreate swapchain now?
+        {
+            return;
+        }
+        case vk::Result::eErrorOutOfHostMemory:
+        case vk::Result::eErrorOutOfDeviceMemory:
+        case vk::Result::eErrorDeviceLost:
+        case vk::Result::eErrorSurfaceLostKHR:
+            GE_THROW_EXPECTED_RESULT(next_image_result, "Queue present failed");
+        default:
+        {
+            GE_THROW_UNEXPECTED_RESULT(next_image_result, "Queue present failed");
+        }
+        }
+
+        wait_for_fences
+        (
+            *device_data_.logical_device,
+            {&*render_finished_fence_, 1},
+            true,
+            std::chrono::nanoseconds::max()
+        );
     }
 }

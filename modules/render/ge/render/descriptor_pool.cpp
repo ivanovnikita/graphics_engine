@@ -18,7 +18,8 @@ namespace ge
         const vk::DescriptorPoolCreateInfo create_info = vk::DescriptorPoolCreateInfo()
             .setPoolSizeCount(1)
             .setPPoolSizes(&pool_size)
-            .setMaxSets(static_cast<uint32_t>(size));
+            .setMaxSets(static_cast<uint32_t>(size))
+            .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
         vk::DescriptorPool pool;
         const vk::Result result = device.createDescriptorPool(&create_info, nullptr, &pool);

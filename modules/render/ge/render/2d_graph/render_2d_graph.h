@@ -34,6 +34,9 @@ namespace ge::graph
         void set_object_to_draw(const Graph&);
 
     private:
+        void create_command_buffers();
+        void update_uniform_buffer(size_t current_image);
+
         std::reference_wrapper<const Logger> logger_;
 
         InstanceData instance_data_;
@@ -63,8 +66,9 @@ namespace ge::graph
         vk::UniqueFence transfer_finished_fence_;
 
         vk::UniqueCommandPool command_pool_;
-        std::vector<vk::CommandBuffer> command_buffers_;
 
         std::optional<GraphInDeviceMemory> graph_in_device_memory_;
+
+        std::vector<vk::UniqueCommandBuffer> command_buffers_;
     };
 }

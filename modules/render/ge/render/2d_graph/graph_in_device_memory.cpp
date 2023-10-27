@@ -38,7 +38,7 @@ namespace ge::graph
         );
 
         constexpr vk::DeviceSize offset = 0;
-        void* const  memory_start = map_memory
+        void* const memory_start = map_memory
         (
             *device_data.logical_device,
             *staging_buffer.device_memory,
