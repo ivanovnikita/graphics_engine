@@ -15,7 +15,7 @@ namespace ge
         int x = 0;
         int y = 0;
         int channels_in_file = 0;
-        constexpr int desired_channels = 0;
+        constexpr int desired_channels = STBI_rgb_alpha;
 
         unsigned char* const data = stbi_load
         (
@@ -37,8 +37,8 @@ namespace ge
             {
                 safe_cast<size_t>(x),
                 safe_cast<size_t>(y),
-                safe_cast<size_t>(channels_in_file),
-                {data, safe_cast<size_t>(x * y * channels_in_file)}
+                safe_cast<size_t>(desired_channels),
+                {data, safe_cast<size_t>(x * y * desired_channels)}
             };
 
             stbi_image_free(data);

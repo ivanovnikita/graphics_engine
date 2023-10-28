@@ -13,7 +13,7 @@ TEST(read_image, success)
 
     EXPECT_EQ(image.x(), 1920);
     EXPECT_EQ(image.y(), 2013);
-    EXPECT_EQ(image.channels_count(), 3);
+    EXPECT_EQ(image.channels_count(), 4);
 
     EXPECT_EQ(image.pixels_count(), image.x() * image.y());
     EXPECT_EQ(image.bytes_count(), image.pixels_count() * image.channels_count());

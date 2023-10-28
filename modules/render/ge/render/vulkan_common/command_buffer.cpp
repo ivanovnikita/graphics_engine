@@ -1,5 +1,7 @@
 #include "command_buffer.h"
 #include "exception.h"
+#include "fence.h"
+#include "queue.h"
 
 #include "ge/common/safe_cast.hpp"
 
@@ -162,5 +164,47 @@ namespace ge
             GE_THROW_UNEXPECTED_RESULT(result, "Command buffer end failed");
         }
         }
+    }
+
+    vk::UniqueCommandBuffer create_one_time_commands
+    (
+        const vk::Device& device,
+        const vk::CommandPool& command_pool
+    )
+    {
+        vk::UniqueCommandBuffer command_buffer = allocate_command_buffer
+        (
+            device,
+            command_pool,
+            vk::CommandBufferLevel::ePrimary
+        );
+
+        const auto begin_info = vk::CommandBufferBeginInfo{}
+            .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+
+        begin(*command_buffer, begin_info);
+
+        return command_buffer;
+    }
+
+    void submit_one_time_commands
+    (
+        vk::UniqueCommandBuffer command_buffer,
+        const DeviceData& device_data,
+        const vk::Fence& fence
+    )
+    {
+        end(*command_buffer);
+
+        const std::span fences{&fence, 1};
+        reset_fences(*device_data.logical_device, fences);
+
+        const auto submit_info = vk::SubmitInfo{}
+            .setCommandBufferCount(1)
+            .setPCommandBuffers(&*command_buffer);
+
+        submit(device_data.graphics_queue, {&submit_info, 1}, fence);
+
+        wait_for_fences(*device_data.logical_device, fences, true, std::chrono::nanoseconds::max());
     }
 }

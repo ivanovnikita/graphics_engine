@@ -64,6 +64,7 @@ endif()
 target_link_libraries(render
     PUBLIC
         GE::common
+        GE::io
         CONAN_PKG::glm
         CONAN_PKG::vulkan-headers
     PRIVATE

@@ -20,6 +20,13 @@ namespace ge
         vk::UniqueDeviceMemory device_memory;
     };
 
+    vk::UniqueDeviceMemory allocate_device_memory
+    (
+        const DeviceData&,
+        const vk::MemoryPropertyFlags,
+        const vk::MemoryRequirements&
+    );
+
     void copy_buffer
     (
         const DeviceData&,

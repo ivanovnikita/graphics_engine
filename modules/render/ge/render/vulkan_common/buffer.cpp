@@ -83,39 +83,7 @@ namespace ge
             const vk::Device& device = *device_data.logical_device;
             const vk::MemoryRequirements mem_requirements = device.getBufferMemoryRequirements(buffer);
 
-            const vk::MemoryAllocateInfo alloc_info
-            {
-                mem_requirements.size,
-                find_memory_type_index
-                (
-                    device_data.physical_device_data,
-                    mem_requirements.memoryTypeBits,
-                    mem_properies
-                )
-            };
-
-            vk::DeviceMemory memory;
-            const vk::Result result = device.allocateMemory(&alloc_info, nullptr, &memory);
-            switch (result)
-            {
-            case vk::Result::eSuccess:
-                break;
-            case vk::Result::eErrorOutOfHostMemory:
-            case vk::Result::eErrorOutOfDeviceMemory:
-            case vk::Result::eErrorInvalidExternalHandle:
-            case vk::Result::eErrorInvalidOpaqueCaptureAddressKHR:
-                GE_THROW_EXPECTED_RESULT(result, "Device memory allocation failed");
-            default:
-            {
-                GE_THROW_UNEXPECTED_RESULT(result, "Device memory allocation failed");
-            }
-            }
-
-            return vk::UniqueDeviceMemory
-            {
-                std::move(memory),
-                vk::ObjectFree<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
-            };
+            return allocate_device_memory(device_data, mem_properies, mem_requirements);
         }
     }
 
@@ -161,6 +129,49 @@ namespace ge
         };
     }
 
+    vk::UniqueDeviceMemory allocate_device_memory
+    (
+        const DeviceData& device_data,
+        const vk::MemoryPropertyFlags mem_properties,
+        const vk::MemoryRequirements& mem_requirements
+    )
+    {
+        const vk::Device& device = *device_data.logical_device;
+        const vk::MemoryAllocateInfo alloc_info
+        {
+            mem_requirements.size,
+            find_memory_type_index
+            (
+                device_data.physical_device_data,
+                mem_requirements.memoryTypeBits,
+                mem_properties
+            )
+        };
+
+        vk::DeviceMemory memory;
+        const vk::Result result = device.allocateMemory(&alloc_info, nullptr, &memory);
+        switch (result)
+        {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eErrorOutOfHostMemory:
+        case vk::Result::eErrorOutOfDeviceMemory:
+        case vk::Result::eErrorInvalidExternalHandle:
+        case vk::Result::eErrorInvalidOpaqueCaptureAddressKHR:
+            GE_THROW_EXPECTED_RESULT(result, "Device memory allocation failed");
+        default:
+        {
+            GE_THROW_UNEXPECTED_RESULT(result, "Device memory allocation failed");
+        }
+        }
+
+        return vk::UniqueDeviceMemory
+        {
+            std::move(memory),
+            vk::ObjectFree<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+        };
+    }
+
     void copy_buffer
     (
         const DeviceData& device_data,
@@ -171,17 +182,11 @@ namespace ge
         const size_t size
     )
     {
-        const vk::UniqueCommandBuffer command_buffer = allocate_command_buffer
+        vk::UniqueCommandBuffer command_buffer = create_one_time_commands
         (
             *device_data.logical_device,
-            command_pool,
-            vk::CommandBufferLevel::ePrimary
+            command_pool
         );
-
-        const auto begin_info = vk::CommandBufferBeginInfo{}
-            .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-
-        begin(*command_buffer, begin_info);
 
         const auto copy_region = vk::BufferCopy{}
             .setSrcOffset(0)
@@ -189,18 +194,7 @@ namespace ge
             .setSize(size);
         command_buffer->copyBuffer(src, dst, copy_region);
 
-        end(*command_buffer);
-
-        const std::span fences{&transfer_finished, 1};
-        reset_fences(*device_data.logical_device, fences);
-
-        const auto submit_info = vk::SubmitInfo{}
-            .setCommandBufferCount(1)
-            .setPCommandBuffers(&*command_buffer);
-
-        submit(device_data.graphics_queue, {&submit_info, 1}, transfer_finished);
-
-        wait_for_fences(*device_data.logical_device, fences, true, std::chrono::nanoseconds::max());
+        submit_one_time_commands(std::move(command_buffer), device_data, transfer_finished);
     }
 
     void* map_memory
