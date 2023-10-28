@@ -28,7 +28,9 @@ namespace ge::graph
             (
                 InstanceLayerFlags
                 {
+#ifdef GE_DEBUG_LAYERS_ENABLED
                     InstanceLayer::VkLayerKhronosValidation
+#endif
                 },
                 InstanceExtensionFlags
                 {
@@ -53,7 +55,9 @@ namespace ge::graph
             (
                 DeviceLayerFlags
                 {
+#ifdef GE_DEBUG_LAYERS_ENABLED
                     DeviceLayer::VkLayerKhronosValidation
+#endif
                 },
                 DeviceExtensionFlags
                 {

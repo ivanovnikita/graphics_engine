@@ -13,7 +13,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 option(GE_ENABLE_LTO "Enable LTO?" ${default_lto})
-# NOTE: add path to validation dir from conan to LD_LIBRARY_PATH
+# NOTE: add path to bin to LD_LIBRARY_PATH (bin dir must contain libVkLayer_khronos_validation.so)
 option(GE_ENABLE_DEBUG_LAYERS "Enable vulkan debug layers?" ${default_debug_layers})
 option(GE_BUILD_EXAMPLES "Build examples?" ON)
 option(GE_BUILD_TESTS "Build tests?" ON)
@@ -31,7 +31,7 @@ include(source_tools)
 include(iwyu)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/builded_package" CACHE PATH "Install path prefix" FORCE)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Install path prefix" FORCE)
 endif()
 
 include(install_deps)

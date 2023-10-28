@@ -9,14 +9,10 @@
 #include "vk_layer_path.h"
 #endif
 
-#include <vulkan/vulkan.hpp>
-
-#include <thread>
-#include <fstream>
-#include <regex>
-#include <span>
-
 #include <iostream>
+#include <fstream>
+#include <span>
+#include <thread>
 
 using C = ge::Vertex;
 using T = ge::tiles::Polygons::Triangle;

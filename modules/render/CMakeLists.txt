@@ -127,7 +127,7 @@ install(
     DIRECTORY
         ${CONAN_LIB_DIRS_VULKAN-LOADER}/
     DESTINATION
-        lib
+        bin
     FILES_MATCHING
         PATTERN "libvulkan.so*"
 )
@@ -136,6 +136,6 @@ if (${GE_ENABLE_DEBUG_LAYERS})
         FILES
             "${CONAN_LIB_DIRS_VULKAN-VALIDATIONLAYERS}/libVkLayer_khronos_validation.so"
         DESTINATION
-            lib
+            bin
     )
 endif()

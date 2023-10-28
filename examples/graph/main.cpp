@@ -7,13 +7,9 @@
 #include "vk_layer_path.h"
 #endif
 
-#include <vulkan/vulkan.hpp>
-
-#include <thread>
-#include <fstream>
-#include <regex>
-#include <span>
 #include <iostream>
+#include <fstream>
+#include <thread>
 
 using Cl = ge::Color;
 
@@ -179,7 +175,6 @@ int main(int argc, char* argv[])
     using namespace ge::graph;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
-    // NOTE: add path to validation libs to LD_LIBRARY_PATH
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
