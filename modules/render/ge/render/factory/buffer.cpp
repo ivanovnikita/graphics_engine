@@ -232,9 +232,11 @@ namespace ge::factory
         const vk::CommandPool& command_pool,
         const vk::Queue& transfer,
         const vk::Fence& transfer_finished,
-        const std::span<const Polygons>& polygons
+        const std::span<const tiles::Polygons>& polygons
     )
     {
+        using namespace tiles;
+
         static_assert(sizeof(Vertex) == 2 * sizeof(float));
         static_assert(sizeof(Color) == 3 * sizeof(float));
 

@@ -31,7 +31,7 @@ namespace ge
         );
         ~RenderImpl() override;
 
-        void set_object_to_draw(const std::span<const Polygons>&);
+        void set_object_to_draw(const std::span<const tiles::Polygons>&);
         void set_object_to_draw(const Graph&);
 
         void draw_frame() override;

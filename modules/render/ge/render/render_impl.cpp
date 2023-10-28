@@ -327,7 +327,7 @@ namespace ge
         create_command_buffers();
     }
 
-    void RenderImpl::set_object_to_draw(const std::span<const Polygons>& polygons)
+    void RenderImpl::set_object_to_draw(const std::span<const tiles::Polygons>& polygons)
     {
         polygon_in_device_mem_ = factory::load_polygons_to_device
         (

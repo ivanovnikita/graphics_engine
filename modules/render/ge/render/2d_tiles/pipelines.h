@@ -1,0 +1,31 @@
+#pragma once
+
+#include "ge/common/logger.hpp"
+#include "ge/render/device.h"
+
+#include <vulkan/vulkan.hpp>
+
+namespace ge::tiles
+{
+    vk::UniquePipeline create_triangles_pipeline
+    (
+        const DeviceData&,
+        const vk::RenderPass&,
+        const vk::ShaderModule& vertex,
+        const vk::ShaderModule& fragment,
+        const vk::Extent2D&,
+        const vk::PipelineLayout&,
+        const Logger&
+    );
+
+    vk::UniquePipeline create_lines_pipeline
+    (
+        const DeviceData&,
+        const vk::RenderPass&,
+        const vk::ShaderModule& vertex,
+        const vk::ShaderModule& fragment,
+        const vk::Extent2D&,
+        const vk::PipelineLayout&,
+        const Logger&
+    );
+}

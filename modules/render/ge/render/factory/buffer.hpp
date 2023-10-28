@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ge/render/vertex.h"
+#include "ge/render/2d_tiles/polygons.h"
 #include "ge/render/2d_graph/2d_graph.h"
 
 #include <vulkan/vulkan.hpp>
@@ -100,7 +100,7 @@ namespace ge::factory
         const vk::CommandPool&,
         const vk::Queue& transfer,
         const vk::Fence& transfer_finished,
-        const std::span<const Polygons>&
+        const std::span<const tiles::Polygons>&
     );
 }
 
