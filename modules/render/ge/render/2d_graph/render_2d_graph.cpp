@@ -228,6 +228,8 @@ namespace ge::graph
         );
 
         camera_.set_surface_sizes(new_surface_width, new_surface_height);
+
+        create_command_buffers();
     }
 
     void Render2dGraph::create_command_buffers()
