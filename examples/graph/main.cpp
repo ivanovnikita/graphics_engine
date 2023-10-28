@@ -1,5 +1,5 @@
 #include "ge/render/2d_graph/render_2d_graph.h"
-#include "ge/render/exception.h"
+#include "ge/common/exception.h"
 #include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_loop.h"
 

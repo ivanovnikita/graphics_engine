@@ -128,7 +128,7 @@ namespace ge::graph
                 .setInputRate(vk::VertexInputRate::eVertex)
             , vk::VertexInputBindingDescription{}
                 .setBinding(1)
-                .setStride(vertex_stride)
+                .setStride(color_stride)
                 .setInputRate(vk::VertexInputRate::eVertex)
         };
 
