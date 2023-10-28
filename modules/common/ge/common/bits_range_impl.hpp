@@ -40,7 +40,7 @@ namespace ge
         assert(bit_number_ < 8 * sizeof(T));
         assert(value_ != nullptr);
 
-        const T bit_mask = 1 << bit_number_;
+        const T bit_mask = static_cast<T>(1 << bit_number_);
         return *value_ & bit_mask;
     }
 

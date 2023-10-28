@@ -50,9 +50,9 @@ namespace ge
     {
         vk::UniqueSurfaceKHR surface = std::visit
         (
-            [&instance] (const auto& params)
+            [&instance] (const auto& p)
             {
-                return create_surface(params, instance);
+                return create_surface(p, instance);
             },
             params.surface
         );

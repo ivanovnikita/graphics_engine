@@ -148,7 +148,7 @@ namespace ge
             {
                 devices.resize(devices_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for physical devices failed");
             }
@@ -186,7 +186,7 @@ namespace ge
             {
                 result.resize(queue_family_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for physical devices failed");
             }
@@ -423,7 +423,7 @@ namespace ge
             {
                 extensions.resize(ext_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for physical device extension properties failed");
             }
@@ -563,7 +563,7 @@ namespace ge
             {
                 layers.resize(layer_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for physical device layer properties failed");
             }

@@ -41,6 +41,15 @@ function(get_warnings result)
             -Wno-unreachable-code
             -Wno-padded
 
+            -Wno-unsafe-buffer-usage # not usable for `int main(int argc, char** argv)`
+
+            -Wno-double-promotion
+
+            # for vulkan
+            -Wno-switch-enum
+            -Wno-covered-switch-default
+            -Wno-cast-function-type-strict
+
             # Or it is better to not ignore?
             -Wno-exit-time-destructors
 

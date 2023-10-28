@@ -17,7 +17,7 @@ namespace ge::tiles
         {
             buffers.reserve(count);
         }
-        catch (const std::bad_alloc& e)
+        catch (const std::bad_alloc&)
         {
             GE_THROW_EXPECTED_ERROR("Allocation for uniform buffers failed");
         }

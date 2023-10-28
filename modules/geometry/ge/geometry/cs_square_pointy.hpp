@@ -32,6 +32,9 @@ namespace ge
         T height_;
         T y_tilt_;
     };
+
+    template <typename T>
+    CsSquarePointy(T, T, T) -> CsSquarePointy<T>;
 }
 
 #include "cs_square_pointy_impl.hpp"

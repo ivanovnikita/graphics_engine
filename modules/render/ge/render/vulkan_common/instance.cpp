@@ -94,7 +94,7 @@ namespace ge
             {
                 extensions.resize(ext_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for instance extension properties failed");
             }
@@ -223,7 +223,7 @@ namespace ge
             {
                 layers.resize(layer_count);
             }
-            catch (const std::bad_alloc& e)
+            catch (const std::bad_alloc&)
             {
                 GE_THROW_EXPECTED_ERROR("Allocation for instance layer properties failed");
             }

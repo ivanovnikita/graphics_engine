@@ -143,7 +143,7 @@ namespace ge
     HexCoordAxialFlat CsHexFlat<T>::to_hex_axial_flat(const Point2d<T>& in) const noexcept
     {
         const T sqrt_3 = std::sqrt(static_cast<T>(3));
-        const Point2d<T> normalized(in.x / width_half_, sqrt_3 * (in.y / height_));
+        const Point2d<T> normalized{in.x / width_half_, sqrt_3 * (in.y / height_)};
         const T x = (static_cast<T>(2) / 3) * normalized.x;
         const T y = (static_cast<T>(-1) / 3) * normalized.x + (sqrt_3 / 3) * normalized.y;
         return hex_round<HexCoordAxialFlat>(HexCoordCubeFractional<T>{x, y, -x - y});

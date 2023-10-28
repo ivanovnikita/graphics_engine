@@ -39,6 +39,12 @@ namespace ge
         uint8_t bit_number_;
     };
 
+    template<class T>
+    BitsIterator(const T&) -> BitsIterator<T>;
+
+    template<class T>
+    BitsIterator(const T&, uint8_t) -> BitsIterator<T>;
+
     template <typename T>
     bool operator!=(const BitsIterator<T>&, const BitsIteratorSentinel<T>&) noexcept;
 
