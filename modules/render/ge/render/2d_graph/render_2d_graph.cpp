@@ -282,8 +282,8 @@ namespace ge::graph
         constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
         uint32_t image_index = 0;
-        const vk::Result next_image_result = static_cast<vk::Result>
-        (
+        const vk::Result next_image_result = vk::Result
+        {
             vkAcquireNextImageKHR
             (
                 *device_data_.logical_device,
@@ -293,7 +293,7 @@ namespace ge::graph
                 vk::Fence{nullptr},
                 &image_index
             )
-        );
+        };
 
         switch (next_image_result)
         {
@@ -347,14 +347,14 @@ namespace ge::graph
             .setPSwapchains(swapchains.data())
             .setPImageIndices(&image_index);
 
-        const vk::Result present_result = static_cast<vk::Result>
-        (
+        const vk::Result present_result = vk::Result
+        {
             vkQueuePresentKHR
             (
                 device_data_.present_queue,
                 reinterpret_cast<const VkPresentInfoKHR*>(&present_info)
             )
-        );
+        };
         switch (present_result)
         {
         case vk::Result::eSuccess:
