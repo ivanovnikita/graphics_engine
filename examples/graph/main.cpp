@@ -1,5 +1,6 @@
-#include "ge/render/render.h"
-#include "ge/window/window.h"
+#include "ge/render/2d_graph/render_2d_graph.h"
+#include "ge/common/exception.h"
+#include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
@@ -12,6 +13,7 @@
 #include <fstream>
 #include <regex>
 #include <span>
+#include <iostream>
 
 using Cl = ge::Color;
 
@@ -55,25 +57,25 @@ namespace
         return result;
     }
 
-    std::vector<ge::Graph::Vertice> init_vertices(const std::vector<ge::Vertex>& points)
+    std::vector<ge::graph::Graph::Vertice> init_vertices(const std::vector<ge::Vertex>& points)
     {
-        std::vector<ge::Graph::Vertice> result;
+        std::vector<ge::graph::Graph::Vertice> result;
 
         for (size_t i = 0; i < points.size(); ++i)
         {
-            result.emplace_back(ge::Graph::Vertice{i, BL});
+            result.emplace_back(ge::graph::Graph::Vertice{i, BL});
         }
 
         return result;
     }
 
-    std::pair<std::vector<ge::Vertex>, std::vector<ge::Graph::Arc>> init_arcs
+    std::pair<std::vector<ge::Vertex>, std::vector<ge::graph::Graph::Arc>> init_arcs
     (
         const std::vector<std::vector<ge::Vertex>>& raw
     )
     {
         std::vector<ge::Vertex> points;
-        std::vector<ge::Graph::Arc> arcs;
+        std::vector<ge::graph::Graph::Arc> arcs;
 
         for (const std::vector<ge::Vertex>& road : raw)
         {
@@ -86,7 +88,7 @@ namespace
             for (size_t i = 1; i < road.size(); ++i)
             {
                 points.emplace_back(road[i]);
-                arcs.emplace_back(ge::Graph::Arc{points.size() - 2, points.size() - 1, GR});
+                arcs.emplace_back(ge::graph::Graph::Arc{points.size() - 2, points.size() - 1, GR});
             }
         }
 
@@ -158,101 +160,137 @@ namespace
         };
         constexpr std::array vertices
         {
-            ge::Graph::Vertice{.index = 0, .color = ge::Color{{1.f, 0.f, 0.f}}}
-          , ge::Graph::Vertice{.index = 1, .color = ge::Color{{0.f, 1.f, 0.f}}}
-          , ge::Graph::Vertice{.index = 2, .color = ge::Color{{0.f, 0.f, 1.f}}}
+            ge::graph::Graph::Vertice{.index = 0, .color = ge::Color{{1.f, 0.f, 0.f}}}
+          , ge::graph::Graph::Vertice{.index = 1, .color = ge::Color{{0.f, 1.f, 0.f}}}
+          , ge::graph::Graph::Vertice{.index = 2, .color = ge::Color{{0.f, 0.f, 1.f}}}
         };
         constexpr std::array arcs
         {
-            ge::Graph::Arc{.index_from = 0, .index_to = 1, .color = ge::Color{{1.f, 0.f, 0.f}}}
-          , ge::Graph::Arc{.index_from = 1, .index_to = 2, .color = ge::Color{{0.f, 1.f, 0.f}}}
-          , ge::Graph::Arc{.index_from = 2, .index_to = 0, .color = ge::Color{{0.f, 0.f, 1.f}}}
+            ge::graph::Graph::Arc{.index_from = 0, .index_to = 1, .color = ge::Color{{1.f, 0.f, 0.f}}}
+          , ge::graph::Graph::Arc{.index_from = 1, .index_to = 2, .color = ge::Color{{0.f, 1.f, 0.f}}}
+          , ge::graph::Graph::Arc{.index_from = 2, .index_to = 0, .color = ge::Color{{0.f, 0.f, 1.f}}}
         };
     }
 }
 
 int main(int argc, char* argv[])
 {
+    using namespace ge;
+    using namespace ge::graph;
+
 #ifdef GE_DEBUG_LAYERS_ENABLED
+    // NOTE: add path to validation libs to LD_LIBRARY_PATH
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
-    constexpr uint16_t width = 1024;
-    constexpr uint16_t height = 768;
-    constexpr ge::DynamicSize size
+    try
     {
-        .default_size = ge::Size{width, height}
-        , .min_size = ge::Size{100, 100}
-        , .max_size = std::nullopt
-    };
-    constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
-
-    auto window = ge::Window::create(size, background_color);
-
-    ge::Render render
-    (
-        ge::SurfaceParams
+        const Logger logger
         {
-            .surface_creator = [&window] (const vk::Instance& instance)
+            Flags<LogType>
             {
-                return window->create_surface(instance);
+                LogType::Error,
+                LogType::ErrorDetails,
+//                LogType::SystemInfo
             }
-            , .width = width
-            , .height = height
-            , .background_color = background_color
-        },
-        ge::DrawMode::GRAPH
-    );
-
-    window->start_display();
-
-    if (argc == 1)
-    {
-        const ge::Graph graph
-        {
-            triangle::points
-          , triangle::vertices
-          , triangle::arcs
         };
 
-        render.set_object_to_draw(graph);
-
-        const glm::vec2 camera_pos = camera_on_center(triangle::points);
-        render.set_camera_pos(camera_pos);
-        render.set_camera_scale(1.f / 300.f);
-    }
-    else
-    {
-        std::string_view graph_file_path{argv[1]};
-        const std::vector<std::vector<ge::Vertex>> raw_points = read_points(graph_file_path);
-        auto [points, arcs] = init_arcs(raw_points);
-
-        const std::vector<ge::Graph::Vertice> vertices = init_vertices(points);
-
-        const ge::Graph graph
+        constexpr uint16_t width = 1024;
+        constexpr uint16_t height = 768;
+        constexpr DynamicSize size
         {
-            points,
-            vertices,
-//            {},
-            arcs
+            .default_size = Size{width, height}
+            , .min_size = Size{100, 100}
+            , .max_size = std::nullopt
         };
+        constexpr std::array<uint8_t, 4> background_color{255, 255, 255, 1};
+        auto window = WindowXCB(size, background_color, logger);
 
-        render.set_object_to_draw(graph);
+        Render2dGraph render
+        (
+            ge::SurfaceParams
+            {
+                .surface = XcbSurface{window.get_connection(), window.get_window()}
+                , .width = width
+                , .height = height
+                , .background_color = background_color
+            },
+            logger
+        );
 
-        const glm::vec2 camera_pos = camera_on_center(points);
-        render.set_camera_pos(camera_pos);
+        window.start_display();
 
-        render.set_camera_scale(scale_to_fit_all(points, width, height));
+        if (argc == 1)
+        {
+            const ge::graph::Graph graph
+            {
+                triangle::points
+              , triangle::vertices
+              , triangle::arcs
+            };
+
+            render.set_object_to_draw(graph);
+
+            const glm::vec2 camera_pos = camera_on_center(triangle::points);
+            Camera2d camera{camera_pos, 1.f / 300.f, width, height};
+            render.set_camera(std::move(camera));
+        }
+        else
+        {
+            std::string_view graph_file_path{argv[1]};
+            const std::vector<std::vector<ge::Vertex>> raw_points = read_points(graph_file_path);
+            auto [points, arcs] = init_arcs(raw_points);
+
+            const std::vector<ge::graph::Graph::Vertice> vertices = init_vertices(points);
+
+            const ge::graph::Graph graph
+            {
+                points,
+                vertices,
+//                {},
+                arcs
+            };
+
+            render.set_object_to_draw(graph);
+
+            const glm::vec2 camera_pos = camera_on_center(points);
+            Camera2d camera{camera_pos, scale_to_fit_all(points, width, height), width, height};
+            render.set_camera(std::move(camera));
+        }
+
+        render.draw_frame();
+
+        ge::RenderLoop render_loop(window, render);
+        while (not render_loop.stopped())
+        {
+            render_loop.handle_window_events();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
     }
-
-    render.draw_frame();
-
-    ge::RenderLoop render_loop(*window, render);
-    while (not render_loop.stopped())
+    catch (const ge::expected_error& e)
     {
-        render_loop.handle_window_events();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::cerr
+            << "Expected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const ge::unexpected_error& e)
+    {
+        std::cerr
+            << "Unexpected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Unexpected exception: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unexpected exception" << std::endl;
     }
 
     return 0;

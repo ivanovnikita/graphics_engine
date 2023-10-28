@@ -1,8 +1,9 @@
+#include "ge/render/2d_tiles/render_2d_tiles.h"
+#include "ge/common/exception.h"
 #include "ge/geometry/cs_hex_flat.hpp"
 #include "ge/geometry/cs_hex_pointy.hpp"
 #include "ge/geometry/convert_between_flat_and_pointy.h"
-#include "ge/render/render.h"
-#include "ge/window/window.h"
+#include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
@@ -19,8 +20,8 @@
 #include <iostream>
 
 using C = ge::Vertex;
-using T = ge::Polygons::Triangle;
-using L = ge::Polygons::Line;
+using T = ge::tiles::Polygons::Triangle;
+using L = ge::tiles::Polygons::Line;
 using Cl = ge::Color;
 
 [[ maybe_unused ]] constexpr Cl WH{{1.f, 1.f, 1.f}};
@@ -54,7 +55,7 @@ namespace hex
         C{{std::sqrt(3.f) * (-hex_size_part / 2.f), -hex_size_part / 2.f}},
     };
 
-    [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> triangles
+    [[ maybe_unused ]] const std::vector<ge::tiles::Polygons::Triangle> triangles
     {
         T{{0, 1, 2}, GR},
         T{{3, 4, 5}, GR},
@@ -62,11 +63,11 @@ namespace hex
         T{{5, 0, 2}, GR},
     };
 
-    [[ maybe_unused ]] const std::vector<ge::Polygons::Triangle> selected_triangles = []
+    [[ maybe_unused ]] const std::vector<ge::tiles::Polygons::Triangle> selected_triangles = []
     {
         auto result = triangles;
 
-        for (ge::Polygons::Triangle& tr : result)
+        for (ge::tiles::Polygons::Triangle& tr : result)
         {
             tr.color = OR;
         }
@@ -74,7 +75,7 @@ namespace hex
         return result;
     } ();
 
-    [[ maybe_unused ]] const std::vector<ge::Polygons::Line> border
+    [[ maybe_unused ]] const std::vector<ge::tiles::Polygons::Line> border
     {
         L{{0, 1}, BL},
         L{{1, 2}, BL},
@@ -84,10 +85,10 @@ namespace hex
         L{{5, 0}, BL},
     };
 
-    [[ maybe_unused ]] const std::vector<ge::Polygons::Line> selected_border = []
+    [[ maybe_unused ]] const std::vector<ge::tiles::Polygons::Line> selected_border = []
     {
         auto result = border;
-        for (ge::Polygons::Line& line : result)
+        for (ge::tiles::Polygons::Line& line : result)
         {
             line.color = GR;
         }
@@ -121,13 +122,13 @@ namespace
         };
     }
 
-    ge::Polygons move_object
+    ge::tiles::Polygons move_object
     (
-        const ge::Polygons& x,
+        const ge::tiles::Polygons& x,
         const glm::vec2& offset
     )
     {
-        ge::Polygons result = x;
+        ge::tiles::Polygons result = x;
 
         for (auto& vertex : result.points)
         {
@@ -180,318 +181,354 @@ namespace
 int main(int /*argc*/, char* /*argv*/[])
 {
     using namespace ge;
+    using namespace ge::tiles;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
     constexpr int override = 1;
     setenv("VK_LAYER_PATH", std::string{ge::VK_LAYER_PATH}.c_str(), override);
 #endif
 
-    constexpr uint16_t width = 500;
-    constexpr uint16_t height = 500;
-    constexpr DynamicSize size
+    try
     {
-        .default_size = Size{width, height}
-        , .min_size = Size{100, 100}
-        , .max_size = std::nullopt
-    };
-//    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
-    constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
-
-    auto window = Window::create(size, background_color);
-
-    Render render
-    (
-        SurfaceParams
+        const Logger logger
         {
-            .surface_creator = [&window] (const vk::Instance& instance)
+            Flags<LogType>
             {
-                return window->create_surface(instance);
+                LogType::Error,
+                LogType::ErrorDetails,
+//                LogType::SystemInfo
             }
-            , .width = width
-            , .height = height
-            , .background_color = background_color
-        },
-        ge::DrawMode::POLYGONS
-    );
+        };
 
-    window->start_display();
-
-    RenderLoop render_loop(*window, render);
-
-    const CsHexFlat cs_hex_flat
-    (
-        2.f * hex::hex_size_part,
-        static_cast<float>(std::sqrt(3) * hex::hex_size_part),
-        hex::points_flat[1].pos.x,
-        hex::points_flat[2].pos.x
-    );
-    const CsHexPointy cs_hex_pointy
-    (
-        static_cast<float>(std::sqrt(3) * hex::hex_size_part),
-        2.f * hex::hex_size_part,
-        hex::points_pointy[1].pos.y,
-        hex::points_pointy[2].pos.y
-    );
-
-    std::optional<HexCoordDoubledHeight> prev_selected_hex_flat;
-    const Polygons hex_flat
-    {
-        hex::points_flat,
-        hex::triangles,
-        hex::border
-    };
-    const Polygons selected_hex_flat
-    {
-        hex::points_flat,
-        hex::selected_triangles,
-        hex::border
-    };
-
-    std::optional<HexCoordDoubledWidth> prev_selected_hex_pointy;
-    const Polygons hex_pointy
-    {
-        hex::points_pointy,
-        hex::triangles,
-        hex::border
-    };
-    const Polygons selected_hex_pointy
-    {
-        hex::points_pointy,
-        hex::selected_triangles,
-        hex::border
-    };
-
-    std::vector<Polygons> fixed_grid_flat;
-    std::vector<Polygons> fixed_grid_pointy;
-
-    constexpr int hex_map_radius = 11;
-//    for (int x = -hex_map_radius; x <= hex_map_radius; ++x)
-//    {
-//        const int y1 = std::max(-hex_map_radius, -x - hex_map_radius);
-//        const int y2 = std::min(hex_map_radius, -x + hex_map_radius);
-//        for (int y = y1; y <= y2; ++y)
-//        {
-//            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
-//            fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
-
-//            // TODO: rewrite copy-pasted code
-//            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
-//            fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
-//        }
-//    }
-
-    for (int y = 0; y < hex_map_radius; ++y)
-    {
-        int y_offset = static_cast<int>(std::floor(y / 2));
-        for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
+        constexpr uint16_t width = 500;
+        constexpr uint16_t height = 500;
+        constexpr DynamicSize size
         {
-            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
-            fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
+            .default_size = Size{width, height}
+            , .min_size = Size{100, 100}
+            , .max_size = std::nullopt
+        };
+    //    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
+        constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
+        auto window = WindowXCB(size, background_color, logger);
 
-            // TODO: rewrite copy-pasted code
-            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
-            fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
-        }
-    }
-
-    fixed_grid_flat.emplace_back(selected_hex_flat);
-    fixed_grid_pointy.emplace_back(selected_hex_pointy);
-
-    render.set_object_to_draw(fixed_grid_flat);
-    HexCsType current_cs = HexCsType::Flat;
-
-    const auto draw_selected_hex_flat =
-    [
-        &selected_hex_flat,
-        &render,
-        &cs_hex_flat,
-        &prev_selected_hex_flat,
-        &fixed_grid_flat,
-        &window
-    ] (const MouseMoveEvent& event)
-    {
-        const HexCoordDoubledHeight selected_hex_pos = cs_hex_flat.to_hex_doubled_height
+        Render2dTiles render
         (
-            Point2dF{event.pos.x, event.pos.y}
+            SurfaceParams
+            {
+                .surface = XcbSurface{window.get_connection(), window.get_window()}
+                , .width = width
+                , .height = height
+                , .background_color = background_color
+            },
+            logger
         );
 
-        window->set_window_title(print_coords(selected_hex_pos, event.pos));
+        window.start_display();
 
-        if (selected_hex_pos == prev_selected_hex_flat)
+        RenderLoop render_loop(window, render);
+
+        const CsHexFlat cs_hex_flat
+        (
+            2.f * hex::hex_size_part,
+            static_cast<float>(std::sqrt(3) * hex::hex_size_part),
+            hex::points_flat[1].pos.x,
+            hex::points_flat[2].pos.x
+        );
+        const CsHexPointy cs_hex_pointy
+        (
+            static_cast<float>(std::sqrt(3) * hex::hex_size_part),
+            2.f * hex::hex_size_part,
+            hex::points_pointy[1].pos.y,
+            hex::points_pointy[2].pos.y
+        );
+
+        std::optional<HexCoordDoubledHeight> prev_selected_hex_flat;
+        const Polygons hex_flat
         {
-            return RenderLoop::NeedRedraw::No;
+            hex::points_flat,
+            hex::triangles,
+            hex::border
+        };
+        const Polygons selected_hex_flat
+        {
+            hex::points_flat,
+            hex::selected_triangles,
+            hex::border
+        };
+
+        std::optional<HexCoordDoubledWidth> prev_selected_hex_pointy;
+        const Polygons hex_pointy
+        {
+            hex::points_pointy,
+            hex::triangles,
+            hex::border
+        };
+        const Polygons selected_hex_pointy
+        {
+            hex::points_pointy,
+            hex::selected_triangles,
+            hex::border
+        };
+
+        std::vector<Polygons> fixed_grid_flat;
+        std::vector<Polygons> fixed_grid_pointy;
+
+        constexpr int hex_map_radius = 11;
+    //    for (int x = -hex_map_radius; x <= hex_map_radius; ++x)
+    //    {
+    //        const int y1 = std::max(-hex_map_radius, -x - hex_map_radius);
+    //        const int y2 = std::min(hex_map_radius, -x + hex_map_radius);
+    //        for (int y = y1; y <= y2; ++y)
+    //        {
+    //            const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
+    //            fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
+
+    //            // TODO: rewrite copy-pasted code
+    //            const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
+    //            fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
+    //        }
+    //    }
+
+        for (int y = 0; y < hex_map_radius; ++y)
+        {
+            int y_offset = static_cast<int>(std::floor(y / 2));
+            for (int x = -y_offset; x < hex_map_radius - y_offset; ++x)
+            {
+                const Point2dF pos_flat = cs_hex_flat.to_draw_space(to_hex_doubled_height(HexCoordAxialFlat{x, y}));
+                fixed_grid_flat.emplace_back(move_object(hex_flat, {pos_flat.x, pos_flat.y}));
+
+                // TODO: rewrite copy-pasted code
+                const Point2dF pos_pointy = cs_hex_pointy.to_draw_space(to_hex_doubled_width(HexCoordAxialPointy{x, y}));
+                fixed_grid_pointy.emplace_back(move_object(hex_pointy, {pos_pointy.x, pos_pointy.y}));
+            }
         }
 
-        prev_selected_hex_flat = selected_hex_pos;
-
-        const Point2dF pos = cs_hex_flat.to_draw_space(selected_hex_pos);
-        fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
+        fixed_grid_flat.emplace_back(selected_hex_flat);
+        fixed_grid_pointy.emplace_back(selected_hex_pointy);
 
         render.set_object_to_draw(fixed_grid_flat);
+        HexCsType current_cs = HexCsType::Flat;
 
-        return RenderLoop::NeedRedraw::Yes;
-    };
-
-    // TODO: rewrite copy-pasted code
-    const auto draw_selected_hex_pointy =
-    [
-        &selected_hex_pointy,
-        &render,
-        &cs_hex_pointy,
-        &prev_selected_hex_pointy,
-        &fixed_grid_pointy,
-        &window
-    ] (const MouseMoveEvent& event)
-    {
-        const HexCoordDoubledWidth selected_hex_pos = cs_hex_pointy.to_hex_doubled_width
-        (
-            Point2dF{event.pos.x, event.pos.y}
-        );
-
-        window->set_window_title(print_coords(selected_hex_pos, event.pos));
-
-        if (selected_hex_pos == prev_selected_hex_pointy)
+        const auto draw_selected_hex_flat =
+        [
+            &selected_hex_flat,
+            &render,
+            &cs_hex_flat,
+            &prev_selected_hex_flat,
+            &fixed_grid_flat,
+            &window
+        ] (const MouseMoveEvent& event)
         {
-            return RenderLoop::NeedRedraw::No;
-        }
+            const HexCoordDoubledHeight selected_hex_pos = cs_hex_flat.to_hex_doubled_height
+            (
+                Point2dF{event.pos.x, event.pos.y}
+            );
 
-        prev_selected_hex_pointy = selected_hex_pos;
+            window.set_window_title(print_coords(selected_hex_pos, event.pos));
 
-        const Point2dF pos = cs_hex_pointy.to_draw_space(selected_hex_pos);
-        fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
-
-        render.set_object_to_draw(fixed_grid_pointy);
-
-        return RenderLoop::NeedRedraw::Yes;
-    };
-
-    std::optional<HexCoordDoubledHeight> pressed_hex_flat;
-    std::optional<HexCoordDoubledWidth> pressed_hex_pointy;
-    const auto switch_cs_start =
-    [
-        &current_cs,
-        &cs_hex_flat,
-        &cs_hex_pointy,
-        &pressed_hex_flat,
-        &pressed_hex_pointy
-    ] (const MouseButtonPress& e)
-    {
-        if (e.button != MouseButton::RIGHT)
-        {
-            return RenderLoop::NeedRedraw::No;
-        }
-
-        switch (current_cs)
-        {
-        case HexCsType::Flat:
-        {
-            pressed_hex_flat = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
-            break;
-        }
-        case HexCsType::Pointy:
-        {
-            pressed_hex_pointy = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
-            break;
-        }
-        }
-
-        return RenderLoop::NeedRedraw::No;
-    };
-
-    const auto switch_cs_stop =
-    [
-        &render,
-        &render_loop,
-        &current_cs,
-        &cs_hex_flat,
-        &cs_hex_pointy,
-        &fixed_grid_flat,
-        &fixed_grid_pointy,
-        &pressed_hex_flat,
-        &pressed_hex_pointy,
-        &prev_selected_hex_flat,
-        &prev_selected_hex_pointy,
-        &draw_selected_hex_flat,
-        &draw_selected_hex_pointy,
-        &selected_hex_flat,
-        &selected_hex_pointy
-    ] (const MouseButtonRelease& e)
-    {
-        if (e.button != MouseButton::RIGHT)
-        {
-            return RenderLoop::NeedRedraw::No;
-        }
-
-        RenderLoop::NeedRedraw redraw = RenderLoop::NeedRedraw::No;
-
-        switch (current_cs)
-        {
-        case HexCsType::Flat:
-        {
-            HexCoordDoubledHeight released_hex = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
-            if (pressed_hex_flat == released_hex)
+            if (selected_hex_pos == prev_selected_hex_flat)
             {
-                if (prev_selected_hex_flat.has_value())
-                {
-                    prev_selected_hex_pointy = to_hex_doubled_width
-                    (
-                        to_pointy_by_cw_rotation(to_hex_axial_flat(*prev_selected_hex_flat))
-                    );
-                    const Point2dF pos = cs_hex_pointy.to_draw_space(*prev_selected_hex_pointy);
-                    fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
-                }
-
-                render.set_object_to_draw(fixed_grid_pointy);
-                render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
-                current_cs = HexCsType::Pointy;
-                redraw = RenderLoop::NeedRedraw::Yes;
+                return RenderLoop::NeedRedraw::No;
             }
-            pressed_hex_flat.reset();
-            break;
-        }
-        case HexCsType::Pointy:
+
+            prev_selected_hex_flat = selected_hex_pos;
+
+            const Point2dF pos = cs_hex_flat.to_draw_space(selected_hex_pos);
+            fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
+
+            render.set_object_to_draw(fixed_grid_flat);
+
+            return RenderLoop::NeedRedraw::Yes;
+        };
+
+        // TODO: rewrite copy-pasted code
+        const auto draw_selected_hex_pointy =
+        [
+            &selected_hex_pointy,
+            &render,
+            &cs_hex_pointy,
+            &prev_selected_hex_pointy,
+            &fixed_grid_pointy,
+            &window
+        ] (const MouseMoveEvent& event)
         {
-            HexCoordDoubledWidth released_hex = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
-            if (pressed_hex_pointy == released_hex)
+            const HexCoordDoubledWidth selected_hex_pos = cs_hex_pointy.to_hex_doubled_width
+            (
+                Point2dF{event.pos.x, event.pos.y}
+            );
+
+            window.set_window_title(print_coords(selected_hex_pos, event.pos));
+
+            if (selected_hex_pos == prev_selected_hex_pointy)
             {
-                if (prev_selected_hex_pointy.has_value())
-                {
-                    prev_selected_hex_flat = to_hex_doubled_height
-                    (
-                        to_flat_by_ccw_rotation(to_hex_axial_pointy(*prev_selected_hex_pointy))
-                    );
-                    const Point2dF pos = cs_hex_flat.to_draw_space(*prev_selected_hex_flat);
-                    fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
-                }
-
-                render.set_object_to_draw(fixed_grid_flat);
-                render_loop.set_mouse_move_callback({draw_selected_hex_flat});
-                current_cs = HexCsType::Flat;
-                redraw = RenderLoop::NeedRedraw::Yes;
+                return RenderLoop::NeedRedraw::No;
             }
-            pressed_hex_pointy.reset();
-            break;
+
+            prev_selected_hex_pointy = selected_hex_pos;
+
+            const Point2dF pos = cs_hex_pointy.to_draw_space(selected_hex_pos);
+            fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
+
+            render.set_object_to_draw(fixed_grid_pointy);
+
+            return RenderLoop::NeedRedraw::Yes;
+        };
+
+        std::optional<HexCoordDoubledHeight> pressed_hex_flat;
+        std::optional<HexCoordDoubledWidth> pressed_hex_pointy;
+        const auto switch_cs_start =
+        [
+            &current_cs,
+            &cs_hex_flat,
+            &cs_hex_pointy,
+            &pressed_hex_flat,
+            &pressed_hex_pointy
+        ] (const MouseButtonPress& e)
+        {
+            if (e.button != MouseButton::RIGHT)
+            {
+                return RenderLoop::NeedRedraw::No;
+            }
+
+            switch (current_cs)
+            {
+            case HexCsType::Flat:
+            {
+                pressed_hex_flat = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
+                break;
+            }
+            case HexCsType::Pointy:
+            {
+                pressed_hex_pointy = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
+                break;
+            }
+            }
+
+            return RenderLoop::NeedRedraw::No;
+        };
+
+        const auto switch_cs_stop =
+        [
+            &render,
+            &render_loop,
+            &current_cs,
+            &cs_hex_flat,
+            &cs_hex_pointy,
+            &fixed_grid_flat,
+            &fixed_grid_pointy,
+            &pressed_hex_flat,
+            &pressed_hex_pointy,
+            &prev_selected_hex_flat,
+            &prev_selected_hex_pointy,
+            &draw_selected_hex_flat,
+            &draw_selected_hex_pointy,
+            &selected_hex_flat,
+            &selected_hex_pointy
+        ] (const MouseButtonRelease& e)
+        {
+            if (e.button != MouseButton::RIGHT)
+            {
+                return RenderLoop::NeedRedraw::No;
+            }
+
+            RenderLoop::NeedRedraw redraw = RenderLoop::NeedRedraw::No;
+
+            switch (current_cs)
+            {
+            case HexCsType::Flat:
+            {
+                HexCoordDoubledHeight released_hex = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
+                if (pressed_hex_flat == released_hex)
+                {
+                    if (prev_selected_hex_flat.has_value())
+                    {
+                        prev_selected_hex_pointy = to_hex_doubled_width
+                        (
+                            to_pointy_by_cw_rotation(to_hex_axial_flat(*prev_selected_hex_flat))
+                        );
+                        const Point2dF pos = cs_hex_pointy.to_draw_space(*prev_selected_hex_pointy);
+                        fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
+                    }
+
+                    render.set_object_to_draw(fixed_grid_pointy);
+                    render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
+                    current_cs = HexCsType::Pointy;
+                    redraw = RenderLoop::NeedRedraw::Yes;
+                }
+                pressed_hex_flat.reset();
+                break;
+            }
+            case HexCsType::Pointy:
+            {
+                HexCoordDoubledWidth released_hex = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
+                if (pressed_hex_pointy == released_hex)
+                {
+                    if (prev_selected_hex_pointy.has_value())
+                    {
+                        prev_selected_hex_flat = to_hex_doubled_height
+                        (
+                            to_flat_by_ccw_rotation(to_hex_axial_pointy(*prev_selected_hex_pointy))
+                        );
+                        const Point2dF pos = cs_hex_flat.to_draw_space(*prev_selected_hex_flat);
+                        fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
+                    }
+
+                    render.set_object_to_draw(fixed_grid_flat);
+                    render_loop.set_mouse_move_callback({draw_selected_hex_flat});
+                    current_cs = HexCsType::Flat;
+                    redraw = RenderLoop::NeedRedraw::Yes;
+                }
+                pressed_hex_pointy.reset();
+                break;
+            }
+            }
+
+            return redraw;
+        };
+
+        const glm::vec2 camera_pos = camera_on_center(hex::points_flat);
+
+        Camera2d camera = render.get_camera();
+        camera.set_pos(camera_pos);
+        camera.set_scale(1.f / 27.f);
+        render.set_camera(std::move(camera));
+
+        render.draw_frame();
+
+        render_loop.set_mouse_move_callback({draw_selected_hex_flat});
+        render_loop.set_mouse_press_callback({switch_cs_start});
+        render_loop.set_mouse_release_callback({switch_cs_stop});
+
+        while (not render_loop.stopped())
+        {
+            render_loop.handle_window_events();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        }
-
-        return redraw;
-    };
-
-    const glm::vec2 camera_pos = camera_on_center(hex::points_flat);
-    render.set_camera_pos(camera_pos);
-
-    render.set_camera_scale(1.f / 27.f);
-
-    render.draw_frame();
-
-    render_loop.set_mouse_move_callback({draw_selected_hex_flat});
-    render_loop.set_mouse_press_callback({switch_cs_start});
-    render_loop.set_mouse_release_callback({switch_cs_stop});
-
-    while (not render_loop.stopped())
+    }
+    catch (const ge::expected_error& e)
     {
-        render_loop.handle_window_events();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::cerr
+            << "Expected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const ge::unexpected_error& e)
+    {
+        std::cerr
+            << "Unexpected error: [" << e.get_function_name()
+            << "] [" << e.get_line_number()
+            << "]: " << e.get_error_message()
+            << " " << e.get_error_details() << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Unexpected exception: " << e.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unexpected exception" << std::endl;
     }
 
     return 0;
