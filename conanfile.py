@@ -38,6 +38,8 @@ class GraphicsEngineConan(ConanFile):
         self.requires.add("vulkan-loader/1.3.236.0", private=False)
         self.requires.add("glm/0.9.9.7", private=False)
 
+        self.requires.add("stb/cci.20230920", private=False)
+
         if self.settings.os == "Linux":
             self.requires.add("xorg/system", private=False)
 
