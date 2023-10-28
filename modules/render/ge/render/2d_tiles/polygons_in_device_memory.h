@@ -1,8 +1,8 @@
 #pragma once
 
 #include "polygons.h"
-#include "ge/render/device.h"
-#include "ge/render/buffer.h"
+#include "ge/render/vulkan_common/device.h"
+#include "ge/render/vulkan_common/buffer.h"
 
 #include <vulkan/vulkan.hpp>
 

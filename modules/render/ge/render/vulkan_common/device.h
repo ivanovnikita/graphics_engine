@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ge/render/instance.h"
-#include "ge/render/device_layers.h"
-#include "ge/render/device_extensions.h"
-#include "ge/render/device_features.h"
+#include "instance.h"
+#include "device_layers.h"
+#include "device_extensions.h"
+#include "device_features.h"
 
 #include <vulkan/vulkan.hpp>
 

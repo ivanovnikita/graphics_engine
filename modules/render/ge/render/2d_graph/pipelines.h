@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ge/common/logger.hpp"
-#include "ge/render/device.h"
+#include "ge/render/vulkan_common/device.h"
 
 #include <vulkan/vulkan.hpp>
 

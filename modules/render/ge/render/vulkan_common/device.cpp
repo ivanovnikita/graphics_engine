@@ -2,7 +2,7 @@
 #include "log_vulkan.hpp"
 //#include "invoke_for_downcasted.h"
 #include "ge/common/bits_range.hpp"
-#include "ge/render/exception.h"
+#include "ge/render/vulkan_common/exception.h"
 
 #include <limits>
 

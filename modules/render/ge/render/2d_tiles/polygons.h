@@ -1,7 +1,9 @@
 #pragma once
 
+#include "ge/render/color.h"
 #include "ge/render/vertex.h"
 
+#include <array>
 #include <vector>
 
 namespace ge::tiles

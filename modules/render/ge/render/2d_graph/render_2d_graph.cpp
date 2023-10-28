@@ -7,14 +7,14 @@
 #include "pipelines.h"
 #include "draw_graph_commands.h"
 
-#include "ge/render/descriptor_pool.h"
-#include "ge/render/shader_module.h"
-#include "ge/render/framebuffer.h"
-#include "ge/render/fence.h"
-#include "ge/render/semaphore.h"
-#include "ge/render/command_pool.h"
-#include "ge/render/exception.h"
-#include "ge/render/queue.h"
+#include "ge/render/vulkan_common/descriptor_pool.h"
+#include "ge/render/vulkan_common/shader_module.h"
+#include "ge/render/vulkan_common/framebuffer.h"
+#include "ge/render/vulkan_common/fence.h"
+#include "ge/render/vulkan_common/semaphore.h"
+#include "ge/render/vulkan_common/command_pool.h"
+#include "ge/render/vulkan_common/exception.h"
+#include "ge/render/vulkan_common/queue.h"
 
 #include "generated_shaders.h"
 

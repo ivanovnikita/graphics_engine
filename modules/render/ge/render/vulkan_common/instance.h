@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ge/common/logger.hpp"
-#include "ge/render/instance_layers.h"
-#include "ge/render/instance_extensions.h"
-#include "ge/render/version.h"
+#include "instance_layers.h"
+#include "instance_extensions.h"
+#include "version.h"
 
 #include <vulkan/vulkan.hpp>
 

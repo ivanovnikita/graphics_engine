@@ -1,4 +1,4 @@
-#include "ge/render/debug_callback.h"
+#include "debug_callback.h"
 #include "exception.h"
 
 #include <iostream>

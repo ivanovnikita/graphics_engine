@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ge/render/buffer.h"
+#include "ge/render/vulkan_common/buffer.h"
 
 #include <vulkan/vulkan.hpp>
 

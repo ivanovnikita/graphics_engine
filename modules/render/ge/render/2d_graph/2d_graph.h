@@ -1,12 +1,13 @@
 #pragma once
 
+#include "ge/render/color.h"
 #include "ge/render/vertex.h"
 
 #include <span>
 
 #include <cstddef>
 
-namespace ge//::graph
+namespace ge::graph
 {
     struct Graph final
     {

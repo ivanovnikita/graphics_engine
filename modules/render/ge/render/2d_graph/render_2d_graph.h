@@ -7,11 +7,11 @@
 
 #include "ge/render/render_i.h"
 
-#include "ge/render/instance.h"
-#include "ge/render/surface.h"
-#include "ge/render/device.h"
-#include "ge/render/swapchain.h"
-#include "ge/render/buffer.h"
+#include "ge/render/vulkan_common/instance.h"
+#include "ge/render/vulkan_common/surface.h"
+#include "ge/render/vulkan_common/device.h"
+#include "ge/render/vulkan_common/swapchain.h"
+#include "ge/render/vulkan_common/buffer.h"
 
 #include "ge/render/2d_graph/2d_graph.h"
 

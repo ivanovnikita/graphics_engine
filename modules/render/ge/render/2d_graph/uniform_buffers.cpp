@@ -1,6 +1,6 @@
 #include "uniform_buffers.h"
 #include "ge/render/view_proj_2d.h"
-#include "ge/render/exception.h"
+#include "ge/render/vulkan_common/exception.h"
 
 namespace ge::graph
 {

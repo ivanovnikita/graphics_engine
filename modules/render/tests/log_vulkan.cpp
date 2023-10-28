@@ -1,4 +1,4 @@
-#include "ge/render/log_vulkan.hpp"
+#include "ge/render/vulkan_common/log_vulkan.hpp"
 
 #include <gtest/gtest.h>
 

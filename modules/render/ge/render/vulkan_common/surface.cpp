@@ -1,5 +1,5 @@
 #include "surface.h"
-#include "ge/render/exception.h"
+#include "ge/render/vulkan_common/exception.h"
 
 namespace ge
 {

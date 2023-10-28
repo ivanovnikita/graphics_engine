@@ -116,8 +116,8 @@ install(
 install(
     FILES
         ge/render/render_i.h
-        ge/render/render_impl.h
         ge/render/vertex.h
+        ge/render/color.h
         ge/render/2d_graph/2d_graph.h
         ge/render/2d_graph/render_2d_graph.h
     DESTINATION

@@ -1,5 +1,5 @@
 #include "draw_graph_commands.h"
-#include "ge/render/command_buffer.h"
+#include "ge/render/vulkan_common/command_buffer.h"
 
 #include "ge/common/safe_cast.hpp"
 

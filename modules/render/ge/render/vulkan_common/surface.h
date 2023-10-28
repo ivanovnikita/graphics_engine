@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ge/common/logger.hpp"
-#include "ge/render/surface_params.h"
+#include "surface_params.h"
 
 #include <vulkan/vulkan.hpp>
 
