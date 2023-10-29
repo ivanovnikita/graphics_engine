@@ -20,5 +20,7 @@ namespace ge
 
         vk::UniqueImage image;
         vk::UniqueDeviceMemory device_memory;
+        vk::UniqueImageView image_view;
+        vk::UniqueSampler sampler;
     };
 }

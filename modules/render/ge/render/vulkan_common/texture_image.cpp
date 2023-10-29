@@ -2,6 +2,8 @@
 #include "buffer.h"
 #include "exception.h"
 #include "command_buffer.h"
+#include "image_view.h"
+#include "sampler.h"
 
 namespace ge
 {
@@ -104,10 +106,15 @@ namespace ge
             }
             }
 
+            vk::UniqueImageView image_view = create_image_view(device, *image, format);
+            vk::UniqueSampler sampler = create_sampler(device_data);
+
             return TextureImageData
             {
                 .image = std::move(image),
-                .device_memory = std::move(memory)
+                .device_memory = std::move(memory),
+                .image_view = std::move(image_view),
+                .sampler = std::move(sampler)
             };
         }
 

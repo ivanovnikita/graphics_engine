@@ -1,5 +1,6 @@
 #include "swapchain.h"
 #include "exception.h"
+#include "image_view.h"
 
 #include <array>
 #include <limits>
@@ -365,72 +366,6 @@ namespace ge
 
             return images;
         }
-
-        std::vector<vk::UniqueImageView> create_image_views
-        (
-            const std::vector<vk::Image>& images,
-            const vk::Format format,
-            const vk::Device& device
-        )
-        {
-            std::vector<vk::UniqueImageView> views;
-            try
-            {
-                views.reserve(images.size());
-            }
-            catch(const std::bad_alloc&)
-            {
-                GE_THROW_EXPECTED_ERROR("Allocation for swapchain image views failed");
-            }
-
-            const vk::ImageSubresourceRange subresource_range = vk::ImageSubresourceRange{}
-                .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                .setBaseMipLevel(0)
-                .setLevelCount(1)
-                .setBaseArrayLayer(0)
-                .setLayerCount(1);
-
-            vk::ImageViewCreateInfo create_info = vk::ImageViewCreateInfo{}
-                .setViewType(vk::ImageViewType::e2D)
-                .setFormat(format)
-                .setSubresourceRange(subresource_range);
-
-            for (const vk::Image& image : images)
-            {
-                create_info.setImage(image);
-
-                vk::ImageView view;
-                const vk::Result result = device.createImageView
-                (
-                    &create_info,
-                    nullptr,
-                    &view
-                );
-
-                switch (result)
-                {
-                case vk::Result::eSuccess:
-                    break;
-                case vk::Result::eErrorOutOfHostMemory:
-                case vk::Result::eErrorOutOfDeviceMemory:
-                case vk::Result::eErrorInvalidOpaqueCaptureAddressKHR:
-                    GE_THROW_EXPECTED_RESULT(result, "Swapchain image view creation failed");
-                default:
-                {
-                    GE_THROW_UNEXPECTED_RESULT(result, "Swapchain image view creation failed");
-                }
-                }
-
-                vk::UniqueImageView unique_view
-                {
-                    std::move(view),
-                    vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
-                };
-                views.emplace_back(std::move(unique_view));
-            }
-
-            return views;
-        }
     }
 
     SwapchainData SwapchainData::create_default
@@ -495,9 +430,9 @@ namespace ge
         std::vector<vk::Image> images = get_swapchain_images(*device_data.logical_device, *swapchain);
         std::vector<vk::UniqueImageView> image_views = create_image_views
         (
+            *device_data.logical_device,
             images,
-            format.format,
-            *device_data.logical_device
+            format.format
         );
 
         return SwapchainData
