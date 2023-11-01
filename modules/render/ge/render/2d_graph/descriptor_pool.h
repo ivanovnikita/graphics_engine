@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge
+namespace ge::graph
 {
     vk::UniqueDescriptorPool create_descriptor_pool
     (

@@ -1,7 +1,7 @@
 #include "descriptor_pool.h"
-#include "exception.h"
+#include "ge/render/vulkan_common/exception.h"
 
-namespace ge
+namespace ge::graph
 {
     vk::UniqueDescriptorPool create_descriptor_pool
     (
