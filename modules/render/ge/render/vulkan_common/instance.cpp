@@ -305,7 +305,8 @@ namespace ge
                         logger.log
                         (
                             LogType::SystemInfo,
-                            "'vkEnumerateInstanceVersion' returned error ",result,
+                            "'vkEnumerateInstanceVersion' returned error ",
+                            result,
                             ", perhaps api version is 1.0"
                         );
                     }
@@ -364,13 +365,14 @@ namespace ge
             assert(required_layers.size() < std::numeric_limits<uint32_t>::max());
             const vk::InstanceCreateInfo create_info
             {
-                vk::InstanceCreateFlags()
-              , &application_info
-              , static_cast<uint32_t>(required_layers.size())
-              , required_layers.data()
-              , static_cast<uint32_t>(required_extensions.size())
-              , required_extensions.data()
+                vk::InstanceCreateFlags(),
+                &application_info,
+                static_cast<uint32_t>(required_layers.size()),
+                required_layers.data(),
+                static_cast<uint32_t>(required_extensions.size()),
+                required_extensions.data()
             };
+            // TODO: enable best practice validation: https://vulkan.lunarg.com/doc/view/1.2.189.0/linux/best_practices.html
 
             vk::Instance instance;
             const vk::Result result = vk::createInstance(&create_info, nullptr, &instance);
