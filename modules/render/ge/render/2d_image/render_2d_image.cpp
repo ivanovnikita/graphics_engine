@@ -138,8 +138,16 @@ namespace ge::image
         camera_ = std::move(camera);
     }
 
-    void Render2dImage::set_object_to_draw(const Image& image)
+    void Render2dImage::set_object_to_draw(const std::span<const Polygons>& polygons, const Image& image)
     {
+        polygons_in_device_memory_ = load_polygons_to_device
+        (
+            device_data_,
+            *command_pool_,
+            *transfer_finished_fence_,
+            polygons
+        );
+
         texture_image_data_ = TextureImageData::create_from_image
         (
             device_data_,
@@ -201,6 +209,7 @@ namespace ge::image
 
     void Render2dImage::create_command_buffers()
     {
+        assert(polygons_in_device_memory_.has_value());
         assert(texture_image_data_.has_value());
         assert(not descriptor_sets_.empty());
 

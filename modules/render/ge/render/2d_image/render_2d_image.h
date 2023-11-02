@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shaders.h"
+#include "polygons_in_device_memory.h"
 
 #include "ge/common/logger.hpp"
 
@@ -31,7 +32,7 @@ namespace ge::image
         const Camera2d& get_camera() const override;
         void set_camera(Camera2d) override;
 
-        void set_object_to_draw(const Image&);
+        void set_object_to_draw(const std::span<const Polygons>&, const Image&);
 
     private:
         void create_command_buffers();
@@ -65,6 +66,7 @@ namespace ge::image
 
         vk::UniqueCommandPool command_pool_;
 
+        std::optional<PolygonsInDeviceMemory> polygons_in_device_memory_;
         std::optional<TextureImageData> texture_image_data_;
 
         std::vector<vk::UniqueDescriptorSet> descriptor_sets_;
