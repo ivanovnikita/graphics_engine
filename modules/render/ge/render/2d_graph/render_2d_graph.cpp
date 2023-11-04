@@ -4,7 +4,6 @@
 #include "pipeline_layout.h"
 #include "descriptor_pool.h"
 #include "descriptor_set.h"
-#include "render_pass.h"
 #include "pipelines.h"
 #include "draw_graph_commands.h"
 
@@ -15,6 +14,7 @@
 #include "ge/render/vulkan_common/command_pool.h"
 #include "ge/render/vulkan_common/exception.h"
 #include "ge/render/vulkan_common/queue.h"
+#include "ge/render/vulkan_common/render_pass.h"
 
 #include "generated_shaders.h"
 
@@ -111,7 +111,7 @@ namespace ge::graph
                 uniform_buffers_
             )
         }
-        , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
+        , render_pass_{create_render_pass_default(*device_data_.logical_device, swapchain_data_.format)}
         , arcs_pipeline_
         {
             create_arcs_pipeline

@@ -1,9 +1,9 @@
 #include "render_pass.h"
-#include "ge/render/vulkan_common/create_render_pass.h"
+#include "create_render_pass.h"
 
-namespace ge::tiles
+namespace ge
 {
-    vk::UniqueRenderPass create_render_pass
+    vk::UniqueRenderPass create_render_pass_default
     (
         const vk::Device& device,
         const vk::Format& format
@@ -59,6 +59,6 @@ namespace ge::tiles
             .setDependencyCount(1)
             .setPDependencies(&dependency);
 
-        return ge::create_render_pass(device, render_pass_info);
+        return create_render_pass(device, render_pass_info);
     }
 }

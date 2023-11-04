@@ -4,7 +4,6 @@
 #include "pipeline_layout.h"
 #include "descriptor_pool.h"
 #include "descriptor_set.h"
-#include "render_pass.h"
 #include "pipelines.h"
 #include "draw_image_commands.h"
 
@@ -15,6 +14,7 @@
 #include "ge/render/vulkan_common/command_pool.h"
 #include "ge/render/vulkan_common/exception.h"
 #include "ge/render/vulkan_common/queue.h"
+#include "ge/render/vulkan_common/render_pass.h"
 
 #include "generated_shaders.h"
 
@@ -95,7 +95,7 @@ namespace ge::image
         , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_, vk::Format::eB8G8R8A8Srgb)}
         , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
         , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
-        , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
+        , render_pass_{create_render_pass_default(*device_data_.logical_device, swapchain_data_.format)}
         , image_pipeline_
         {
             create_image_pipeline

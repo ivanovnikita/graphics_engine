@@ -123,8 +123,7 @@ int main(int /*argc*/, char* /*argv*/[])
             , .min_size = ge::Size{100, 100}
             , .max_size = std::nullopt
         };
-    //    constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
-        constexpr std::array<uint8_t, 4> background_color{100, 100, 100, 1};
+        constexpr std::array<uint8_t, 4> background_color{38, 38, 38, 1};
 
         auto window = WindowXCB(size, background_color, logger);
 
