@@ -25,6 +25,13 @@ namespace ge::tiles
             },
             vk::Format::eB8G8R8A8Unorm
         }
+        , camera_
+        {
+            {0.f, 0.f},
+            1.f,
+            surface_params.width,
+            surface_params.height
+        }
         , descriptor_set_layout_{create_descriptor_set_layout(*device_data_.logical_device)}
         , pipeline_layout_{create_pipeline_layout(*device_data_.logical_device, *descriptor_set_layout_)}
         , shaders_
@@ -100,6 +107,12 @@ namespace ge::tiles
     void Render2dTiles::set_camera(Camera2d camera)
     {
         camera_ = std::move(camera);
+    }
+
+    void Render2dTiles::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
+    {
+        RenderBase::resize(new_surface_width, new_surface_height);
+        camera_.set_surface_sizes(new_surface_width, new_surface_height);
     }
 
     void Render2dTiles::set_object_to_draw(const std::span<const Polygons>& polygons)

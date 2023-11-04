@@ -38,13 +38,6 @@ namespace ge
             )
         }
         , surface_data_{SurfaceData::create_default(surface_params, *instance_data_.instance)}
-        , camera_
-        {
-            {0.f, 0.f},
-            1.f,
-            surface_params.width,
-            surface_params.height
-        }
         , device_data_
         {
             DeviceData::create_default
@@ -114,7 +107,7 @@ namespace ge
 
         create_pipelines();
 
-        camera_.set_surface_sizes(new_surface_width, new_surface_height);
+//        camera_.set_surface_sizes(new_surface_width, new_surface_height);
 
         create_command_buffers();
     }

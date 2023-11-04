@@ -24,12 +24,16 @@ namespace ge::graph
         const Camera2d& get_camera() const override;
         void set_camera(Camera2d) override;
 
+        void resize(const uint16_t new_surface_width, const uint16_t new_surface_height) override;
+
         void set_object_to_draw(const Graph&);
 
     private:
         void create_pipelines() override;
         void create_command_buffers() override;
         void update_uniform_buffer(size_t current_image) override;
+
+        Camera2d camera_;
 
         vk::UniqueDescriptorSetLayout descriptor_set_layout_;
         vk::UniquePipelineLayout pipeline_layout_;

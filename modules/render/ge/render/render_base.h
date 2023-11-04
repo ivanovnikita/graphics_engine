@@ -37,7 +37,6 @@ namespace ge
 
         InstanceData instance_data_;
         SurfaceData surface_data_;
-        Camera2d camera_;
         DeviceData device_data_;
 
         vk::Format desired_surface_format_;
