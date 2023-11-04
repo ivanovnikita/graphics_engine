@@ -107,8 +107,6 @@ namespace ge
 
         create_pipelines();
 
-//        camera_.set_surface_sizes(new_surface_width, new_surface_height);
-
         create_command_buffers();
     }
 
