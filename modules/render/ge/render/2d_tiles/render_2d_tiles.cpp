@@ -65,7 +65,6 @@ namespace ge::tiles
                 },
                 DeviceFeaturesFlags
                 {
-                    DeviceFeatures::SamplerAnisotropy, // ?
                     DeviceFeatures::FillModeNonSolid,
                     DeviceFeatures::WideLines
                 },

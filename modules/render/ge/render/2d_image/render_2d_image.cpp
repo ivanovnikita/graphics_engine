@@ -65,7 +65,7 @@ namespace ge::image
                 },
                 DeviceFeaturesFlags
                 {
-                    DeviceFeatures::SamplerAnisotropy, // ?
+                    DeviceFeatures::SamplerAnisotropy,
                     DeviceFeatures::FillModeNonSolid,
                     DeviceFeatures::WideLines
                 },

@@ -65,7 +65,6 @@ namespace ge::graph
                 },
                 DeviceFeaturesFlags
                 {
-                    DeviceFeatures::SamplerAnisotropy, // ?
                     DeviceFeatures::FillModeNonSolid,
                     DeviceFeatures::WideLines
                 },
