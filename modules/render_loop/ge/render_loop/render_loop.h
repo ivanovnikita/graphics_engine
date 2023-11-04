@@ -28,7 +28,12 @@ namespace ge
         using MouseButtonReleaseCallback = std::function<NeedRedraw(const MouseButtonRelease&)>;
         using MouseMoveCallback = std::function<NeedRedraw(const MouseMoveEvent&)>;
 
-        RenderLoop(WindowI& window, RenderI& render);
+        explicit RenderLoop
+        (
+            WindowI&,
+            WithCamera2dI&,
+            DrawableI&
+        );
 
         bool stopped() const;
         void handle_window_events();
@@ -49,7 +54,8 @@ namespace ge
         void deactivate_state(InputState);
 
         WindowI& window_;
-        RenderI& render_;
+        WithCamera2dI& render_camera_i;
+        DrawableI& render_draw_i;
         bool stopped_;
 
         Flags<InputState> active_states_;

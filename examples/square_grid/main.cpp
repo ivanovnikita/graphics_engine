@@ -184,7 +184,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         window.start_display();
 
-        RenderLoop render_loop(window, render);
+        RenderLoop render_loop(window, render, render);
 
         const CsSquarePointy cs_square_pointy
         (

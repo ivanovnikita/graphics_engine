@@ -36,7 +36,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const WindowEventResize& event)
     {
-        render_.resize(event.new_size.width, event.new_size.height);
+        render_draw_i.resize(event.new_size.width, event.new_size.height);
         need_redraw_= NeedRedraw::Yes;
     }
 
@@ -55,7 +55,7 @@ namespace ge
         // TODO: rewrite copy-pasted code
         if (mouse_press_callback_ != nullptr)
         {
-            const Camera2d& camera = render_.get_camera();
+            const Camera2d& camera = render_camera_i.get_camera();
             MouseButtonPress event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_press_callback_(event_model_space_pos));
@@ -86,7 +86,7 @@ namespace ge
         // TODO: rewrite copy-pasted code
         if (mouse_release_callback_ != nullptr)
         {
-            const Camera2d& camera = render_.get_camera();
+            const Camera2d& camera = render_camera_i.get_camera();
             MouseButtonRelease event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_release_callback_(event_model_space_pos));
@@ -116,7 +116,7 @@ namespace ge
         // TODO: rewrite copy-pasted code
         if (mouse_move_callback_ != nullptr)
         {
-            const Camera2d& camera = render_.get_camera();
+            const Camera2d& camera = render_camera_i.get_camera();
             MouseMoveEvent event_model_space_pos = event;
             event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
             combine_need_redraw(mouse_move_callback_(event_model_space_pos));
@@ -140,11 +140,17 @@ namespace ge
         deactivate_state(InputState::CameraDragMove);
     }
 
-    RenderLoop::RenderLoop(WindowI& window, RenderI& render)
+    RenderLoop::RenderLoop
+    (
+        WindowI& window,
+        WithCamera2dI& render_camera_i,
+        DrawableI& render_draw_i
+    )
         : window_{window}
-        , render_{render}
+        , render_camera_i{render_camera_i}
+        , render_draw_i{render_draw_i}
         , stopped_{false}
-        , camera_mover_{render_}
+        , camera_mover_{render_camera_i}
         , need_redraw_{NeedRedraw::No}
     {
     }
@@ -173,7 +179,7 @@ namespace ge
         {
         case NeedRedraw::Yes:
         {
-            render_.draw_frame();
+            render_draw_i.draw_frame();
             need_redraw_ = NeedRedraw::No;
             break;
         }

@@ -18,7 +18,7 @@ namespace ge
     class Camera2dMover final
     {
     public:
-        explicit Camera2dMover(RenderI&);
+        explicit Camera2dMover(WithCamera2dI&);
 
         void zoom(const glm::vec2& zoom_point, ZoomDirection);
 
@@ -30,7 +30,7 @@ namespace ge
         // void move(direction, speed);
 
     private:
-        std::reference_wrapper<RenderI> render_;
+        std::reference_wrapper<WithCamera2dI> render_;
         std::optional<glm::vec2> last_drag_point_;
     };
 

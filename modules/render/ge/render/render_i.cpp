@@ -2,5 +2,6 @@
 
 namespace ge
 {
-    RenderI::~RenderI() = default;
+    DrawableI::~DrawableI() = default;
+    WithCamera2dI::~WithCamera2dI() = default;
 }

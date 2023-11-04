@@ -2,7 +2,7 @@
 
 namespace ge
 {
-    Camera2dMover::Camera2dMover(RenderI& render)
+    Camera2dMover::Camera2dMover(WithCamera2dI& render)
         : render_{render}
     {
     }

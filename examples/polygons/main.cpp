@@ -355,7 +355,7 @@ int main(int argc, char* /*argv*/[])
 
         render.draw_frame();
 
-        RenderLoop render_loop(window, render);
+        RenderLoop render_loop(window, render, render);
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();
