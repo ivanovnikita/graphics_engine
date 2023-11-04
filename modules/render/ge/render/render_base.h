@@ -13,7 +13,7 @@
 
 namespace ge
 {
-    class RenderBase : public DrawableI
+    class RenderBase : public virtual DrawableI
     {
     public:
         explicit RenderBase

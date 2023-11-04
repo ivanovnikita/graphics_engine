@@ -156,13 +156,13 @@ int main(int /*argc*/, char* /*argv*/[])
         const glm::vec2 camera_pos = camera_on_center(square::points);
         Camera2d camera = render.get_camera();
         camera.set_pos(camera_pos);
-        camera.set_scale(/*1.f / 300.f*/scale_to_fit_all(square::points, width, height));
+        camera.set_scale(scale_to_fit_all(square::points, width, height));
 
         render.set_camera(std::move(camera));
 
         render.draw_frame();
 
-        RenderLoop render_loop(window, render, render);
+        RenderLoop render_loop(window, render);
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();

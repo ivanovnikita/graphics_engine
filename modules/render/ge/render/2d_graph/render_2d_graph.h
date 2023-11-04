@@ -15,7 +15,7 @@
 
 namespace ge::graph
 {
-    class Render2dGraph final : public RenderBase, public WithCamera2dI
+    class Render2dGraph final : public RenderBase, public virtual Render2dI
     {
     public:
         explicit Render2dGraph(const SurfaceParams&, const Logger&);

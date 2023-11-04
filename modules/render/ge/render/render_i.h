@@ -23,4 +23,10 @@ namespace ge
         virtual const Camera2d& get_camera() const = 0;
         virtual void set_camera(Camera2d) = 0;
     };
+
+    class Render2dI : public virtual DrawableI, public WithCamera2dI
+    {
+    public:
+        virtual ~Render2dI();
+    };
 }

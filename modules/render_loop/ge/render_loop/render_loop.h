@@ -31,8 +31,7 @@ namespace ge
         explicit RenderLoop
         (
             WindowI&,
-            WithCamera2dI&,
-            DrawableI&
+            Render2dI&
         );
 
         bool stopped() const;
@@ -54,8 +53,7 @@ namespace ge
         void deactivate_state(InputState);
 
         WindowI& window_;
-        WithCamera2dI& render_camera_i;
-        DrawableI& render_draw_i;
+        Render2dI& render_;
         bool stopped_;
 
         Flags<InputState> active_states_;

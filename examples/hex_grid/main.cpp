@@ -222,7 +222,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         window.start_display();
 
-        RenderLoop render_loop(window, render, render);
+        RenderLoop render_loop(window, render);
 
         const CsHexFlat cs_hex_flat
         (

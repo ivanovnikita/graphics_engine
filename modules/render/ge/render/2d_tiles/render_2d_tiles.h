@@ -14,7 +14,7 @@
 
 namespace ge::tiles
 {
-    class Render2dTiles final : public RenderBase, public WithCamera2dI
+    class Render2dTiles final : public RenderBase, public virtual Render2dI
     {
     public:
         explicit Render2dTiles(const SurfaceParams&, const Logger&);
