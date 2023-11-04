@@ -83,16 +83,16 @@ namespace ge::image
                 .image_vertex = create_shader_module
                 (
                     *device_data_.logical_device,
-                    get_shader(ShaderName::line_2d_camera_Vertex)
+                    get_shader(ShaderName::tex_polygon_2d_camera_Vertex)
                 ),
                 .image_fragment = create_shader_module
                 (
                     *device_data_.logical_device,
-                    get_shader(ShaderName::simple_color_Fragment)
+                    get_shader(ShaderName::simple_texture_Fragment)
                 )
             }
         }
-        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_)}
+        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_, vk::Format::eB8G8R8A8Srgb)}
         , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
         , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
         , render_pass_{create_render_pass(*device_data_.logical_device, swapchain_data_.format)}
@@ -184,7 +184,7 @@ namespace ge::image
 
         surface_data_.extent = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
 
-        swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_);
+        swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_, vk::Format::eB8G8R8A8Srgb);
         image_pipeline_ = create_image_pipeline
         (
             device_data_,
@@ -229,7 +229,8 @@ namespace ge::image
             surface_data_.background_color,
             *image_pipeline_,
             *pipeline_layout_,
-            descriptor_sets_
+            descriptor_sets_,
+            *polygons_in_device_memory_
         );
     }
 

@@ -12,7 +12,8 @@ namespace ge
         static SwapchainData create_default
         (
             const DeviceData&,
-            SurfaceData&
+            SurfaceData&,
+            const vk::Format desiredFormat
         );
 
         void reset();

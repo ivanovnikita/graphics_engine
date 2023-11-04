@@ -14,6 +14,7 @@ namespace ge::tiles
         [line points: [[vec2; vec2], ...]]
         [triangle colors: [[u8vec; u8vec; u8vec], ...]]
         [line colors: [[u8vec; u8vec], ...]]
+        Цвет хранится отдельным блоком для возможности его быстрого изменения
     */
     struct PolygonsInDeviceMemory final
     {

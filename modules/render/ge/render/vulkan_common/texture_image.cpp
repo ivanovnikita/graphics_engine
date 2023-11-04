@@ -218,7 +218,7 @@ namespace ge
                 .setAspectMask(vk::ImageAspectFlagBits::eColor)
                 .setMipLevel(0)
                 .setBaseArrayLayer(0)
-                .setLayerCount(0);
+                .setLayerCount(1);
 
             const vk::BufferImageCopy region = vk::BufferImageCopy{}
                 .setBufferOffset(0)

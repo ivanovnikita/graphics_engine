@@ -57,22 +57,14 @@ namespace ge::image
         {
             for (const Polygons::Triangle& triangle : polygon.triangles)
             {
-                for (const size_t ind : triangle.inds)
+                for (const Polygons::TexturedVertex& vertex : triangle.vertices)
                 {
-                    std::memcpy(current_offset, &polygon.points[ind], sizeof(Vertex));
+                    std::memcpy(current_offset, &polygon.points[vertex.index], sizeof(Vertex));
                     current_offset += sizeof(Vertex);
-                }
-            }
-        }
-
-        for (const Polygons& polygon : polygons)
-        {
-            for (const Polygons::Triangle& triangle : polygon.triangles)
-            {
-                for (size_t i = 0; i < 3; ++i)
-                {
-                    std::memcpy(current_offset, &triangle.tex_coord, sizeof(TextureCoord));
+                    std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
                     current_offset += sizeof(TextureCoord);
+
+                    ++result.vertices_count;
                 }
             }
         }
@@ -100,8 +92,7 @@ namespace ge::image
         );
 
         result.buffer = std::move(device_buffer);
-        result.triangle_points_offset = 0;
-        result.texture_coords_offset = result.triangle_points_offset + triangle_points_memory_usage;
+        result.offset = 0;
 
         return result;
     }

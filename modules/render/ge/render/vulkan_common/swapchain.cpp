@@ -51,7 +51,8 @@ namespace ge
         vk::SurfaceFormatKHR choose_format
         (
             const vk::PhysicalDevice& physical_device,
-            const vk::SurfaceKHR& surface
+            const vk::SurfaceKHR& surface,
+            const vk::Format desiredFormat
         )
         {
             uint32_t formats_count = 0;
@@ -111,7 +112,7 @@ namespace ge
             if (formats.size() == 1 and formats.front().format == vk::Format::eUndefined)
             {
                 vk::SurfaceFormatKHR format;
-                format.format = vk::Format::eB8G8R8A8Unorm;
+                format.format = desiredFormat;
                 format.colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
                 return format;
             }
@@ -120,7 +121,7 @@ namespace ge
             {
                 if
                 (
-                    format.format == vk::Format::eB8G8R8A8Unorm
+                    format.format == desiredFormat
                     and format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear
                 )
                 {
@@ -371,7 +372,8 @@ namespace ge
     SwapchainData SwapchainData::create_default
     (
         const DeviceData& device_data,
-        SurfaceData& surface_data
+        SurfaceData& surface_data,
+        const vk::Format desiredFormat
     )
     {
         const vk::SurfaceCapabilitiesKHR surface_capabilities = get_surface_capabilities
@@ -384,7 +386,8 @@ namespace ge
         const vk::SurfaceFormatKHR format = choose_format
         (
             device_data.physical_device_data.physical_device,
-            *surface_data.surface
+            *surface_data.surface,
+            desiredFormat
         );
         const vk::Extent2D extent = choose_extent(surface_capabilities, surface_data.extent);
         surface_data.extent = extent;

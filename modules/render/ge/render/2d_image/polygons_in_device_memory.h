@@ -10,14 +10,14 @@ namespace ge::image
 {
     /*
         Polygons in memory:
-        [triangle points: [[vec2; vec2; vec2], ...]]
-        [texture coords: [[vec2; vec2; vec2], ...]]
+        [[triangle point; texture coord]:
+
+        [[[vec2; vec2]; [vec2; vec2]; [vec2; vec2]], ...]]
     */
     struct PolygonsInDeviceMemory final
     {
         BufferData buffer;
-        vk::DeviceSize triangle_points_offset;
-        vk::DeviceSize texture_coords_offset;
+        vk::DeviceSize offset;
         size_t vertices_count;
     };
 

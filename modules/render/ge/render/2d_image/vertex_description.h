@@ -6,13 +6,11 @@
 
 namespace ge::image
 {
-    constexpr size_t VERTEX_DESCRIPTION_COUNT = 2;
-
     // Vertex + Color
     std::array
     <
         vk::VertexInputBindingDescription,
-        VERTEX_DESCRIPTION_COUNT
+        1
     > get_vertex_binding_descriptions
     (
         const vk::PhysicalDeviceLimits&,
@@ -22,7 +20,7 @@ namespace ge::image
     std::array
     <
         vk::VertexInputAttributeDescription,
-        VERTEX_DESCRIPTION_COUNT
+        2
     > get_vertex_attribute_descriptions
     (
         const vk::PhysicalDeviceLimits&,

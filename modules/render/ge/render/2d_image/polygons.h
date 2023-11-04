@@ -12,10 +12,15 @@ namespace ge::image
 {
     struct Polygons final
     {
+        struct TexturedVertex final
+        {
+            size_t index;
+            TextureCoord tex_coord;
+        };
+
         struct Triangle final
         {
-            std::array<size_t, 3> inds;
-            TextureCoord tex_coord;
+            std::array<TexturedVertex, 3> vertices;
         };
 
         std::vector<Vertex> points;

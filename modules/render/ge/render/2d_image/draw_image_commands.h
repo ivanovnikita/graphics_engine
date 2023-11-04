@@ -1,5 +1,7 @@
 #pragma once
 
+#include "polygons_in_device_memory.h"
+
 #include <vulkan/vulkan.hpp>
 
 #include <span>
@@ -16,6 +18,7 @@ namespace ge::image
         const vk::ClearColorValue& background_color,
         const vk::Pipeline&,
         const vk::PipelineLayout&,
-        const std::span<const vk::UniqueDescriptorSet>
+        const std::span<const vk::UniqueDescriptorSet>,
+        const PolygonsInDeviceMemory&
     );
 }

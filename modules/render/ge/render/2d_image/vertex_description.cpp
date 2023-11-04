@@ -1,7 +1,7 @@
 #include "vertex_description.h"
 #include "ge/common/exception.h"
 #include "ge/render/vertex.h"
-#include "ge/render/color.h"
+#include "ge/render/texture_coord.h"
 
 namespace ge::image
 {
@@ -9,15 +9,14 @@ namespace ge::image
     std::array
     <
         vk::VertexInputBindingDescription,
-        VERTEX_DESCRIPTION_COUNT
+        1
     > get_vertex_binding_descriptions
     (
         const vk::PhysicalDeviceLimits& device_limits,
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_stride = sizeof(Vertex);
-        constexpr uint32_t color_stride = sizeof(Color);
+        constexpr uint32_t vertex_stride = sizeof(Vertex) + sizeof(TextureCoord);
 
         const auto validate_stride = [&device_limits, &logger]
         (
@@ -39,7 +38,6 @@ namespace ge::image
             }
         };
         validate_stride(vertex_stride);
-        validate_stride(color_stride);
 
         // All binding numbers must be distinct
         const std::array result
@@ -48,10 +46,6 @@ namespace ge::image
                 // привязка к команде bindVertexBuffers
                 .setBinding(0)
                 .setStride(vertex_stride)
-                .setInputRate(vk::VertexInputRate::eVertex)
-            , vk::VertexInputBindingDescription{}
-                .setBinding(1)
-                .setStride(color_stride)
                 .setInputRate(vk::VertexInputRate::eVertex)
         };
 
@@ -76,7 +70,7 @@ namespace ge::image
     std::array
     <
         vk::VertexInputAttributeDescription,
-        VERTEX_DESCRIPTION_COUNT
+        2
     > get_vertex_attribute_descriptions
     (
         const vk::PhysicalDeviceLimits& device_limits,
@@ -84,7 +78,7 @@ namespace ge::image
     )
     {
         constexpr uint32_t vertex_offset = offsetof(Vertex, pos);
-        constexpr uint32_t color_offset = offsetof(Color, color);
+        constexpr uint32_t tex_coord_offset = sizeof(Vertex);
 
         const auto validate_offset = [&device_limits, &logger]
         (
@@ -106,7 +100,7 @@ namespace ge::image
             }
         };
         validate_offset(vertex_offset);
-        validate_offset(color_offset);
+        validate_offset(tex_coord_offset);
 
         // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/chap39.html#_identification_of_formats
         // Every 'binding' here must be present in vertex_binding_description
@@ -132,10 +126,10 @@ namespace ge::image
 
                 .setOffset(vertex_offset) // Смещение от начала куска буфера, считанного для вершины
             , vk::VertexInputAttributeDescription{}
-                .setBinding(1)
+                .setBinding(0)
                 .setLocation(1)
-                .setFormat(vk::Format::eR32G32B32Sfloat)
-                .setOffset(color_offset)
+                .setFormat(vk::Format::eR32G32Sfloat)
+                .setOffset(tex_coord_offset)
         };
 
         if (result.size() > device_limits.maxVertexInputAttributes)

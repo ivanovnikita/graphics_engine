@@ -97,7 +97,7 @@ namespace ge::tiles
                 )
             }
         }
-        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_)}
+        , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_, vk::Format::eB8G8R8A8Unorm)}
         , uniform_buffers_{create_uniform_buffers(device_data_, swapchain_data_.images.size())}
         , descriptor_pool_{create_descriptor_pool(*device_data_.logical_device, swapchain_data_.images.size())}
         , descriptor_sets_
@@ -199,7 +199,7 @@ namespace ge::tiles
 
         surface_data_.extent = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
 
-        swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_);
+        swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_, vk::Format::eB8G8R8A8Unorm);
         triangles_pipeline_ = create_triangles_pipeline
         (
             device_data_,
