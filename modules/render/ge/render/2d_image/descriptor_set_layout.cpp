@@ -1,7 +1,7 @@
 #include "descriptor_set_layout.h"
 #include "ge/render/vulkan_common/create_descriptor_set_layout.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     // The descriptor layout specifies the types of resources that are going to be accessed by the pipeline,
     // just like a render pass specifies the types of attachments that will be accessed.

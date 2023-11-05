@@ -2,7 +2,7 @@
 #include "ge/render/vulkan_common/descriptor_set.h"
 #include "ge/render/camera/view_proj_2d.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<vk::UniqueDescriptorSet> create_descriptor_sets
     (

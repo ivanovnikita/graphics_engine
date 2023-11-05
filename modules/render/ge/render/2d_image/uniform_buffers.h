@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<BufferData> create_uniform_buffers
     (

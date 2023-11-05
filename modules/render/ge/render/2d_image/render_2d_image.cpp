@@ -11,7 +11,7 @@
 
 #include "generated_shaders.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     Render2dImage::Render2dImage(const SurfaceParams& surface_params, const Logger& logger)
         : RenderBase

@@ -14,8 +14,8 @@
 #include <thread>
 
 using C = ge::World2dCoords;
-using T = ge::image::Polygons::Triangle;
-using V = ge::image::Polygons::TexturedVertex;
+using T = ge::image2d::Polygons::Triangle;
+using V = ge::image2d::Polygons::TexturedVertex;
 
 
 namespace square
@@ -38,7 +38,7 @@ namespace square
 int main(int /*argc*/, char* /*argv*/[])
 {
     using namespace ge;
-    using namespace ge::image;
+    using namespace ge::image2d;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
     constexpr int override = 1;

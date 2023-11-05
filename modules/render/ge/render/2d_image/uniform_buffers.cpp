@@ -2,7 +2,7 @@
 #include "ge/render/camera/view_proj_2d.h"
 #include "ge/render/vulkan_common/uniform_buffers.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<BufferData> create_uniform_buffers
     (

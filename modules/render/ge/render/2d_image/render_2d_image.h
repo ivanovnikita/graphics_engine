@@ -14,7 +14,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::image
+namespace ge::image2d
 {
     class Render2dImage final : public RenderBase, public virtual Render2dI
     {

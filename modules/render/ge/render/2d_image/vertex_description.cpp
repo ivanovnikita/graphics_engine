@@ -3,7 +3,7 @@
 #include "ge/render/coords.h"
 #include "ge/render/texture_coord.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     // Описывает какой кусок данных нужно грузить для каждой вершины
     std::array

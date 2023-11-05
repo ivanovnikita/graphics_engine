@@ -6,7 +6,7 @@
 
 #include <span>
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<vk::UniqueCommandBuffer> draw_image_commands
     (

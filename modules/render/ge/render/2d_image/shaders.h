@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::image
+namespace ge::image2d
 {
     struct Shaders final
     {

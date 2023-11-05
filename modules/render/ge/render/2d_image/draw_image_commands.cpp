@@ -3,7 +3,7 @@
 
 #include "ge/common/safe_cast.hpp"
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<vk::UniqueCommandBuffer> draw_image_commands
     (

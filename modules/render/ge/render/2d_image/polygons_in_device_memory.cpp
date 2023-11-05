@@ -2,7 +2,7 @@
 
 #include "ge/common/safe_cast.hpp"
 
-namespace ge::image
+namespace ge::image2d
 {
     PolygonsInDeviceMemory load_polygons_to_device
     (

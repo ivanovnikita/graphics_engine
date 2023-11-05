@@ -7,7 +7,7 @@
 
 #include <span>
 
-namespace ge::image
+namespace ge::image2d
 {
     std::vector<vk::UniqueDescriptorSet> create_descriptor_sets
     (

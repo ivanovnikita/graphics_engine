@@ -8,7 +8,7 @@
 #include <array>
 #include <vector>
 
-namespace ge::image
+namespace ge::image2d
 {
     struct Polygons final
     {

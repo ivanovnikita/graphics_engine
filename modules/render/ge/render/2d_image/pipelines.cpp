@@ -2,7 +2,7 @@
 #include "vertex_description.h"
 #include "ge/render/vulkan_common/pipeline.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     namespace
     {

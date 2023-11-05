@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace ge::image
+namespace ge::image2d
 {
     vk::UniquePipeline create_image_pipeline
     (

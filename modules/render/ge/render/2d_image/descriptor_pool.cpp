@@ -1,7 +1,7 @@
 #include "descriptor_pool.h"
 #include "ge/render/vulkan_common/descriptor_pool.h"
 
-namespace ge::image
+namespace ge::image2d
 {
     vk::UniqueDescriptorPool create_descriptor_pool
     (
