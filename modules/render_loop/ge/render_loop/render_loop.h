@@ -2,8 +2,8 @@
 
 #include "ge/common/flags.hpp"
 #include "ge/render/render_i.h"
-#include "ge/render/camera_2d_mover.h"
 #include "ge/window/window_i.h"
+#include "ge/render/camera/camera_2d_mover.h"
 
 #include <optional>
 #include <functional>

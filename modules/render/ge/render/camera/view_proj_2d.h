@@ -1,6 +1,6 @@
 #pragma once
 
-#include "coords.h"
+#include "ge/render/coords.h"
 
 #include <glm/vec2.hpp>
 

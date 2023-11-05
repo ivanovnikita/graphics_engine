@@ -1,5 +1,5 @@
 #include "uniform_buffers.h"
-#include "ge/render/view_proj_2d.h"
+#include "ge/render/camera/view_proj_2d.h"
 #include "ge/render/vulkan_common/uniform_buffers.h"
 
 namespace ge::graph

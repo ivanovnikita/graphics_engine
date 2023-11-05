@@ -1,6 +1,6 @@
 #pragma once
 
-#include "camera_2d.h"
+#include "camera/camera_2d.h"
 
 #include <cstdint>
 

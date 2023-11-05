@@ -1,8 +1,9 @@
 #pragma once
 
-#include "coords.h"
-#include "extent.h"
 #include "view_proj_2d.h"
+
+#include "ge/render/coords.h"
+#include "ge/render/extent.h"
 
 #include "ge/window/surface_coords.h"
 

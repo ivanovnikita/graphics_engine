@@ -1,6 +1,6 @@
 #include "descriptor_set.h"
 #include "ge/render/vulkan_common/descriptor_set.h"
-#include "ge/render/view_proj_2d.h"
+#include "ge/render/camera/view_proj_2d.h"
 
 namespace ge::image
 {
