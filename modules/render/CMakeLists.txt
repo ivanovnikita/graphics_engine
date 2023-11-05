@@ -65,6 +65,7 @@ target_link_libraries(render
     PUBLIC
         GE::common
         GE::io
+        GE::window
         CONAN_PKG::glm
         CONAN_PKG::vulkan-headers
     PRIVATE
@@ -113,16 +114,6 @@ install(
     EXPORT
         GraphicsEngine
     DESTINATION lib
-)
-install(
-    FILES
-        ge/render/render_i.h
-        ge/render/vertex.h
-        ge/render/color.h
-        ge/render/2d_graph/2d_graph.h
-        ge/render/2d_graph/render_2d_graph.h
-    DESTINATION
-        include/ge/render
 )
 install(
     DIRECTORY

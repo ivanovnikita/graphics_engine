@@ -10,6 +10,26 @@
 
 namespace ge
 {
+    namespace world2d
+    {
+        struct MouseButtonPress final
+        {
+            World2dCoords pos;
+            MouseButton button;
+        };
+
+        struct MouseButtonRelease final
+        {
+            World2dCoords pos;
+            MouseButton button;
+        };
+
+        struct MouseMoveEvent final
+        {
+            World2dCoords pos;
+        };
+    }
+
     enum class InputState
     {
         CameraDragMove = 1
@@ -24,9 +44,9 @@ namespace ge
             Yes = 1
         };
 
-        using MouseButtonPressCallback = std::function<NeedRedraw(const MouseButtonPress&)>;
-        using MouseButtonReleaseCallback = std::function<NeedRedraw(const MouseButtonRelease&)>;
-        using MouseMoveCallback = std::function<NeedRedraw(const MouseMoveEvent&)>;
+        using MouseButtonPressCallback = std::function<NeedRedraw(const world2d::MouseButtonPress&)>;
+        using MouseButtonReleaseCallback = std::function<NeedRedraw(const world2d::MouseButtonRelease&)>;
+        using MouseMoveCallback = std::function<NeedRedraw(const world2d::MouseMoveEvent&)>;
 
         explicit RenderLoop
         (
@@ -42,9 +62,6 @@ namespace ge
         void set_mouse_move_callback(MouseMoveCallback);
 
     private:
-        using ProjVec2 = glm::vec2;
-        using ModelVec2 = glm::vec2;
-
         template <typename T>
         void handle_window_event(const T&);
 

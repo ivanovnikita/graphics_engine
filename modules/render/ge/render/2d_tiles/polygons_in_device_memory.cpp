@@ -12,7 +12,7 @@ namespace ge::tiles
         const std::span<const Polygons>& polygons
     )
     {
-        static_assert(sizeof(Vertex) == 2 * sizeof(float));
+        static_assert(sizeof(World2dCoords) == 2 * sizeof(float));
         static_assert(sizeof(Color) == 3 * sizeof(float));
 
         size_t triangle_points_memory_usage = 0;
@@ -25,9 +25,9 @@ namespace ge::tiles
         result.line_points_count = 0;
         for (const Polygons& polygon : polygons)
         {
-            triangle_points_memory_usage += 3 * sizeof(Vertex) * polygon.triangles.size();
+            triangle_points_memory_usage += 3 * sizeof(World2dCoords) * polygon.triangles.size();
             triangle_colors_memory_usage += 3 * sizeof(Color) * polygon.triangles.size();
-            line_points_memory_usage += 2 * sizeof(Vertex) * polygon.lines.size();
+            line_points_memory_usage += 2 * sizeof(World2dCoords) * polygon.lines.size();
             line_colors_memory_usage += 2 * sizeof(Color) * polygon.lines.size();
 
             result.triangle_points_count += 3 * polygon.triangles.size();
@@ -69,8 +69,8 @@ namespace ge::tiles
             {
                 for (const size_t ind : triangle.inds)
                 {
-                    std::memcpy(current_offset, &polygon.points[ind], sizeof(Vertex));
-                    current_offset += sizeof(Vertex);
+                    std::memcpy(current_offset, &polygon.points[ind], sizeof(World2dCoords));
+                    current_offset += sizeof(World2dCoords);
                 }
             }
         }
@@ -81,8 +81,8 @@ namespace ge::tiles
             {
                 for (const size_t ind : line.inds)
                 {
-                    std::memcpy(current_offset, &polygon.points[ind], sizeof(Vertex));
-                    current_offset += sizeof(Vertex);
+                    std::memcpy(current_offset, &polygon.points[ind], sizeof(World2dCoords));
+                    current_offset += sizeof(World2dCoords);
                 }
             }
         }

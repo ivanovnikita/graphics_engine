@@ -44,12 +44,3 @@ install(
         GraphicsEngine
     DESTINATION lib
 )
-install(
-    DIRECTORY
-        ge/io
-    DESTINATION
-        include/ge
-    FILES_MATCHING
-        PATTERN "*.h"
-        PATTERN "*.hpp"
-)

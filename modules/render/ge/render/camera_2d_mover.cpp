@@ -7,12 +7,12 @@ namespace ge
     {
     }
 
-    void Camera2dMover::zoom(const glm::vec2& zoom_point, const ZoomDirection zoom_direction)
+    void Camera2dMover::zoom(const SurfaceCoords& zoom_point, const ZoomDirection zoom_direction)
     {
         Camera2d camera = render_.get().get_camera();
 
-        const glm::vec2 normalized_event_pos = camera.normalize_in_proj_space(zoom_point);
-        const glm::vec2 model_space_event_pos = camera.proj_to_model_space(normalized_event_pos);
+        const SurfaceNormalizedCoords normalized_event_pos = camera.normalize(zoom_point);
+        const World2dCoords world_space_event_pos = camera.to_world_space(normalized_event_pos);
 
         constexpr float SCALE_STEP = 0.1f;
         float new_scale = camera.get_scale();
@@ -31,22 +31,25 @@ namespace ge
         }
         camera.set_scale(new_scale);
 
-        // We know that mouse cursor must save the same coords in model and projection space,
-        // so we jsut need to calculate new camera position.
-        const glm::vec2 new_camera_pos = model_space_event_pos -
-                (camera.proj_to_model_space(normalized_event_pos) - camera.get_pos());
+        // Mouse cursor must save the same coords in world and projection space,
+        // so we need to calculate new camera position.
+        const World2dCoords new_camera_pos
+        {
+            world_space_event_pos.coords -
+                (camera.to_world_space(normalized_event_pos).coords - camera.get_pos().coords)
+        };
         camera.set_pos(new_camera_pos);
 
         render_.get().set_camera(std::move(camera));
     }
 
-    void Camera2dMover::drag_move_start(const glm::vec2& drag_point)
+    void Camera2dMover::drag_move_start(const SurfaceCoords& drag_point)
     {
         const Camera2d& camera = render_.get().get_camera();
-        last_drag_point_ = camera.proj_to_model_space(camera.normalize_in_proj_space(drag_point));
+        last_drag_point_ = camera.to_world_space(camera.normalize(drag_point));
     }
 
-    void Camera2dMover::drag_move(const glm::vec2& drag_point)
+    void Camera2dMover::drag_move(const SurfaceCoords& drag_point)
     {
         if (not last_drag_point_.has_value())
         {
@@ -56,13 +59,13 @@ namespace ge
 
         Camera2d camera = render_.get().get_camera();
 
-        const glm::vec2 normalized_mouse_pos = camera.normalize_in_proj_space(drag_point);
-        const glm::vec2 mouse_pos = camera.proj_to_model_space(normalized_mouse_pos);
-        const glm::vec2 mouse_pos_delta = mouse_pos - *last_drag_point_;
+        const SurfaceNormalizedCoords normalized_mouse_pos = camera.normalize(drag_point);
+        const World2dCoords mouse_pos = camera.to_world_space(normalized_mouse_pos);
+        const World2dCoords mouse_pos_delta{mouse_pos.coords - last_drag_point_->coords};
 
-        camera.set_pos(camera.get_pos() - mouse_pos_delta);
+        camera.set_pos(World2dCoords{camera.get_pos().coords - mouse_pos_delta.coords});
 
-        last_drag_point_ = camera.proj_to_model_space(normalized_mouse_pos);
+        last_drag_point_ = camera.to_world_space(normalized_mouse_pos);
 
         render_.get().set_camera(std::move(camera));
     }

@@ -193,7 +193,7 @@ namespace ge
         template <ButtonEvent button_event>
         std::optional<WindowEvent> handle_mouse_button_event(const xcb_button_press_event_t& event) noexcept
         {
-            const glm::vec2 pos{event.event_x, event.event_y};
+            const SurfaceCoords pos{{event.event_x, event.event_y}};
             const ModifiersState modifiers{parse_modifiers(event.state)};
             const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
 
@@ -233,7 +233,7 @@ namespace ge
 
         WindowEvent handle_mouse_motion_event(const xcb_motion_notify_event_t& event) noexcept
         {
-            const glm::vec2 pos{event.event_x, event.event_y};
+            const SurfaceCoords pos{{event.event_x, event.event_y}};
             const ModifiersState modifiers{parse_modifiers(event.state)};
             const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
 
@@ -243,7 +243,7 @@ namespace ge
         template <CrossEvent cross_event>
         WindowEvent handle_cross_window_border_event(const xcb_enter_notify_event_t& event) noexcept
         {
-            const glm::vec2 pos{event.event_x, event.event_y};
+            const SurfaceCoords pos{{event.event_x, event.event_y}};
             const ModifiersState modifiers{parse_modifiers(event.state)};
             const EventTimestamp timestamp{std::chrono::milliseconds{event.time}};
 

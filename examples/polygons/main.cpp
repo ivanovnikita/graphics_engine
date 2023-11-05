@@ -12,7 +12,7 @@
 #include <span>
 #include <thread>
 
-using C = ge::Vertex;
+using C = ge::World2dCoords;
 using T = ge::tiles::Polygons::Triangle;
 using L = ge::tiles::Polygons::Line;
 using Cl = ge::Color;
@@ -48,7 +48,7 @@ namespace square
 
 namespace hex
 {
-    const std::vector<ge::Vertex> points
+    const std::vector<ge::World2dCoords> points
     {
         C{{0.f, 2.f}},
         C{{1.f, 0.f}},
@@ -126,30 +126,6 @@ namespace hex
 
 namespace
 {
-    glm::vec2 camera_on_center(const std::span<const ge::Vertex>& points)
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        return glm::vec2
-        {
-            (min_x + max_x) / 2.f
-          , (min_y + max_y) / 2.f
-        };
-    }
-
     ge::tiles::Polygons move_object
     (
         const ge::tiles::Polygons& x,
@@ -158,9 +134,9 @@ namespace
     {
         ge::tiles::Polygons result = x;
 
-        for (auto& vertex : result.points)
+        for (ge::World2dCoords& vertex : result.points)
         {
-            vertex.pos += offset;
+            vertex.coords += offset;
         }
 
         return result;
@@ -344,9 +320,8 @@ int main(int argc, char* /*argv*/[])
 
             render.set_object_to_draw(values);
 
-            const glm::vec2 camera_pos = camera_on_center(hex::points);
             Camera2d camera = render.get_camera();
-            camera.set_pos(camera_pos);
+            camera.camera_on_center(hex::points);
 
             camera.set_scale(1.f / 27.f);
 

@@ -83,7 +83,7 @@ namespace ge
         wait_idle(*device_data_.logical_device);
     }
 
-    void RenderBase::resize(const uint16_t new_surface_width, const uint16_t new_surface_height)
+    void RenderBase::resize(const Extent<uint32_t> new_surface_extent)
     {
         wait_idle(*device_data_.logical_device);
 
@@ -95,7 +95,9 @@ namespace ge
         framebuffers_.clear();
         swapchain_data_.reset();
 
-        surface_data_.extent = vk::Extent2D{}.setWidth(new_surface_width).setHeight(new_surface_height);
+        surface_data_.extent = vk::Extent2D{}
+            .setWidth(new_surface_extent.width)
+            .setHeight(new_surface_extent.height);
 
         swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_, desired_surface_format_);
         framebuffers_ = create_framebuffers

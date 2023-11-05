@@ -1,6 +1,6 @@
 #include "vertex_description.h"
 #include "ge/common/exception.h"
-#include "ge/render/vertex.h"
+#include "ge/render/coords.h"
 #include "ge/render/color.h"
 
 namespace ge::graph
@@ -16,7 +16,7 @@ namespace ge::graph
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_stride = sizeof(Vertex);
+        constexpr uint32_t vertex_stride = sizeof(World2dCoords);
         constexpr uint32_t color_stride = sizeof(Color);
 
         const auto validate_stride = [&device_limits, &logger]
@@ -83,7 +83,7 @@ namespace ge::graph
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_offset = offsetof(Vertex, pos);
+        constexpr uint32_t vertex_offset = offsetof(World2dCoords, coords);
         constexpr uint32_t color_offset = offsetof(Color, color);
 
         const auto validate_offset = [&device_limits, &logger]

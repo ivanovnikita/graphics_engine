@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ge/render/color.h"
-#include "ge/render/vertex.h"
+#include "ge/render/coords.h"
 
 #include <span>
 
@@ -24,7 +24,7 @@ namespace ge::graph
             Color color;
         };
 
-        std::span<const Vertex> points;
+        std::span<const World2dCoords> points;
 
         std::span<const Vertice> vertices;
         std::span<const Arc> arcs;

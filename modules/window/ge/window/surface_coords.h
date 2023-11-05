@@ -4,8 +4,8 @@
 
 namespace ge
 {
-    struct Vertex final
+    struct SurfaceCoords final
     {
-        glm::vec2 pos;
+        glm::vec2 coords;
     };
 }

@@ -1,6 +1,12 @@
 #pragma once
 
+#include "coords.h"
+#include "extent.h"
 #include "view_proj_2d.h"
+
+#include "ge/window/surface_coords.h"
+
+#include <span>
 
 namespace ge
 {
@@ -9,29 +15,29 @@ namespace ge
     public:
         explicit Camera2d
         (
-            glm::vec2 pos,
+            World2dCoords pos,
             float scale,
-            uint32_t surface_width,
-            uint32_t surface_height
-        );
+            Extent<uint32_t> surface_extent
+        ) noexcept;
 
-        glm::vec2 get_pos() const noexcept;
+        World2dCoords get_pos() const noexcept;
         float get_scale() const noexcept;
         const ViewProj2d& get_view_proj_2d() const noexcept;
-        uint32_t get_surface_width() const noexcept;
-        uint32_t get_surface_height() const noexcept;
+        Extent<uint32_t> get_surface_extent() const noexcept;
 
-        void set_pos(glm::vec2 pos) noexcept;
+        void set_pos(World2dCoords) noexcept;
         void set_scale(float) noexcept;
-        void set_surface_sizes(uint32_t width, uint32_t height) noexcept;
+        void set_surface_extent(Extent<uint32_t>) noexcept;
 
-        glm::vec2 normalize_in_proj_space(const glm::vec2&) const noexcept;
-        glm::vec2 proj_to_model_space(const glm::vec2&) const noexcept;
+        SurfaceNormalizedCoords normalize(const SurfaceCoords&) const noexcept;
+        World2dCoords to_world_space(const SurfaceNormalizedCoords&) const noexcept;
+
+        void camera_on_center(const std::span<const World2dCoords>&) noexcept;
+        void scale_to_fit_all(const std::span<const World2dCoords>&) noexcept;
 
     private:
         ViewProj2d transform_;
         float scale_;
-        uint32_t surface_width_;
-        uint32_t surface_height_;
+        Extent<uint32_t> surface_extent_;
     };
 }

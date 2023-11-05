@@ -36,7 +36,7 @@ namespace ge
     template <>
     void RenderLoop::handle_window_event(const WindowEventResize& event)
     {
-        render_.resize(event.new_size.width, event.new_size.height);
+        render_.resize(Extent<uint32_t>{.width = event.new_size.width, .height = event.new_size.height});
         need_redraw_= NeedRedraw::Yes;
     }
 
@@ -56,8 +56,11 @@ namespace ge
         if (mouse_press_callback_ != nullptr)
         {
             const Camera2d& camera = render_.get_camera();
-            MouseButtonPress event_model_space_pos = event;
-            event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
+            world2d::MouseButtonPress event_model_space_pos
+            {
+                .pos = camera.to_world_space(camera.normalize(event.pos)),
+                .button = event.button
+            };
             combine_need_redraw(mouse_press_callback_(event_model_space_pos));
         }
 
@@ -87,8 +90,11 @@ namespace ge
         if (mouse_release_callback_ != nullptr)
         {
             const Camera2d& camera = render_.get_camera();
-            MouseButtonRelease event_model_space_pos = event;
-            event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
+            world2d::MouseButtonRelease event_model_space_pos
+            {
+                .pos = camera.to_world_space(camera.normalize(event.pos)),
+                .button = event.button
+            };
             combine_need_redraw(mouse_release_callback_(event_model_space_pos));
         }
 
@@ -117,8 +123,10 @@ namespace ge
         if (mouse_move_callback_ != nullptr)
         {
             const Camera2d& camera = render_.get_camera();
-            MouseMoveEvent event_model_space_pos = event;
-            event_model_space_pos.pos = camera.proj_to_model_space(camera.normalize_in_proj_space(event.pos));
+            world2d::MouseMoveEvent event_model_space_pos
+            {
+                .pos = camera.to_world_space(camera.normalize(event.pos))
+            };
             combine_need_redraw(mouse_move_callback_(event_model_space_pos));
         }
 

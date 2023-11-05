@@ -1,6 +1,6 @@
 #include "vertex_description.h"
 #include "ge/common/exception.h"
-#include "ge/render/vertex.h"
+#include "ge/render/coords.h"
 #include "ge/render/texture_coord.h"
 
 namespace ge::image
@@ -16,7 +16,7 @@ namespace ge::image
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_stride = sizeof(Vertex) + sizeof(TextureCoord);
+        constexpr uint32_t vertex_stride = sizeof(World2dCoords) + sizeof(TextureCoord);
 
         const auto validate_stride = [&device_limits, &logger]
         (
@@ -77,8 +77,8 @@ namespace ge::image
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_offset = offsetof(Vertex, pos);
-        constexpr uint32_t tex_coord_offset = sizeof(Vertex);
+        constexpr uint32_t vertex_offset = offsetof(World2dCoords, coords);
+        constexpr uint32_t tex_coord_offset = sizeof(World2dCoords);
 
         const auto validate_offset = [&device_limits, &logger]
         (

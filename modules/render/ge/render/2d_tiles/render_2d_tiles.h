@@ -23,7 +23,7 @@ namespace ge::tiles
         const Camera2d& get_camera() const override;
         void set_camera(Camera2d) override;
 
-        void resize(const uint16_t new_surface_width, const uint16_t new_surface_height) override;
+        void resize(const Extent<uint32_t> new_surface_extent) override;
 
         void set_object_to_draw(const std::span<const Polygons>&);
 

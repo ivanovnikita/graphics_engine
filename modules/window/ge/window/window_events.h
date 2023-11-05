@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ge/window/window_size.h"
-
-#include <glm/vec2.hpp>
+#include "surface_coords.h"
+#include "window_size.h"
 
 #include <chrono>
 #include <optional>
@@ -71,7 +70,7 @@ namespace ge
     struct MouseButtonEvent final
     {
         ButtonType button;
-        glm::vec2 pos;
+        SurfaceCoords pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };
@@ -80,7 +79,7 @@ namespace ge
     struct MouseButtonEvent<ScrollButton, button_event> final
     {
         ScrollButton direction;
-        glm::vec2 pos;
+        SurfaceCoords pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };
@@ -91,7 +90,7 @@ namespace ge
 
     struct MouseMoveEvent final
     {
-        glm::vec2 pos;
+        SurfaceCoords pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };
@@ -105,7 +104,7 @@ namespace ge
     template <CrossEvent>
     struct MouseCrossWindowBorderEvent final
     {
-        glm::vec2 pos;
+        SurfaceCoords pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };

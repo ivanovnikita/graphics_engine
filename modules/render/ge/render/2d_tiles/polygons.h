@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ge/render/color.h"
-#include "ge/render/vertex.h"
+#include "ge/render/coords.h"
 
 #include <array>
 #include <vector>
@@ -22,7 +22,7 @@ namespace ge::tiles
             Color color;
         };
 
-        std::vector<Vertex> points;
+        std::vector<World2dCoords> points;
         std::vector<Triangle> triangles;
         std::vector<Line> lines;
     };

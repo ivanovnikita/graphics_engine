@@ -18,12 +18,12 @@ constexpr Cl GR{{0.5f, 0.5f, 0.5f}};
 
 namespace
 {
-    std::vector<std::vector<ge::Vertex>> read_points(const std::string_view& filepath)
+    std::vector<std::vector<ge::World2dCoords>> read_points(const std::string_view& filepath)
     {
         std::ifstream file;
         file.open(std::string{filepath}, std::ios::binary | std::ios::in);
 
-        std::vector<std::vector<ge::Vertex>> result;
+        std::vector<std::vector<ge::World2dCoords>> result;
 
         while (not file.eof() and not file.fail())
         {
@@ -35,7 +35,7 @@ namespace
                 continue;
             }
 
-            result.emplace_back(std::vector<ge::Vertex>{});
+            result.emplace_back(std::vector<ge::World2dCoords>{});
             for (size_t i = 0; i < size; i += 2)
             {
                 double x = 0;
@@ -44,7 +44,7 @@ namespace
                 file.read(reinterpret_cast<char*>(&x), sizeof(double));
                 file.read(reinterpret_cast<char*>(&y), sizeof(double));
 
-                result.back().emplace_back(ge::Vertex{glm::vec2{y, x}});
+                result.back().emplace_back(ge::World2dCoords{glm::vec2{y, x}});
             }
         }
 
@@ -53,7 +53,7 @@ namespace
         return result;
     }
 
-    std::vector<ge::graph::Graph::Vertice> init_vertices(const std::vector<ge::Vertex>& points)
+    std::vector<ge::graph::Graph::Vertice> init_vertices(const std::vector<ge::World2dCoords>& points)
     {
         std::vector<ge::graph::Graph::Vertice> result;
 
@@ -65,15 +65,15 @@ namespace
         return result;
     }
 
-    std::pair<std::vector<ge::Vertex>, std::vector<ge::graph::Graph::Arc>> init_arcs
+    std::pair<std::vector<ge::World2dCoords>, std::vector<ge::graph::Graph::Arc>> init_arcs
     (
-        const std::vector<std::vector<ge::Vertex>>& raw
+        const std::vector<std::vector<ge::World2dCoords>>& raw
     )
     {
-        std::vector<ge::Vertex> points;
+        std::vector<ge::World2dCoords> points;
         std::vector<ge::graph::Graph::Arc> arcs;
 
-        for (const std::vector<ge::Vertex>& road : raw)
+        for (const std::vector<ge::World2dCoords>& road : raw)
         {
             if (road.empty())
             {
@@ -91,68 +91,13 @@ namespace
         return {std::move(points), std::move(arcs)};
     }
 
-    glm::vec2 camera_on_center(const std::span<const ge::Vertex>& points)
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        return glm::vec2
-        {
-            (min_x + max_x) / 2.f
-          , (min_y + max_y) / 2.f
-        };
-    }
-
-    float scale_to_fit_all
-    (
-        const std::span<const ge::Vertex>& points,
-        const uint16_t window_width,
-        const uint16_t window_height
-    )
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        const float width_in_model_space = max_x - min_x;
-        const float height_in_model_space = max_y - min_y;
-
-        const float width_scale = width_in_model_space / static_cast<float>(window_width);
-        const float height_scale = height_in_model_space / static_cast<float>(window_height);
-
-        return std::min(width_scale, height_scale);
-    }
-
     namespace triangle
     {
         constexpr std::array points
         {
-            ge::Vertex{{0.f, 0.5f}}
-            , ge::Vertex{{-0.5f, -0.5f}}
-            , ge::Vertex{{0.5f, -0.5f}}
+            ge::World2dCoords{{0.f, 0.5f}}
+            , ge::World2dCoords{{-0.5f, -0.5f}}
+            , ge::World2dCoords{{0.5f, -0.5f}}
         };
         constexpr std::array vertices
         {
@@ -227,14 +172,15 @@ int main(int argc, char* argv[])
 
             render.set_object_to_draw(graph);
 
-            const glm::vec2 camera_pos = camera_on_center(triangle::points);
-            Camera2d camera{camera_pos, 1.f / 300.f, width, height};
+            Camera2d camera = render.get_camera();
+            camera.camera_on_center(triangle::points);
+            camera.set_scale(1.f / 300.f);
             render.set_camera(std::move(camera));
         }
         else
         {
             std::string_view graph_file_path{argv[1]};
-            const std::vector<std::vector<ge::Vertex>> raw_points = read_points(graph_file_path);
+            const std::vector<std::vector<World2dCoords>> raw_points = read_points(graph_file_path);
             auto [points, arcs] = init_arcs(raw_points);
 
             const std::vector<ge::graph::Graph::Vertice> vertices = init_vertices(points);
@@ -249,8 +195,9 @@ int main(int argc, char* argv[])
 
             render.set_object_to_draw(graph);
 
-            const glm::vec2 camera_pos = camera_on_center(points);
-            Camera2d camera{camera_pos, scale_to_fit_all(points, width, height), width, height};
+            Camera2d camera = render.get_camera();
+            camera.camera_on_center(points);
+            camera.scale_to_fit_all(points);
             render.set_camera(std::move(camera));
         }
 

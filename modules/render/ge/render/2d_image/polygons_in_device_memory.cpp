@@ -12,7 +12,7 @@ namespace ge::image
         const std::span<const Polygons>& polygons
     )
     {
-        static_assert(sizeof(Vertex) == 2 * sizeof(float));
+        static_assert(sizeof(World2dCoords) == 2 * sizeof(float));
         static_assert(sizeof(TextureCoord) == 2 * sizeof(float));
 
         size_t triangle_points_memory_usage = 0;
@@ -22,7 +22,7 @@ namespace ge::image
         result.vertices_count = 0;
         for (const Polygons& polygon : polygons)
         {
-            triangle_points_memory_usage += 3 * sizeof(Vertex) * polygon.triangles.size();
+            triangle_points_memory_usage += 3 * sizeof(World2dCoords) * polygon.triangles.size();
             texture_coords_memory_usage += 3 * sizeof(TextureCoord) * polygon.triangles.size();
         }
 
@@ -59,8 +59,8 @@ namespace ge::image
             {
                 for (const Polygons::TexturedVertex& vertex : triangle.vertices)
                 {
-                    std::memcpy(current_offset, &polygon.points[vertex.index], sizeof(Vertex));
-                    current_offset += sizeof(Vertex);
+                    std::memcpy(current_offset, &polygon.points[vertex.index], sizeof(World2dCoords));
+                    current_offset += sizeof(World2dCoords);
                     std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
                     current_offset += sizeof(TextureCoord);
 

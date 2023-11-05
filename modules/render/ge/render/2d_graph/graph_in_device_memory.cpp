@@ -12,11 +12,11 @@ namespace ge::graph
         const Graph& graph
     )
     {
-        static_assert(sizeof(Vertex) == 2 * sizeof(float));
+        static_assert(sizeof(World2dCoords) == 2 * sizeof(float));
         static_assert(sizeof(Color) == 3 * sizeof(float));
 
-        const size_t arc_points_memory_usage = sizeof(Vertex) * graph.arcs.size() * 2;
-        const size_t vertice_points_memory_usage = sizeof(Vertex) * graph.vertices.size();
+        const size_t arc_points_memory_usage = sizeof(World2dCoords) * graph.arcs.size() * 2;
+        const size_t vertice_points_memory_usage = sizeof(World2dCoords) * graph.vertices.size();
         const size_t arc_colors_memory_usage = sizeof(Color) * graph.arcs.size() * 2;
         const size_t vertice_colors_memory_usage = sizeof(Color) * graph.vertices.size();
 
@@ -51,17 +51,17 @@ namespace ge::graph
 
         for (const Graph::Arc& arc : graph.arcs)
         {
-            std::memcpy(current_offset, &graph.points[arc.index_from], sizeof(Vertex));
-            current_offset += sizeof(Vertex);
+            std::memcpy(current_offset, &graph.points[arc.index_from], sizeof(World2dCoords));
+            current_offset += sizeof(World2dCoords);
 
-            std::memcpy(current_offset, &graph.points[arc.index_to], sizeof(Vertex));
-            current_offset += sizeof(Vertex);
+            std::memcpy(current_offset, &graph.points[arc.index_to], sizeof(World2dCoords));
+            current_offset += sizeof(World2dCoords);
         }
 
         for (const Graph::Vertice& vertice : graph.vertices)
         {
-            std::memcpy(current_offset, &graph.points[vertice.index], sizeof(Vertex));
-            current_offset += sizeof(Vertex);
+            std::memcpy(current_offset, &graph.points[vertice.index], sizeof(World2dCoords));
+            current_offset += sizeof(World2dCoords);
         }
 
         for (const Graph::Arc& arc : graph.arcs)

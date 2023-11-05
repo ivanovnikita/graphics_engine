@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ge/render/vertex.h"
+#include "ge/render/coords.h"
 #include "ge/render/texture_coord.h"
 
 #include <glm/glm.hpp>
@@ -23,7 +23,7 @@ namespace ge::image
             std::array<TexturedVertex, 3> vertices;
         };
 
-        std::vector<Vertex> points;
+        std::vector<World2dCoords> points;
         std::vector<Triangle> triangles;
     };
 }

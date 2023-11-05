@@ -12,7 +12,7 @@ namespace ge
         virtual ~DrawableI();
 
         virtual void draw_frame() = 0;
-        virtual void resize(const uint16_t new_surface_width, const uint16_t new_surface_height) = 0;
+        virtual void resize(Extent<uint32_t> new_surface_extent) = 0;
     };
 
     class WithCamera2dI

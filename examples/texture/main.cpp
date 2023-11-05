@@ -13,7 +13,7 @@
 #include <span>
 #include <thread>
 
-using C = ge::Vertex;
+using C = ge::World2dCoords;
 using T = ge::image::Polygons::Triangle;
 using V = ge::image::Polygons::TexturedVertex;
 
@@ -35,64 +35,6 @@ namespace square
     };
 }
 
-namespace
-{
-    [[ maybe_unused ]] float scale_to_fit_all
-    (
-        const std::span<const ge::Vertex>& points,
-        const uint16_t window_width,
-        const uint16_t window_height
-    )
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        const float width_in_model_space = max_x - min_x;
-        const float height_in_model_space = max_y - min_y;
-
-        const float width_scale = width_in_model_space / static_cast<float>(window_width);
-        const float height_scale = height_in_model_space / static_cast<float>(window_height);
-
-        return std::min(width_scale, height_scale);
-    }
-
-    glm::vec2 camera_on_center(const std::span<const ge::Vertex>& points)
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        return glm::vec2
-        {
-            (min_x + max_x) / 2.f
-          , (min_y + max_y) / 2.f
-        };
-    }
-}
-
 int main(int /*argc*/, char* /*argv*/[])
 {
     using namespace ge;
@@ -111,7 +53,7 @@ int main(int /*argc*/, char* /*argv*/[])
             {
                 LogType::Error,
                 LogType::ErrorDetails,
-//                LogType::SystemInfo
+                LogType::SystemInfo
             }
         };
 
@@ -153,10 +95,9 @@ int main(int /*argc*/, char* /*argv*/[])
 
         render.set_object_to_draw(values, image);
 
-        const glm::vec2 camera_pos = camera_on_center(square::points);
         Camera2d camera = render.get_camera();
-        camera.set_pos(camera_pos);
-        camera.set_scale(scale_to_fit_all(square::points, width, height));
+        camera.camera_on_center(square::points);
+        camera.scale_to_fit_all(square::points);
 
         render.set_camera(std::move(camera));
 

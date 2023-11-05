@@ -25,9 +25,3 @@ install(
         GraphicsEngine
     DESTINATION lib
 )
-install(
-    FILES
-        ge/render_loop/render_loop.h
-    DESTINATION
-        include/ge/render_loop
-)

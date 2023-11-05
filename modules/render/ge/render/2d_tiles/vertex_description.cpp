@@ -93,7 +93,7 @@ namespace ge::tiles
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_stride = sizeof(Vertex);
+        constexpr uint32_t vertex_stride = sizeof(World2dCoords);
         constexpr uint32_t color_stride = sizeof(Color);
 
         const auto validate_stride = [&device_limits, &logger]
@@ -160,7 +160,7 @@ namespace ge::tiles
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_offset = offsetof(Vertex, pos);
+        constexpr uint32_t vertex_offset = offsetof(World2dCoords, coords);
         constexpr uint32_t color_offset = offsetof(Color, color);
 
         const auto validate_offset = [&device_limits, &logger]

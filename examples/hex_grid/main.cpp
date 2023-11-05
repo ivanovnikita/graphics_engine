@@ -15,7 +15,7 @@
 #include <span>
 #include <thread>
 
-using C = ge::Vertex;
+using C = ge::World2dCoords;
 using T = ge::tiles::Polygons::Triangle;
 using L = ge::tiles::Polygons::Line;
 using Cl = ge::Color;
@@ -31,7 +31,7 @@ namespace hex
     // https://www.redblobgames.com/grids/hexagons/#basics
     constexpr float hex_size_part = 1;
 
-    [[ maybe_unused ]] const std::vector<ge::Vertex> points_flat
+    [[ maybe_unused ]] const std::vector<ge::World2dCoords> points_flat
     {
         C{{-hex_size_part, 0.f}},
         C{{-hex_size_part / 2.f, std::sqrt(3.f) * (-hex_size_part / 2.f)}},
@@ -41,7 +41,7 @@ namespace hex
         C{{-hex_size_part / 2.f, std::sqrt(3.f) * (hex_size_part / 2.f)}},
     };
 
-    [[ maybe_unused ]] const std::vector<ge::Vertex> points_pointy
+    [[ maybe_unused ]] const std::vector<ge::World2dCoords> points_pointy
     {
         C{{0.f, -hex_size_part}},
         C{{std::sqrt(3.f) * (hex_size_part / 2.f), -hex_size_part / 2.f}},
@@ -94,30 +94,6 @@ namespace hex
 
 namespace
 {
-    glm::vec2 camera_on_center(const std::span<const ge::Vertex>& points)
-    {
-        float min_x = std::numeric_limits<float>::max();
-        float max_x = std::numeric_limits<float>::min();
-
-        float min_y = std::numeric_limits<float>::max();
-        float max_y = std::numeric_limits<float>::min();
-
-        for (const ge::Vertex& point : points)
-        {
-            min_x = std::min(min_x, point.pos.x);
-            max_x = std::max(max_x, point.pos.x);
-
-            min_y = std::min(min_y, point.pos.y);
-            max_y = std::max(max_y, point.pos.y);
-        }
-
-        return glm::vec2
-        {
-            (min_x + max_x) / 2.f
-          , (min_y + max_y) / 2.f
-        };
-    }
-
     ge::tiles::Polygons move_object
     (
         const ge::tiles::Polygons& x,
@@ -126,15 +102,15 @@ namespace
     {
         ge::tiles::Polygons result = x;
 
-        for (auto& vertex : result.points)
+        for (ge::World2dCoords& vertex : result.points)
         {
-            vertex.pos += offset;
+            vertex.coords += offset;
         }
 
         return result;
     }
 
-    std::string print_coords(const ge::HexCoordDoubledHeight& doubled, const glm::vec2& pixel)
+    std::string print_coords(const ge::HexCoordDoubledHeight& doubled, const ge::World2dCoords& coords)
     {
         using namespace ge;
 
@@ -145,13 +121,13 @@ namespace
         in << "doubled: " << doubled
             << " | offset: " << offset
             << " | axial: " << axial
-            << " | pixel: " << pixel;
+            << " | world: " << coords.coords;
 
         return in.str();
     }
 
     // TODO: rewrite copy-pasted code
-    std::string print_coords(const ge::HexCoordDoubledWidth& doubled, const glm::vec2& pixel)
+    std::string print_coords(const ge::HexCoordDoubledWidth& doubled, const ge::World2dCoords& coords)
     {
         using namespace ge;
 
@@ -162,7 +138,7 @@ namespace
         in << "doubled: " << doubled
             << " | offset: " << offset
             << " | axial: " << axial
-            << " | pixel: " << pixel;
+            << " | world: " << coords.coords;
 
         return in.str();
     }
@@ -228,15 +204,15 @@ int main(int /*argc*/, char* /*argv*/[])
         (
             2.f * hex::hex_size_part,
             static_cast<float>(std::sqrt(3) * hex::hex_size_part),
-            hex::points_flat[1].pos.x,
-            hex::points_flat[2].pos.x
+            hex::points_flat[1].coords.x,
+            hex::points_flat[2].coords.x
         );
         const CsHexPointy cs_hex_pointy
         (
             static_cast<float>(std::sqrt(3) * hex::hex_size_part),
             2.f * hex::hex_size_part,
-            hex::points_pointy[1].pos.y,
-            hex::points_pointy[2].pos.y
+            hex::points_pointy[1].coords.y,
+            hex::points_pointy[2].coords.y
         );
 
         std::optional<HexCoordDoubledHeight> prev_selected_hex_flat;
@@ -314,11 +290,11 @@ int main(int /*argc*/, char* /*argv*/[])
             &prev_selected_hex_flat,
             &fixed_grid_flat,
             &window
-        ] (const MouseMoveEvent& event)
+        ] (const world2d::MouseMoveEvent& event)
         {
             const HexCoordDoubledHeight selected_hex_pos = cs_hex_flat.to_hex_doubled_height
             (
-                Point2dF{event.pos.x, event.pos.y}
+                Point2dF{event.pos.coords.x, event.pos.coords.y}
             );
 
             window.set_window_title(print_coords(selected_hex_pos, event.pos));
@@ -347,11 +323,11 @@ int main(int /*argc*/, char* /*argv*/[])
             &prev_selected_hex_pointy,
             &fixed_grid_pointy,
             &window
-        ] (const MouseMoveEvent& event)
+        ] (const world2d::MouseMoveEvent& event)
         {
             const HexCoordDoubledWidth selected_hex_pos = cs_hex_pointy.to_hex_doubled_width
             (
-                Point2dF{event.pos.x, event.pos.y}
+                Point2dF{event.pos.coords.x, event.pos.coords.y}
             );
 
             window.set_window_title(print_coords(selected_hex_pos, event.pos));
@@ -380,7 +356,7 @@ int main(int /*argc*/, char* /*argv*/[])
             &cs_hex_pointy,
             &pressed_hex_flat,
             &pressed_hex_pointy
-        ] (const MouseButtonPress& e)
+        ] (const world2d::MouseButtonPress& e)
         {
             if (e.button != MouseButton::RIGHT)
             {
@@ -391,12 +367,12 @@ int main(int /*argc*/, char* /*argv*/[])
             {
             case HexCsType::Flat:
             {
-                pressed_hex_flat = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
+                pressed_hex_flat = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.coords.x, e.pos.coords.y});
                 break;
             }
             case HexCsType::Pointy:
             {
-                pressed_hex_pointy = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
+                pressed_hex_pointy = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.coords.x, e.pos.coords.y});
                 break;
             }
             }
@@ -421,7 +397,7 @@ int main(int /*argc*/, char* /*argv*/[])
             &draw_selected_hex_pointy,
             &selected_hex_flat,
             &selected_hex_pointy
-        ] (const MouseButtonRelease& e)
+        ] (const world2d::MouseButtonRelease& e)
         {
             if (e.button != MouseButton::RIGHT)
             {
@@ -434,7 +410,10 @@ int main(int /*argc*/, char* /*argv*/[])
             {
             case HexCsType::Flat:
             {
-                HexCoordDoubledHeight released_hex = cs_hex_flat.to_hex_doubled_height(Point2dF{e.pos.x, e.pos.y});
+                HexCoordDoubledHeight released_hex = cs_hex_flat.to_hex_doubled_height
+                (
+                    Point2dF{e.pos.coords.x, e.pos.coords.y}
+                );
                 if (pressed_hex_flat == released_hex)
                 {
                     if (prev_selected_hex_flat.has_value())
@@ -457,7 +436,10 @@ int main(int /*argc*/, char* /*argv*/[])
             }
             case HexCsType::Pointy:
             {
-                HexCoordDoubledWidth released_hex = cs_hex_pointy.to_hex_doubled_width(Point2dF{e.pos.x, e.pos.y});
+                HexCoordDoubledWidth released_hex = cs_hex_pointy.to_hex_doubled_width
+                (
+                    Point2dF{e.pos.coords.x, e.pos.coords.y}
+                );
                 if (pressed_hex_pointy == released_hex)
                 {
                     if (prev_selected_hex_pointy.has_value())
@@ -483,10 +465,8 @@ int main(int /*argc*/, char* /*argv*/[])
             return redraw;
         };
 
-        const glm::vec2 camera_pos = camera_on_center(hex::points_flat);
-
         Camera2d camera = render.get_camera();
-        camera.set_pos(camera_pos);
+        camera.camera_on_center(hex::points_flat);
         camera.set_scale(1.f / 27.f);
         render.set_camera(std::move(camera));
 
