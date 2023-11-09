@@ -4,7 +4,7 @@
 #include "ge/geometry/cs_hex_pointy.hpp"
 #include "ge/geometry/convert_between_flat_and_pointy.h"
 #include "ge/window/linux/window_xcb.h"
-#include "ge/render_loop/render_loop.h"
+#include "ge/render_loop/render_2d_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
 #include "vk_layer_path.h"
@@ -197,8 +197,8 @@ int main(int /*argc*/, char* /*argv*/[])
         );
 
         window.start_display();
-
-        RenderLoop render_loop(window, render);
+        
+        Render2dLoop render_loop(window, render);
 
         const CsHexFlat cs_hex_flat
         (
@@ -301,7 +301,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (selected_hex_pos == prev_selected_hex_flat)
             {
-                return RenderLoop::NeedRedraw::No;
+                return Render2dLoop::NeedRedraw::No;
             }
 
             prev_selected_hex_flat = selected_hex_pos;
@@ -310,8 +310,8 @@ int main(int /*argc*/, char* /*argv*/[])
             fixed_grid_flat.back() = move_object(selected_hex_flat, {pos.x, pos.y});
 
             render.set_object_to_draw(fixed_grid_flat);
-
-            return RenderLoop::NeedRedraw::Yes;
+            
+            return Render2dLoop::NeedRedraw::Yes;
         };
 
         // TODO: rewrite copy-pasted code
@@ -334,7 +334,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (selected_hex_pos == prev_selected_hex_pointy)
             {
-                return RenderLoop::NeedRedraw::No;
+                return Render2dLoop::NeedRedraw::No;
             }
 
             prev_selected_hex_pointy = selected_hex_pos;
@@ -343,8 +343,8 @@ int main(int /*argc*/, char* /*argv*/[])
             fixed_grid_pointy.back() = move_object(selected_hex_pointy, {pos.x, pos.y});
 
             render.set_object_to_draw(fixed_grid_pointy);
-
-            return RenderLoop::NeedRedraw::Yes;
+            
+            return Render2dLoop::NeedRedraw::Yes;
         };
 
         std::optional<HexCoordDoubledHeight> pressed_hex_flat;
@@ -360,7 +360,7 @@ int main(int /*argc*/, char* /*argv*/[])
         {
             if (e.button != MouseButton::RIGHT)
             {
-                return RenderLoop::NeedRedraw::No;
+                    return Render2dLoop::NeedRedraw::No;
             }
 
             switch (current_cs)
@@ -376,8 +376,8 @@ int main(int /*argc*/, char* /*argv*/[])
                 break;
             }
             }
-
-            return RenderLoop::NeedRedraw::No;
+            
+            return Render2dLoop::NeedRedraw::No;
         };
 
         const auto switch_cs_stop =
@@ -401,10 +401,10 @@ int main(int /*argc*/, char* /*argv*/[])
         {
             if (e.button != MouseButton::RIGHT)
             {
-                return RenderLoop::NeedRedraw::No;
+                    return Render2dLoop::NeedRedraw::No;
             }
-
-            RenderLoop::NeedRedraw redraw = RenderLoop::NeedRedraw::No;
+            
+            Render2dLoop::NeedRedraw redraw = Render2dLoop::NeedRedraw::No;
 
             switch (current_cs)
             {
@@ -429,7 +429,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     render.set_object_to_draw(fixed_grid_pointy);
                     render_loop.set_mouse_move_callback({draw_selected_hex_pointy});
                     current_cs = HexCsType::Pointy;
-                    redraw = RenderLoop::NeedRedraw::Yes;
+                    redraw = Render2dLoop::NeedRedraw::Yes;
                 }
                 pressed_hex_flat.reset();
                 break;
@@ -455,7 +455,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     render.set_object_to_draw(fixed_grid_flat);
                     render_loop.set_mouse_move_callback({draw_selected_hex_flat});
                     current_cs = HexCsType::Flat;
-                    redraw = RenderLoop::NeedRedraw::Yes;
+                    redraw = Render2dLoop::NeedRedraw::Yes;
                 }
                 pressed_hex_pointy.reset();
                 break;

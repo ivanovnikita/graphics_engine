@@ -3,7 +3,7 @@
 #include "ge/geometry/cs_square_flat.hpp"
 #include "ge/geometry/cs_square_pointy.hpp"
 #include "ge/window/linux/window_xcb.h"
-#include "ge/render_loop/render_loop.h"
+#include "ge/render_loop/render_2d_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
 #include "vk_layer_path.h"
@@ -160,7 +160,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         window.start_display();
 
-        RenderLoop render_loop(window, render);
+        Render2dLoop render_loop(window, render);
 
         const CsSquarePointy cs_square_pointy
         (
@@ -219,7 +219,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (selected_hex_pos == prev_selected_square_pointy)
             {
-                return RenderLoop::NeedRedraw::No;
+                return Render2dLoop::NeedRedraw::No;
             }
 
             prev_selected_square_pointy = selected_hex_pos;
@@ -229,7 +229,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             render.set_object_to_draw(fixed_grid_pointy);
 
-            return RenderLoop::NeedRedraw::Yes;
+            return Render2dLoop::NeedRedraw::Yes;
         };
 
         Camera2d camera = render.get_camera();

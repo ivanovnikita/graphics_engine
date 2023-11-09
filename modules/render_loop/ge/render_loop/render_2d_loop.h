@@ -35,7 +35,7 @@ namespace ge
         CameraDragMove = 1
     };
 
-    class RenderLoop final
+    class Render2dLoop final
     {
     public:
         enum class NeedRedraw : uint8_t
@@ -48,7 +48,7 @@ namespace ge
         using MouseButtonReleaseCallback = std::function<NeedRedraw(const world2d::MouseButtonRelease&)>;
         using MouseMoveCallback = std::function<NeedRedraw(const world2d::MouseMoveEvent&)>;
 
-        explicit RenderLoop
+        explicit Render2dLoop
         (
             WindowI&,
             Render2dI&

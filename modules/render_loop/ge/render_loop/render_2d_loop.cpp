@@ -1,4 +1,4 @@
-#include "render_loop.h"
+#include "render_2d_loop.h"
 
 namespace ge
 {
@@ -17,31 +17,31 @@ namespace ge
     }
 
     template <typename T>
-    void RenderLoop::handle_window_event(const T&)
+    void Render2dLoop::handle_window_event(const T&)
     {
     }
 
     template <>
-    void RenderLoop::handle_window_event(const WindowExposed&)
+    void Render2dLoop::handle_window_event(const WindowExposed&)
     {
         need_redraw_= NeedRedraw::Yes;
     }
 
     template <>
-    void RenderLoop::handle_window_event(const WindowEventClose&)
+    void Render2dLoop::handle_window_event(const WindowEventClose&)
     {
         stopped_ = true;
     }
 
     template <>
-    void RenderLoop::handle_window_event(const WindowEventResize& event)
+    void Render2dLoop::handle_window_event(const WindowEventResize& event)
     {
         render_.resize(Extent<uint32_t>{.width = event.new_size.width, .height = event.new_size.height});
         need_redraw_= NeedRedraw::Yes;
     }
 
     template <>
-    void RenderLoop::handle_window_event(const WheelEvent& event)
+    void Render2dLoop::handle_window_event(const WheelEvent& event)
     {
         camera_mover_.zoom(event.pos, map_zoom_direction(event.direction));
         need_redraw_= NeedRedraw::Yes;
@@ -50,7 +50,7 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseButtonPress& event)
+    void Render2dLoop::handle_window_event(const MouseButtonPress& event)
     {
         // TODO: rewrite copy-pasted code
         if (mouse_press_callback_ != nullptr)
@@ -84,7 +84,7 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseButtonRelease& event)
+    void Render2dLoop::handle_window_event(const MouseButtonRelease& event)
     {
         // TODO: rewrite copy-pasted code
         if (mouse_release_callback_ != nullptr)
@@ -117,7 +117,7 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseMoveEvent& event)
+    void Render2dLoop::handle_window_event(const MouseMoveEvent& event)
     {
         // TODO: rewrite copy-pasted code
         if (mouse_move_callback_ != nullptr)
@@ -138,17 +138,17 @@ namespace ge
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseEnterWindow&)
+    void Render2dLoop::handle_window_event(const MouseEnterWindow&)
     {
     }
 
     template <>
-    void RenderLoop::handle_window_event(const MouseLeaveWindow&)
+    void Render2dLoop::handle_window_event(const MouseLeaveWindow&)
     {
         deactivate_state(InputState::CameraDragMove);
     }
-
-    RenderLoop::RenderLoop
+    
+    Render2dLoop::Render2dLoop
     (
         WindowI& window,
         Render2dI& render
@@ -160,13 +160,13 @@ namespace ge
         , need_redraw_{NeedRedraw::No}
     {
     }
-
-    bool RenderLoop::stopped() const
+    
+    bool Render2dLoop::stopped() const
     {
         return stopped_;
     }
-
-    void RenderLoop::handle_window_events()
+    
+    void Render2dLoop::handle_window_events()
     {
         const std::vector<WindowEvent> events = window_.grab_events();
         for (const WindowEvent& event : events)
@@ -195,13 +195,13 @@ namespace ge
         }
         }
     }
-
-    void RenderLoop::combine_need_redraw(NeedRedraw v)
+    
+    void Render2dLoop::combine_need_redraw(NeedRedraw v)
     {
         need_redraw_ = static_cast<NeedRedraw>(static_cast<uint8_t>(need_redraw_) | static_cast<uint8_t>(v));
     }
-
-    void RenderLoop::deactivate_state(const InputState state)
+    
+    void Render2dLoop::deactivate_state(const InputState state)
     {
         switch (state)
         {
@@ -216,18 +216,18 @@ namespace ge
         }
         }
     }
-
-    void RenderLoop::set_mouse_press_callback(MouseButtonPressCallback callback)
+    
+    void Render2dLoop::set_mouse_press_callback(MouseButtonPressCallback callback)
     {
         mouse_press_callback_ = std::move(callback);
     }
-
-    void RenderLoop::set_mouse_release_callback(MouseButtonReleaseCallback callback)
+    
+    void Render2dLoop::set_mouse_release_callback(MouseButtonReleaseCallback callback)
     {
         mouse_release_callback_ = std::move(callback);
     }
-
-    void RenderLoop::set_mouse_move_callback(MouseMoveCallback callback)
+    
+    void Render2dLoop::set_mouse_move_callback(MouseMoveCallback callback)
     {
         mouse_move_callback_ = std::move(callback);
     }

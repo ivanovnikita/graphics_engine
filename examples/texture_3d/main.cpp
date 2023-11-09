@@ -1,8 +1,8 @@
-#include "ge/render/2d_image/render_2d_image.h"
+#include "ge/render/3d_image/render_3d_image.h"
 #include "ge/io/read_image.h"
 #include "ge/common/exception.h"
 #include "ge/window/linux/window_xcb.h"
-#include "ge/render_loop/render_2d_loop.h"
+#include "ge/render_loop/render_3d_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
 #include "vk_layer_path.h"
@@ -13,19 +13,19 @@
 #include <span>
 #include <thread>
 
-using C = ge::World2dCoords;
-using T = ge::image2d::Polygons::Triangle;
-using V = ge::image2d::Polygons::TexturedVertex;
+using C = ge::World3dCoords;
+using T = ge::image3d::Polygons::Triangle;
+using V = ge::image3d::Polygons::TexturedVertex;
 
 
 namespace square
 {
     [[ maybe_unused ]] constexpr std::array points
     {
-        C{{-0.5f, -0.5f}},
-        C{{0.5f, -0.5f}},
-        C{{0.5f, 0.5f}},
-        C{{-0.5f, 0.5f}},
+        C{{-0.5f, -0.5f, 0.f}},
+        C{{0.5f, -0.5f, 0.f}},
+        C{{0.5f, 0.5f, 0.f}},
+        C{{-0.5f, 0.5f, 0.f}},
     };
 
     [[ maybe_unused ]] constexpr std::array triangles
@@ -38,7 +38,7 @@ namespace square
 int main(int /*argc*/, char* /*argv*/[])
 {
     using namespace ge;
-    using namespace ge::image2d;
+    using namespace ge::image3d;
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
     constexpr int override = 1;
@@ -69,7 +69,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         auto window = WindowXCB(size, background_color, logger);
 
-        Render2dImage render
+        Render3dImage render
         (
             ge::SurfaceParams
             {
@@ -93,17 +93,16 @@ int main(int /*argc*/, char* /*argv*/[])
 
         const Image image = read_image("../res/dwarf_king.jpg");
 
-        render.set_object_to_draw(values, image);
+        render.set_object_to_draw(World3dCoords{{0.f, 0.f, 0.f}}, values, image);
 
-        Camera2d camera = render.get_camera();
-        camera.camera_on_center(square::points);
-        camera.scale_to_fit_all(square::points);
+        Camera3d camera = render.get_camera();
+        camera.set_pos(World3dCoords{{-2.f, -2.f, 2.f}});
 
         render.set_camera(std::move(camera));
 
         render.draw_frame();
 
-        Render2dLoop render_loop(window, render);
+        Render3dLoop render_loop{window, render};
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();

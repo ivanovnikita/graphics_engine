@@ -1,7 +1,7 @@
 #include "ge/render/2d_graph/render_2d_graph.h"
 #include "ge/common/exception.h"
 #include "ge/window/linux/window_xcb.h"
-#include "ge/render_loop/render_loop.h"
+#include "ge/render_loop/render_2d_loop.h"
 
 #ifdef GE_DEBUG_LAYERS_ENABLED
 #include "vk_layer_path.h"
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
         if (argc == 1)
         {
-            const ge::graph::Graph graph
+            const Graph graph
             {
                 triangle::points
               , triangle::vertices
@@ -183,9 +183,9 @@ int main(int argc, char* argv[])
             const std::vector<std::vector<World2dCoords>> raw_points = read_points(graph_file_path);
             auto [points, arcs] = init_arcs(raw_points);
 
-            const std::vector<ge::graph::Graph::Vertice> vertices = init_vertices(points);
+            const std::vector<Graph::Vertice> vertices = init_vertices(points);
 
-            const ge::graph::Graph graph
+            const Graph graph
             {
                 points,
                 vertices,
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 
         render.draw_frame();
 
-        ge::RenderLoop render_loop(window, render);
+        Render2dLoop render_loop(window, render);
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();
