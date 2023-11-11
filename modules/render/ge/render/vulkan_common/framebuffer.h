@@ -1,6 +1,7 @@
 #pragma once
 
 #include "swapchain.h"
+#include "depth_buffer.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -13,7 +14,8 @@ namespace ge
     (
         const vk::Device&,
         const vk::RenderPass&,
-        const vk::ImageView&,
+        const vk::ImageView& surface_image,
+        const vk::ImageView& depth_buffer,
         const vk::Extent2D&
     );
 
@@ -21,6 +23,7 @@ namespace ge
     (
         const vk::Device&,
         const vk::RenderPass&,
-        const SwapchainData&
+        const SwapchainData&,
+        const DepthBuffer&
     );
 }

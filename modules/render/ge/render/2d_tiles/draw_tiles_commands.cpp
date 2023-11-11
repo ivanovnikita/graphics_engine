@@ -33,7 +33,11 @@ namespace ge::tiles
         const vk::CommandBufferBeginInfo begin_info = vk::CommandBufferBeginInfo{}
             .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
 
-        const vk::ClearValue clear_color{background_color};
+        const std::array clear_values
+        {
+            vk::ClearValue{}.setColor(background_color),
+            vk::ClearValue{}.setDepthStencil({1.0f, 0})
+        };
 
         vk::RenderPassBeginInfo render_pass_info = vk::RenderPassBeginInfo{}
             .setRenderPass(render_pass)
@@ -43,8 +47,8 @@ namespace ge::tiles
                     .setOffset(vk::Offset2D{0, 0})
                     .setExtent(extent)
             )
-            .setClearValueCount(1)
-            .setPClearValues(&clear_color);
+            .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
+            .setPClearValues(clear_values.data());
 
         const std::array polygons_buffers{*polygons.buffer.buffer, *polygons.buffer.buffer};
         const std::array<vk::DeviceSize, 2> triangle_offsets
@@ -73,14 +77,6 @@ namespace ge::tiles
             render_pass_info.setFramebuffer(*framebuffers[i]);
             command_buffer.beginRenderPass(&render_pass_info, vk::SubpassContents::eInline);
 
-            command_buffer.bindVertexBuffers
-            (
-                first_binding,
-                binding_count,
-                polygons_buffers.data(),
-                triangle_offsets.data()
-            );
-
             // Each pipeline object can use up to maxBoundDescriptorSets (32)
             command_buffer.bindDescriptorSets
             (
@@ -91,6 +87,14 @@ namespace ge::tiles
                 &*descriptor_sets[i],
                 0, // dynamic offset count
                 nullptr // dynamic offsets
+            );
+
+            command_buffer.bindVertexBuffers
+            (
+                first_binding,
+                binding_count,
+                polygons_buffers.data(),
+                triangle_offsets.data()
             );
 
             command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, triangles_pipeline);
@@ -124,7 +128,6 @@ namespace ge::tiles
             // TODO: draw ui here
 
             command_buffer.endRenderPass();
-
 
             end(command_buffer);
         }

@@ -61,6 +61,8 @@ namespace ge::tiles
                 logger
             );
 
+            const bool depth_buffer_enabled = false;
+
             return create_pipeline_default
             (
                 *device_data.logical_device,
@@ -71,7 +73,8 @@ namespace ge::tiles
                 raster_info,
                 render_pass,
                 extent,
-                pipeline_layout
+                pipeline_layout,
+                depth_buffer_enabled
             );
         }
     }

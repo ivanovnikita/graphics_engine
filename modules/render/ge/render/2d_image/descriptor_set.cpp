@@ -33,7 +33,7 @@ namespace ge::image2d
 
             const vk::DescriptorImageInfo image_info = vk::DescriptorImageInfo{}
                 .setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
-                .setImageView(*texture_data.image_view)
+                .setImageView(*texture_data.image_data.image_view)
                 .setSampler(*texture_data.sampler);
 
             const std::array descriptor_writes

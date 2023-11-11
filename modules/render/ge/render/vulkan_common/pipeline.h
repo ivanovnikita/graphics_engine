@@ -16,6 +16,7 @@ namespace ge
         const vk::PipelineRasterizationStateCreateInfo,
         const vk::RenderPass&,
         const vk::Extent2D&,
-        const vk::PipelineLayout&
+        const vk::PipelineLayout&,
+        const bool depth_buffer_enabled
     );
 }

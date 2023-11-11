@@ -58,23 +58,42 @@ namespace ge
                 logger_
             )
         }
+        , image_available_semaphore_{create_semaphore(*device_data_.logical_device)}
+        , render_finished_semaphore_{create_semaphore(*device_data_.logical_device)}
+        , render_finished_fence_{create_fence(*device_data_.logical_device)}
+        , transfer_finished_fence_{create_fence(*device_data_.logical_device)}
+        , command_pool_{create_command_pool(device_data_)}
         , desired_surface_format_{desired_surface_format}
         , swapchain_data_{SwapchainData::create_default(device_data_, surface_data_, desired_surface_format_)}
-        , render_pass_{create_render_pass_default(*device_data_.logical_device, swapchain_data_.format)}
+        , depth_buffer_
+        {
+            DepthBuffer::create
+            (
+                device_data_,
+                Extent<size_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+                *command_pool_,
+                *transfer_finished_fence_
+            )
+        }
+        , render_pass_
+        {
+            create_render_pass_default
+            (
+                *device_data_.logical_device,
+                swapchain_data_.format,
+                depth_buffer_.format
+            )
+        }
         , framebuffers_
         {
             create_framebuffers
             (
                 *device_data_.logical_device,
                 *render_pass_,
-                swapchain_data_
+                swapchain_data_,
+                depth_buffer_
             )
         }
-        , image_available_semaphore_{create_semaphore(*device_data_.logical_device)}
-        , render_finished_semaphore_{create_semaphore(*device_data_.logical_device)}
-        , render_finished_fence_{create_fence(*device_data_.logical_device)}
-        , transfer_finished_fence_{create_fence(*device_data_.logical_device)}
-        , command_pool_{create_command_pool(device_data_)}
     {
     }
 
@@ -100,11 +119,19 @@ namespace ge
             .setHeight(new_surface_extent.height);
 
         swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_, desired_surface_format_);
+        depth_buffer_ = DepthBuffer::create
+        (
+            device_data_,
+            Extent<size_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+            *command_pool_,
+            *transfer_finished_fence_
+        );
         framebuffers_ = create_framebuffers
         (
             *device_data_.logical_device,
             *render_pass_,
-            swapchain_data_
+            swapchain_data_,
+            depth_buffer_
         );
 
         create_pipelines();

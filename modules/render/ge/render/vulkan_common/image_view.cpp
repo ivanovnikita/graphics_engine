@@ -7,11 +7,12 @@ namespace ge
     (
         const vk::Device& device,
         const vk::Image& image,
-        const vk::Format format
+        const vk::Format format,
+        const vk::ImageAspectFlags& aspect
     )
     {
         const vk::ImageSubresourceRange subresource_range = vk::ImageSubresourceRange{}
-            .setAspectMask(vk::ImageAspectFlagBits::eColor)
+            .setAspectMask(aspect)
             .setBaseMipLevel(0)
             .setLevelCount(1)
             .setBaseArrayLayer(0)
@@ -56,8 +57,9 @@ namespace ge
     std::vector<vk::UniqueImageView> create_image_views
     (
         const vk::Device& device,
-        const std::vector<vk::Image>& images,
-        const vk::Format format
+        const std::span<vk::Image>& images,
+        const vk::Format format,
+        const vk::ImageAspectFlags& aspect
     )
     {
         std::vector<vk::UniqueImageView> views;
@@ -72,7 +74,7 @@ namespace ge
 
         for (const vk::Image& image : images)
         {
-            views.emplace_back(create_image_view(device, image, format));
+            views.emplace_back(create_image_view(device, image, format, aspect));
         }
 
         return views;

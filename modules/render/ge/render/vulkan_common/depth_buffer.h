@@ -1,24 +1,23 @@
 #pragma once
 
+#include "device.h"
 #include "image.h"
-
-#include "ge/io/image.h"
 
 #include <vulkan/vulkan.hpp>
 
 namespace ge
 {
-    struct TextureImageData final
+    struct DepthBuffer final
     {
-        static TextureImageData create_from_image
+        static DepthBuffer create
         (
             const DeviceData&,
+            const Extent<size_t>&,
             const vk::CommandPool&,
-            const vk::Fence&,
-            const Image&
+            const vk::Fence&
         );
 
         ImageData image_data;
-        vk::UniqueSampler sampler;
+        vk::Format format;
     };
 }

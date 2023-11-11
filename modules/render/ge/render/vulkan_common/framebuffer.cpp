@@ -7,14 +7,21 @@ namespace ge
     (
         const vk::Device& device,
         const vk::RenderPass& render_pass,
-        const vk::ImageView& image_view,
+        const vk::ImageView& surface_image,
+        const vk::ImageView& depth_buffer,
         const vk::Extent2D& extent
     )
     {
-        const auto framebuffer_info = vk::FramebufferCreateInfo()
+        const std::array attachments
+        {
+            surface_image,
+            depth_buffer
+        };
+
+        const vk::FramebufferCreateInfo framebuffer_info = vk::FramebufferCreateInfo{}
             .setRenderPass(render_pass)
-            .setAttachmentCount(1)
-            .setPAttachments(&image_view)
+            .setAttachmentCount(static_cast<uint32_t>(attachments.size()))
+            .setPAttachments(attachments.data())
             .setWidth(extent.width)
             .setHeight(extent.height)
             .setLayers(1);
@@ -51,7 +58,8 @@ namespace ge
     (
         const vk::Device& device,
         const vk::RenderPass& render_pass,
-        const SwapchainData& swapchain_data
+        const SwapchainData& swapchain_data,
+        const DepthBuffer& depth_buffer
     )
     {
         std::vector<vk::UniqueFramebuffer> framebuffers;
@@ -73,6 +81,7 @@ namespace ge
                     device,
                     render_pass,
                     *image_view,
+                    *depth_buffer.image_data.image_view,
                     swapchain_data.extent
                 )
             );

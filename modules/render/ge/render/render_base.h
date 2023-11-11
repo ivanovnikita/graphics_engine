@@ -6,6 +6,7 @@
 #include "ge/render/vulkan_common/surface.h"
 #include "ge/render/vulkan_common/device.h"
 #include "ge/render/vulkan_common/swapchain.h"
+#include "ge/render/vulkan_common/depth_buffer.h"
 
 #include "ge/common/logger.hpp"
 
@@ -39,19 +40,19 @@ namespace ge
         SurfaceData surface_data_;
         DeviceData device_data_;
 
-        vk::Format desired_surface_format_;
-        SwapchainData swapchain_data_;
-
-        vk::UniqueRenderPass render_pass_;
-
-        std::vector<vk::UniqueFramebuffer> framebuffers_;
-
         vk::UniqueSemaphore image_available_semaphore_;
         vk::UniqueSemaphore render_finished_semaphore_;
         vk::UniqueFence render_finished_fence_;
         vk::UniqueFence transfer_finished_fence_;
 
         vk::UniqueCommandPool command_pool_;
+
+        vk::Format desired_surface_format_;
+        SwapchainData swapchain_data_;
+        DepthBuffer depth_buffer_;
+        vk::UniqueRenderPass render_pass_;
+
+        std::vector<vk::UniqueFramebuffer> framebuffers_;
 
         std::vector<vk::UniqueCommandBuffer> command_buffers_;
     };

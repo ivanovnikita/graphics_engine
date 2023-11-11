@@ -435,7 +435,8 @@ namespace ge
         (
             *device_data.logical_device,
             images,
-            format.format
+            format.format,
+            vk::ImageAspectFlagBits::eColor
         );
 
         return SwapchainData

@@ -69,6 +69,33 @@ namespace ge
                 .setPAttachments(&blend_attachment)
                 .setBlendConstants({{0.0f, 0.0f, 0.0f, 0.0f}});
         }
+
+        vk::PipelineDepthStencilStateCreateInfo get_depth_stencil_create_info
+        (
+            const bool depth_buffer_enabled
+        )
+        {
+            return vk::PipelineDepthStencilStateCreateInfo{}
+                .setDepthTestEnable
+                (
+                    depth_buffer_enabled
+                        ? VK_TRUE
+                        : VK_FALSE
+                )
+                .setDepthWriteEnable
+                (
+                    depth_buffer_enabled
+                        ? VK_TRUE
+                        : VK_FALSE
+                )
+                .setDepthCompareOp(vk::CompareOp::eLess)
+                .setDepthBoundsTestEnable(VK_FALSE)
+                .setMinDepthBounds(0.f)
+                .setMaxDepthBounds(1.f)
+                .setStencilTestEnable(VK_FALSE)
+                .setFront({})
+                .setBack({});
+        }
     }
 
     vk::UniquePipeline create_pipeline_default
@@ -81,7 +108,8 @@ namespace ge
         const vk::PipelineRasterizationStateCreateInfo raster_info,
         const vk::RenderPass& render_pass,
         const vk::Extent2D& extent,
-        const vk::PipelineLayout& pipeline_layout
+        const vk::PipelineLayout& pipeline_layout,
+        const bool depth_buffer_enabled
     )
     {
         const vk::Viewport viewport = get_viewport(extent);
@@ -92,6 +120,11 @@ namespace ge
 
         const vk::PipelineColorBlendAttachmentState blend_attachment = get_blend_attachment();
         const vk::PipelineColorBlendStateCreateInfo blend_state_info = get_blend_create_info(blend_attachment);
+
+        const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info = get_depth_stencil_create_info
+        (
+            depth_buffer_enabled
+        );
 
         const auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
             .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_descriptions.size()))
@@ -108,6 +141,7 @@ namespace ge
             .setPRasterizationState(&raster_info)
             .setPMultisampleState(&multisample_info)
             .setPColorBlendState(&blend_state_info)
+            .setPDepthStencilState(&depth_stencil_info)
             .setLayout(pipeline_layout)
             .setRenderPass(render_pass)
             .setSubpass(0);

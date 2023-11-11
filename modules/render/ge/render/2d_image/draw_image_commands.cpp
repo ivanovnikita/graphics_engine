@@ -32,7 +32,11 @@ namespace ge::image2d
         const vk::CommandBufferBeginInfo begin_info = vk::CommandBufferBeginInfo{}
             .setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
 
-        const vk::ClearValue clear_color{background_color};
+        const std::array clear_values
+        {
+            vk::ClearValue{}.setColor(background_color),
+            vk::ClearValue{}.setDepthStencil({1.0f, 0})
+        };
 
         vk::RenderPassBeginInfo render_pass_info = vk::RenderPassBeginInfo{}
             .setRenderPass(render_pass)
@@ -42,8 +46,8 @@ namespace ge::image2d
                     .setOffset(vk::Offset2D{0, 0})
                     .setExtent(extent)
             )
-            .setClearValueCount(1)
-            .setPClearValues(&clear_color);
+            .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
+            .setPClearValues(clear_values.data());
 
         const std::array polygons_buffers{*polygons.buffer.buffer};
         const std::array<vk::DeviceSize, 1> offsets
