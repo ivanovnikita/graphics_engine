@@ -57,9 +57,11 @@ namespace ge::image2d
         {
             for (const Polygons::Triangle& triangle : polygon.triangles)
             {
-                for (const Polygons::TexturedVertex& vertex : triangle.vertices)
+                for (const size_t ind : triangle.vertices)
                 {
-                    std::memcpy(current_offset, &polygon.points[vertex.index], sizeof(World2dCoords));
+                    const Polygons::TexturedVertex& vertex = polygon.vertices[ind];
+
+                    std::memcpy(current_offset, &vertex.coord, sizeof(World2dCoords));
                     current_offset += sizeof(World2dCoords);
                     std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
                     current_offset += sizeof(TextureCoord);

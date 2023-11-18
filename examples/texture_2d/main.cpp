@@ -20,7 +20,7 @@ using V = ge::image2d::Polygons::TexturedVertex;
 
 namespace square
 {
-    [[ maybe_unused ]] constexpr std::array points
+    constexpr std::array points
     {
         C{{-0.5f, -0.5f}},
         C{{0.5f, -0.5f}},
@@ -28,10 +28,18 @@ namespace square
         C{{-0.5f, 0.5f}},
     };
 
-    [[ maybe_unused ]] constexpr std::array triangles
+    constexpr std::array vertices
     {
-        T{{V{0, {0.f, 1.f}}, V{1, {1.f, 1.f}}, V{2, {1.f, 0.f}}}},
-        T{{V{2, {1.f, 0.f}}, V{3, {0.f, 0.f}}, V{0, {0.f, 1.f}}}},
+        V{points[0], {0.f, 1.f}},
+        V{points[1], {1.f, 1.f}},
+        V{points[2], {1.f, 0.f}},
+        V{points[3], {0.f, 0.f}},
+    };
+
+    constexpr std::array triangles
+    {
+        T{{0, 1, 2}},
+        T{{2, 3, 0}},
     };
 }
 
@@ -85,7 +93,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         const Polygons polygons
         {
-            {square::points.cbegin(), square::points.cend()},
+            {square::vertices.cbegin(), square::vertices.cend()},
             {square::triangles.cbegin(), square::triangles.cend()}
         };
 
