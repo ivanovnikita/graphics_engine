@@ -17,29 +17,28 @@ using C = ge::World3dCoords;
 using T = ge::image3d::Polygons::Triangle;
 using V = ge::image3d::Polygons::TexturedVertex;
 
-
 namespace square
 {
-    [[ maybe_unused ]] constexpr std::array points
+    constexpr std::array vertices
     {
-        C{{-0.5f, -0.5f, 0.f}},
-        C{{0.5f, -0.5f, 0.f}},
-        C{{0.5f, 0.5f, 0.f}},
-        C{{-0.5f, 0.5f, 0.f}},
+        V{C{{-0.5f, -0.5f, 0.f}}, {0.f, 1.f}},
+        V{C{{0.5f, -0.5f, 0.f}}, {1.f, 1.f}},
+        V{C{{0.5f, 0.5f, 0.f}}, {1.f, 0.f}},
+        V{C{{-0.5f, 0.5f, 0.f}}, {0.f, 0.f}},
 
-        C{{-0.5f, -0.5f, -0.5f}},
-        C{{0.5f, -0.5f, -0.5f}},
-        C{{0.5f, 0.5f, -0.5f}},
-        C{{-0.5f, 0.5f, -0.5f}},
+        V{C{{-0.5f, -0.5f, -0.5f}}, {0.f, 1.f}},
+        V{C{{0.5f, -0.5f, -0.5f}}, {1.f, 1.f}},
+        V{C{{0.5f, 0.5f, -0.5f}}, {1.f, 0.f}},
+        V{C{{-0.5f, 0.5f, -0.5f}}, {0.f, 0.f}},
     };
 
-    [[ maybe_unused ]] constexpr std::array triangles
+    constexpr std::array triangles
     {
-        T{{V{0, {0.f, 1.f}}, V{1, {1.f, 1.f}}, V{2, {1.f, 0.f}}}},
-        T{{V{2, {1.f, 0.f}}, V{3, {0.f, 0.f}}, V{0, {0.f, 1.f}}}},
+        T{{0, 1, 2}},
+        T{{2, 3, 0}},
 
-        T{{V{4, {0.f, 1.f}}, V{5, {1.f, 1.f}}, V{6, {1.f, 0.f}}}},
-        T{{V{6, {1.f, 0.f}}, V{7, {0.f, 0.f}}, V{4, {0.f, 1.f}}}},
+        T{{4, 5, 6}},
+        T{{6, 7, 4}},
     };
 }
 
@@ -93,7 +92,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
         const Polygons polygons
         {
-            {square::points.cbegin(), square::points.cend()},
+            {square::vertices.cbegin(), square::vertices.cend()},
             {square::triangles.cbegin(), square::triangles.cend()}
         };
 

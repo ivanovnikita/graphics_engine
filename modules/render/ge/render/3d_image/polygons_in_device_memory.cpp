@@ -57,9 +57,11 @@ namespace ge::image3d
         {
             for (const Polygons::Triangle& triangle : polygon.triangles)
             {
-                for (const Polygons::TexturedVertex& vertex : triangle.vertices)
+                for (const size_t ind : triangle.inds)
                 {
-                    std::memcpy(current_offset, &polygon.points[vertex.index], sizeof(World3dCoords));
+                    const Polygons::TexturedVertex& vertex = polygon.vertices[ind];
+
+                    std::memcpy(current_offset, &vertex.coord, sizeof(World3dCoords));
                     current_offset += sizeof(World3dCoords);
                     std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
                     current_offset += sizeof(TextureCoord);

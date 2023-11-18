@@ -14,16 +14,16 @@ namespace ge::image3d
     {
         struct TexturedVertex final
         {
-            size_t index;
+            World3dCoords coord;
             TextureCoord tex_coord;
         };
 
         struct Triangle final
         {
-            std::array<TexturedVertex, 3> vertices;
+            std::array<size_t, 3> inds;
         };
 
-        std::vector<World3dCoords> points;
+        std::vector<TexturedVertex> vertices;
         std::vector<Triangle> triangles;
     };
 }
