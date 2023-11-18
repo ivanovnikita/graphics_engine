@@ -16,9 +16,10 @@ namespace ge::image3d
     */
     struct PolygonsInDeviceMemory final
     {
-        BufferData buffer;
-        vk::DeviceSize offset;
+        BufferData vertex_buffer;
+        BufferData index_buffer;
         size_t vertices_count;
+        size_t indices_count;
     };
 
     PolygonsInDeviceMemory load_polygons_to_device

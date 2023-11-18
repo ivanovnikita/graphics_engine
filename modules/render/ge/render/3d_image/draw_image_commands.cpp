@@ -49,17 +49,15 @@ namespace ge::image3d
             .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
             .setPClearValues(clear_values.data());
 
-        const std::array polygons_buffers{*polygons.buffer.buffer};
-        const std::array<vk::DeviceSize, 1> offsets
-        {
-            polygons.offset
-        };
+        const std::array<vk::DeviceSize, 1> vertex_offsets{0};
         constexpr uint32_t first_binding{0};
-        constexpr uint32_t binding_count{polygons_buffers.size()};
+        constexpr uint32_t vertex_buffers_count{1};
 
         constexpr uint32_t instance_count{1};
         constexpr uint32_t first_vertex{0};
         constexpr uint32_t first_instance{0};
+        constexpr uint32_t first_index{0};
+        const vk::DeviceSize index_offset{0};
 
         for (size_t i = 0; i < command_buffers.size(); ++i)
         {
@@ -73,9 +71,15 @@ namespace ge::image3d
             command_buffer.bindVertexBuffers
             (
                 first_binding,
-                binding_count,
-                polygons_buffers.data(),
-                offsets.data()
+                vertex_buffers_count,
+                &*polygons.vertex_buffer.buffer,
+                vertex_offsets.data()
+            );
+            command_buffer.bindIndexBuffer
+            (
+                *polygons.index_buffer.buffer,
+                index_offset,
+                vk::IndexType::eUint32
             );
 
             // Each pipeline object can use up to maxBoundDescriptorSets (32)
@@ -92,10 +96,12 @@ namespace ge::image3d
 
             command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 
-            command_buffer.draw
+
+            command_buffer.drawIndexed
             (
-                safe_cast<uint32_t>(polygons.vertices_count),
+                safe_cast<uint32_t>(polygons.indices_count),
                 instance_count,
+                first_index,
                 first_vertex,
                 first_instance
             );

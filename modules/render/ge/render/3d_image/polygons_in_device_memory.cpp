@@ -15,72 +15,64 @@ namespace ge::image3d
         static_assert(sizeof(World3dCoords) == 3 * sizeof(float));
         static_assert(sizeof(TextureCoord) == 2 * sizeof(float));
 
-        size_t triangle_points_memory_usage = 0;
-        size_t texture_coords_memory_usage = 0;
+        size_t vertex_buffer_memory_usage = 0;
+        size_t index_buffer_memory_usage = 0;
 
         PolygonsInDeviceMemory result;
         result.vertices_count = 0;
+        result.indices_count = 0;
         for (const Polygons& polygon : polygons)
         {
-            triangle_points_memory_usage += 3 * sizeof(World3dCoords) * polygon.triangles.size();
-            texture_coords_memory_usage += 3 * sizeof(TextureCoord) * polygon.triangles.size();
+            vertex_buffer_memory_usage += (sizeof(World3dCoords) + sizeof(TextureCoord)) * polygon.vertices.size();
+            index_buffer_memory_usage += 3 * sizeof(uint32_t) * polygon.triangles.size();
         }
 
-        const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
-        (
-            triangle_points_memory_usage +
-            texture_coords_memory_usage
-        );
+        const vk::DeviceSize vertex_buffer_size = safe_cast<vk::DeviceSize>(vertex_buffer_memory_usage);
 
-        BufferData staging_buffer = BufferData::create_default
+        BufferData vertex_staging_buffer = BufferData::create_default
         (
             device_data,
             vk::BufferUsageFlagBits::eTransferSrc,
             vk::MemoryPropertyFlagBits::eHostVisible |
             vk::MemoryPropertyFlagBits::eHostCoherent,
-            buffer_size
+            vertex_buffer_size
         );
 
         constexpr vk::DeviceSize offset = 0;
-        void* const memory_start = map_memory
+        void* const vertex_memory_start = map_memory
         (
             *device_data.logical_device,
-            *staging_buffer.device_memory,
+            *vertex_staging_buffer.device_memory,
             offset,
-            buffer_size,
+            vertex_buffer_size,
             vk::MemoryMapFlags{}
         );
 
-        uint8_t* current_offset = static_cast<uint8_t*>(memory_start);
+        uint8_t* current_offset = static_cast<uint8_t*>(vertex_memory_start);
 
         for (const Polygons& polygon : polygons)
         {
-            for (const Polygons::Triangle& triangle : polygon.triangles)
+            for (const Polygons::TexturedVertex& vertex : polygon.vertices)
             {
-                for (const size_t ind : triangle.inds)
-                {
-                    const Polygons::TexturedVertex& vertex = polygon.vertices[ind];
+                std::memcpy(current_offset, &vertex.coord, sizeof(World3dCoords));
+                current_offset += sizeof(World3dCoords);
+                std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
+                current_offset += sizeof(TextureCoord);
 
-                    std::memcpy(current_offset, &vertex.coord, sizeof(World3dCoords));
-                    current_offset += sizeof(World3dCoords);
-                    std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
-                    current_offset += sizeof(TextureCoord);
-
-                    ++result.vertices_count;
-                }
+                ++result.vertices_count;
             }
         }
 
-        assert(current_offset == static_cast<uint8_t*>(memory_start) + buffer_size);
+        assert(current_offset == static_cast<uint8_t*>(vertex_memory_start) + vertex_buffer_size);
 
-        device_data.logical_device->unmapMemory(*staging_buffer.device_memory);
+        device_data.logical_device->unmapMemory(*vertex_staging_buffer.device_memory);
 
-        BufferData device_buffer = BufferData::create_default
+        BufferData vertex_device_buffer = BufferData::create_default
         (
             device_data,
             vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
-            buffer_size
+            vertex_buffer_size
         );
 
         copy_buffer
@@ -88,13 +80,73 @@ namespace ge::image3d
             device_data
             , command_pool
             , transfer_finished
-            , *staging_buffer.buffer
-            , *device_buffer.buffer
-            , buffer_size
+            , *vertex_staging_buffer.buffer
+            , *vertex_device_buffer.buffer
+            , vertex_buffer_size
         );
 
-        result.buffer = std::move(device_buffer);
-        result.offset = 0;
+        result.vertex_buffer = std::move(vertex_device_buffer);
+
+        const vk::DeviceSize index_buffer_size = safe_cast<vk::DeviceSize>(index_buffer_memory_usage);
+
+        BufferData index_staging_buffer = BufferData::create_default
+        (
+            device_data,
+            vk::BufferUsageFlagBits::eTransferSrc,
+            vk::MemoryPropertyFlagBits::eHostVisible |
+            vk::MemoryPropertyFlagBits::eHostCoherent,
+            index_buffer_size
+        );
+
+        void* const index_memory_start = map_memory
+        (
+            *device_data.logical_device,
+            *index_staging_buffer.device_memory,
+            offset,
+            index_buffer_size,
+            vk::MemoryMapFlags{}
+        );
+
+        current_offset = static_cast<uint8_t*>(index_memory_start);
+
+        for (const Polygons& polygon : polygons)
+        {
+            for (const Polygons::Triangle& triangle : polygon.triangles)
+            {
+                for (const size_t ind : triangle.inds)
+                {
+                    const uint32_t i = static_cast<uint32_t>(ind);
+                    std::memcpy(current_offset, &i, sizeof(uint32_t));
+                    current_offset += sizeof(uint32_t);
+
+                    ++result.indices_count;
+                }
+            }
+        }
+
+        assert(current_offset == static_cast<uint8_t*>(index_memory_start) + index_buffer_size);
+
+        device_data.logical_device->unmapMemory(*index_staging_buffer.device_memory);
+
+        BufferData index_device_buffer = BufferData::create_default
+        (
+            device_data,
+            vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
+            vk::MemoryPropertyFlagBits::eDeviceLocal,
+            index_buffer_size
+        );
+
+        copy_buffer
+        (
+            device_data
+            , command_pool
+            , transfer_finished
+            , *index_staging_buffer.buffer
+            , *index_device_buffer.buffer
+            , index_buffer_size
+        );
+
+        result.index_buffer = std::move(index_device_buffer);
 
         return result;
     }
