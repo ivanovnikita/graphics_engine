@@ -3,13 +3,14 @@
 #include "ge/geometry/texture_coords.h"
 #include "ge/geometry/world_3d_coords.h"
 
-#include <glm/glm.hpp>
+#include "ge/io/model.h"
 
 #include <array>
 #include <vector>
 
 namespace ge::image3d
 {
+    // TODO: use Model instead?
     struct Polygons final
     {
         struct TexturedVertex final
@@ -26,4 +27,6 @@ namespace ge::image3d
         std::vector<TexturedVertex> vertices;
         std::vector<Triangle> triangles;
     };
+
+    Polygons from_model(const Model&);
 }

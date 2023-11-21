@@ -35,33 +35,36 @@ namespace ge
                 GE_THROW_EXPECTED_ERROR("Wrong number of triangle vertices");
             }
 
+            TriangleIndexed triangle;
+            size_t i = 0;
+
             for (const tinyobj::index_t& index : shape.mesh.indices)
             {
-                TriangleIndexed triangle;
+                triangle.inds[i] = vertices.size();
 
-                for (size_t i = 0; i < 3; ++i)
+                Vertex vertex{};
+
+                vertex.world_coords.coords =
                 {
-                    triangle.inds[i] = vertices.size();
+                    attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 0],
+                    attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 1],
+                    attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 2]
+                };
 
-                    Vertex vertex{};
+                vertex.texture_coords.coords =
+                {
+                    attrib.texcoords[2 * safe_cast<size_t>(index.texcoord_index) + 0],
+                    1.0f - attrib.texcoords[2 * safe_cast<size_t>(index.texcoord_index) + 1]
+                };
 
-                    vertex.world_coords.coords =
-                    {
-                        attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 0],
-                        attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 1],
-                        attrib.vertices[3 * safe_cast<size_t>(index.vertex_index) + 2]
-                    };
+                vertices.push_back(std::move(vertex));
 
-                    vertex.texture_coords.coords =
-                    {
-                        attrib.texcoords[2 * safe_cast<size_t>(index.texcoord_index) + 0],
-                        attrib.texcoords[2 * safe_cast<size_t>(index.texcoord_index) + 1]
-                    };
-
-                    vertices.push_back(std::move(vertex));
+                ++i;
+                if (i == 3)
+                {
+                    triangles.emplace_back(std::move(triangle));
+                    i = 0;
                 }
-
-                triangles.emplace_back(std::move(triangle));
             }
         }
 

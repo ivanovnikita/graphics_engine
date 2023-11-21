@@ -1,5 +1,6 @@
 #include "ge/render/3d_image/render_3d_image.h"
 #include "ge/io/read_image.h"
+#include "ge/io/read_model.h"
 #include "ge/common/exception.h"
 #include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_3d_loop.h"
@@ -19,7 +20,7 @@ using V = ge::image3d::Polygons::TexturedVertex;
 
 namespace square
 {
-    constexpr std::array vertices
+    [[ maybe_unused ]] constexpr std::array vertices
     {
         V{C{{-0.5f, -0.5f, 0.f}}, {{0.f, 1.f}}},
         V{C{{0.5f, -0.5f, 0.f}}, {{1.f, 1.f}}},
@@ -32,7 +33,7 @@ namespace square
         V{C{{-0.5f, 0.5f, -0.5f}}, {{0.f, 0.f}}},
     };
 
-    constexpr std::array triangles
+    [[ maybe_unused ]] constexpr std::array triangles
     {
         T{{0, 1, 2}},
         T{{2, 3, 0}},
@@ -90,22 +91,38 @@ int main(int /*argc*/, char* /*argv*/[])
 
         window.start_display();
 
-        const Polygons polygons
+        std::array<Polygons, 1> models;
+        std::optional<Image> texture;
+
+        const bool draw_square = false;
+        const bool draw_model = true;
+
+        if (draw_square)
         {
-            {square::vertices.cbegin(), square::vertices.cend()},
-            {square::triangles.cbegin(), square::triangles.cend()}
-        };
+            models[0] = Polygons
+            {
+                {square::vertices.cbegin(), square::vertices.cend()},
+                {square::triangles.cbegin(), square::triangles.cend()}
+            };
+            texture.emplace(read_image("../res/dwarf_king.jpg"));
 
-        const std::array values{polygons};
+            Camera3d camera = render.get_camera();
+            camera.set_pos(World3dCoords{{-2.f, -2.f, 2.f}});
+            render.set_camera(std::move(camera));
+        }
+        else if (draw_model)
+        {
+            models[0] = from_model(read_model_obj("../res/viking_room.obj"));
+            texture.emplace(read_image("../res/viking_room.png"));
 
-        const Image image = read_image("../res/dwarf_king.jpg");
+            Camera3d camera = render.get_camera();
+            camera.set_pos(World3dCoords{{2.f, 2.f, 2.f}});
+            render.set_camera(std::move(camera));
+        }
 
-        render.set_object_to_draw(World3dCoords{{0.f, 0.f, 0.f}}, values, image);
+        assert(texture.has_value());
 
-        Camera3d camera = render.get_camera();
-        camera.set_pos(World3dCoords{{-2.f, -2.f, 2.f}});
-
-        render.set_camera(std::move(camera));
+        render.set_object_to_draw(World3dCoords{{0.f, 0.f, 0.f}}, models, *texture);
 
         render.draw_frame();
 
@@ -113,6 +130,7 @@ int main(int /*argc*/, char* /*argv*/[])
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();
+            render.draw_frame();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
