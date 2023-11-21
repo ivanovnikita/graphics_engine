@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ge/render/coords.h"
-#include "ge/render/texture_coord.h"
+#include "ge/geometry/texture_coords.h"
+#include "ge/geometry/world_2d_coords.h"
 
 #include <glm/glm.hpp>
 
@@ -15,7 +15,7 @@ namespace ge::image2d
         struct TexturedVertex final
         {
             World2dCoords coord;
-            TextureCoord tex_coord;
+            TextureCoords tex_coord;
         };
 
         struct Triangle final

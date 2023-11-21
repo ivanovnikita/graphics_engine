@@ -2,8 +2,9 @@
 
 #include "mvp_3d.h"
 
-#include "ge/render/coords.h"
 #include "ge/render/extent.h"
+
+#include "ge/geometry/world_3d_coords.h"
 
 namespace ge
 {

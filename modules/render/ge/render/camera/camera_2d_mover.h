@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ge/render/coords.h"
 #include "ge/render/render_i.h"
 
 #include <glm/glm.hpp>

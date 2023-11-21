@@ -30,10 +30,10 @@ namespace square
 
     constexpr std::array vertices
     {
-        V{points[0], {0.f, 1.f}},
-        V{points[1], {1.f, 1.f}},
-        V{points[2], {1.f, 0.f}},
-        V{points[3], {0.f, 0.f}},
+        V{points[0], {{0.f, 1.f}}},
+        V{points[1], {{1.f, 1.f}}},
+        V{points[2], {{1.f, 0.f}}},
+        V{points[3], {{0.f, 0.f}}},
     };
 
     constexpr std::array triangles

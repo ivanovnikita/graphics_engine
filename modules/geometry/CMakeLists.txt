@@ -9,6 +9,10 @@ target_include_directories(geometry
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(geometry
+    PUBLIC
+        CONAN_PKG::glm
+)
 add_library(GE::geometry ALIAS geometry)
 define_source_group(geometry)
 

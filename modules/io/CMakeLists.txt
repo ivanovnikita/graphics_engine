@@ -12,8 +12,10 @@ target_include_directories(io
 target_link_libraries(io
     PUBLIC
         GE::common
+        GE::geometry
     PRIVATE
         CONAN_PKG::stb
+        CONAN_PKG::tinyobjloader
 )
 
 add_library(GE::io ALIAS io)

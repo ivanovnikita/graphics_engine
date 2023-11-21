@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ge/render/coords.h"
-#include "ge/render/texture_coord.h"
+#include "ge/geometry/texture_coords.h"
+#include "ge/geometry/world_3d_coords.h"
 
 #include <glm/glm.hpp>
 
@@ -14,8 +14,8 @@ namespace ge::image3d
     {
         struct TexturedVertex final
         {
-            World3dCoords coord;
-            TextureCoord tex_coord;
+            World3dCoords world_coords;
+            TextureCoords texture_coords;
         };
 
         struct Triangle final

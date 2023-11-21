@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ge/render/color.h"
-#include "ge/render/coords.h"
+
+#include "ge/geometry/world_2d_coords.h"
 
 #include <array>
 #include <vector>

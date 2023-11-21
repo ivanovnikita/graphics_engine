@@ -13,7 +13,7 @@ namespace ge::image3d
     )
     {
         static_assert(sizeof(World3dCoords) == 3 * sizeof(float));
-        static_assert(sizeof(TextureCoord) == 2 * sizeof(float));
+        static_assert(sizeof(TextureCoords) == 2 * sizeof(float));
 
         size_t vertex_buffer_memory_usage = 0;
         size_t index_buffer_memory_usage = 0;
@@ -23,7 +23,7 @@ namespace ge::image3d
         result.indices_count = 0;
         for (const Polygons& polygon : polygons)
         {
-            vertex_buffer_memory_usage += (sizeof(World3dCoords) + sizeof(TextureCoord)) * polygon.vertices.size();
+            vertex_buffer_memory_usage += (sizeof(World3dCoords) + sizeof(TextureCoords)) * polygon.vertices.size();
             index_buffer_memory_usage += 3 * sizeof(uint32_t) * polygon.triangles.size();
         }
 
@@ -54,10 +54,10 @@ namespace ge::image3d
         {
             for (const Polygons::TexturedVertex& vertex : polygon.vertices)
             {
-                std::memcpy(current_offset, &vertex.coord, sizeof(World3dCoords));
+                std::memcpy(current_offset, &vertex.world_coords, sizeof(World3dCoords));
                 current_offset += sizeof(World3dCoords);
-                std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
-                current_offset += sizeof(TextureCoord);
+                std::memcpy(current_offset, &vertex.texture_coords, sizeof(TextureCoords));
+                current_offset += sizeof(TextureCoords);
 
                 ++result.vertices_count;
             }

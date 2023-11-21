@@ -13,7 +13,7 @@ namespace ge::image2d
     )
     {
         static_assert(sizeof(World2dCoords) == 2 * sizeof(float));
-        static_assert(sizeof(TextureCoord) == 2 * sizeof(float));
+        static_assert(sizeof(TextureCoords) == 2 * sizeof(float));
 
         size_t triangle_points_memory_usage = 0;
         size_t texture_coords_memory_usage = 0;
@@ -23,7 +23,7 @@ namespace ge::image2d
         for (const Polygons& polygon : polygons)
         {
             triangle_points_memory_usage += 3 * sizeof(World2dCoords) * polygon.triangles.size();
-            texture_coords_memory_usage += 3 * sizeof(TextureCoord) * polygon.triangles.size();
+            texture_coords_memory_usage += 3 * sizeof(TextureCoords) * polygon.triangles.size();
         }
 
         const vk::DeviceSize buffer_size = safe_cast<vk::DeviceSize>
@@ -63,8 +63,8 @@ namespace ge::image2d
 
                     std::memcpy(current_offset, &vertex.coord, sizeof(World2dCoords));
                     current_offset += sizeof(World2dCoords);
-                    std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoord));
-                    current_offset += sizeof(TextureCoord);
+                    std::memcpy(current_offset, &vertex.tex_coord, sizeof(TextureCoords));
+                    current_offset += sizeof(TextureCoords);
 
                     ++result.vertices_count;
                 }

@@ -64,6 +64,7 @@ endif()
 target_link_libraries(render
     PUBLIC
         GE::common
+        GE::geometry
         GE::io
         GE::window
         CONAN_PKG::glm

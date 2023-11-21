@@ -1,7 +1,8 @@
 #include "vertex_description.h"
 #include "ge/common/exception.h"
-#include "ge/render/coords.h"
-#include "ge/render/texture_coord.h"
+
+#include "ge/geometry/texture_coords.h"
+#include "ge/geometry/world_2d_coords.h"
 
 namespace ge::image2d
 {
@@ -16,7 +17,7 @@ namespace ge::image2d
         const Logger& logger
     )
     {
-        constexpr uint32_t vertex_stride = sizeof(World2dCoords) + sizeof(TextureCoord);
+        constexpr uint32_t vertex_stride = sizeof(World2dCoords) + sizeof(TextureCoords);
 
         const auto validate_stride = [&device_limits, &logger]
         (

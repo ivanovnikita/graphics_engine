@@ -39,6 +39,7 @@ class GraphicsEngineConan(ConanFile):
         self.requires.add("glm/0.9.9.7", private=False)
 
         self.requires.add("stb/cci.20230920", private=False)
+        self.requires.add("tinyobjloader/2.0.0-rc10", private=False)
 
         if self.settings.os == "Linux":
             self.requires.add("xorg/system", private=False)

@@ -1,7 +1,8 @@
 #include "vertex_description.h"
 #include "ge/common/exception.h"
-#include "ge/render/coords.h"
 #include "ge/render/color.h"
+
+#include "ge/geometry/world_2d_coords.h"
 
 namespace ge::graph
 {
