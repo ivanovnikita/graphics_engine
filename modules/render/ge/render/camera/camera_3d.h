@@ -22,6 +22,7 @@ namespace ge
         Mvp3d get_mvp(const World3dCoords& model_coords) const;
 
         void set_pos(World3dCoords);
+        void set_surface_extent(Extent<uint32_t>);
 
     private:
         Extent<uint32_t> surface_extent_;

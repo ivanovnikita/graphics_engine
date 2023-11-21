@@ -84,7 +84,7 @@ namespace ge::image3d
     void Render3dImage::resize(const Extent<uint32_t> new_surface_extent)
     {
         RenderBase::resize(new_surface_extent);
-//        camera_.set_surface_extent(new_surface_extent);
+        camera_.set_surface_extent(new_surface_extent);
     }
 
     void Render3dImage::set_object_to_draw

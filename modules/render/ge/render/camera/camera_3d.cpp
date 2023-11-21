@@ -56,4 +56,19 @@ namespace ge
         );
         */
     }
+
+    void Camera3d::set_surface_extent(const Extent<uint32_t> extent)
+    {
+        surface_extent_ = extent;
+        projection_ = glm::mat4
+        {
+            glm::perspective
+            (
+                glm::radians(projection_angle_),
+                static_cast<float>(surface_extent_.width) / static_cast<float>(surface_extent_.height),
+                projection_near_plane_,
+                projection_far_plane_
+            )
+        };
+    }
 }
