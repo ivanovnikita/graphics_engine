@@ -5,7 +5,8 @@ namespace ge
 {
     vk::UniqueSampler create_sampler
     (
-        const DeviceData& device_data
+        const DeviceData& device_data,
+        const uint32_t mip_levels
     )
     {
         assert(device_data.enabled_features.test(DeviceFeatures::SamplerAnisotropy));
@@ -27,7 +28,7 @@ namespace ge
             .setMipmapMode(vk::SamplerMipmapMode::eLinear)
             .setMipLodBias(0.0f)
             .setMinLod(0.0f)
-            .setMaxLod(0.0f);
+            .setMaxLod(static_cast<float>(mip_levels));
 
         vk::Sampler sampler;
         const vk::Result result = device_data.logical_device->createSampler(&create_info, nullptr, &sampler);

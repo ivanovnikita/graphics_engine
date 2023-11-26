@@ -130,7 +130,7 @@ int main(int /*argc*/, char* /*argv*/[])
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();
-            render.draw_frame();
+//            render.draw_frame();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }

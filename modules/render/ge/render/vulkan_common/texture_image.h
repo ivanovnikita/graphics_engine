@@ -15,7 +15,8 @@ namespace ge
             const DeviceData&,
             const vk::CommandPool&,
             const vk::Fence&,
-            const Image&
+            const Image&,
+            bool generate_mipmaps
         );
 
         ImageData image_data;

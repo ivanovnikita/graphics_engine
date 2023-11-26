@@ -96,12 +96,14 @@ namespace ge::image2d
             polygons
         );
 
+        const bool generate_mipmaps = false;
         texture_image_data_ = TextureImageData::create_from_image
         (
             device_data_,
             *command_pool_,
             *transfer_finished_fence_,
-            image
+            image,
+            generate_mipmaps
         );
 
         descriptor_sets_ = create_descriptor_sets

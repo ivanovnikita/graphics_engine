@@ -8,13 +8,14 @@ namespace ge
         const vk::Device& device,
         const vk::Image& image,
         const vk::Format format,
+        const uint32_t mip_levels,
         const vk::ImageAspectFlags& aspect
     )
     {
         const vk::ImageSubresourceRange subresource_range = vk::ImageSubresourceRange{}
             .setAspectMask(aspect)
             .setBaseMipLevel(0)
-            .setLevelCount(1)
+            .setLevelCount(mip_levels)
             .setBaseArrayLayer(0)
             .setLayerCount(1);
 
@@ -59,6 +60,7 @@ namespace ge
         const vk::Device& device,
         const std::span<vk::Image>& images,
         const vk::Format format,
+        const uint32_t mip_levels,
         const vk::ImageAspectFlags& aspect
     )
     {
@@ -74,7 +76,7 @@ namespace ge
 
         for (const vk::Image& image : images)
         {
-            views.emplace_back(create_image_view(device, image, format, aspect));
+            views.emplace_back(create_image_view(device, image, format, mip_levels, aspect));
         }
 
         return views;

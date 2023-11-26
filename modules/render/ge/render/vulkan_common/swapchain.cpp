@@ -431,11 +431,13 @@ namespace ge
         vk::UniqueSwapchainKHR swapchain = create_swapchain(create_info, *device_data.logical_device);
 
         std::vector<vk::Image> images = get_swapchain_images(*device_data.logical_device, *swapchain);
+        const uint32_t mip_levels = 1;
         std::vector<vk::UniqueImageView> image_views = create_image_views
         (
             *device_data.logical_device,
             images,
             format.format,
+            mip_levels,
             vk::ImageAspectFlagBits::eColor
         );
 

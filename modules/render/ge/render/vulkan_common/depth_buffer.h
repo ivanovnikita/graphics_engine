@@ -12,7 +12,7 @@ namespace ge
         static DepthBuffer create
         (
             const DeviceData&,
-            const Extent<size_t>&,
+            const Extent<uint32_t>&,
             const vk::CommandPool&,
             const vk::Fence&
         );

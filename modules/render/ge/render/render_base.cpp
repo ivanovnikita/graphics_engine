@@ -70,7 +70,7 @@ namespace ge
             DepthBuffer::create
             (
                 device_data_,
-                Extent<size_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+                Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
                 *command_pool_,
                 *transfer_finished_fence_
             )
@@ -122,7 +122,7 @@ namespace ge
         depth_buffer_ = DepthBuffer::create
         (
             device_data_,
-            Extent<size_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+            Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
             *command_pool_,
             *transfer_finished_fence_
         );

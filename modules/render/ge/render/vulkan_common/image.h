@@ -10,8 +10,9 @@ namespace ge
         static ImageData create
         (
             const DeviceData&,
-            const Extent<size_t>&,
+            const Extent<uint32_t>&,
             const vk::Format&,
+            const uint32_t mip_levels,
             const vk::ImageTiling&,
             const vk::ImageUsageFlags&,
             const vk::MemoryPropertyFlags&,
@@ -30,6 +31,7 @@ namespace ge
         const vk::Fence&,
         const vk::Image&,
         const vk::Format&,
+        const uint32_t mip_levels,
         const vk::ImageLayout&,
         const vk::ImageLayout&
     );

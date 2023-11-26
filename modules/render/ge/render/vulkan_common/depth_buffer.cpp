@@ -6,17 +6,19 @@ namespace ge
     DepthBuffer DepthBuffer::create
     (
         const DeviceData& device_data,
-        const Extent<size_t>& extent,
+        const Extent<uint32_t>& extent,
         const vk::CommandPool& command_pool,
         const vk::Fence& fence
     )
     {
         const vk::Format format = find_depth_format(device_data.physical_device_data.physical_device);
+        const uint32_t mip_levels = 1;
         ImageData image_data = ImageData::create
         (
             device_data,
             extent,
             format,
+            mip_levels,
             vk::ImageTiling::eOptimal,
             vk::ImageUsageFlagBits::eDepthStencilAttachment,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
@@ -30,6 +32,7 @@ namespace ge
             fence,
             *image_data.image,
             format,
+            mip_levels,
             vk::ImageLayout::eUndefined,
             vk::ImageLayout::eDepthStencilAttachmentOptimal
         );

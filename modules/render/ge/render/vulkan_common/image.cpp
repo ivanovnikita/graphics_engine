@@ -12,21 +12,22 @@ namespace ge
         vk::UniqueImage create_image
         (
             const vk::Device& device,
-            const Extent<size_t>& extent,
+            const Extent<uint32_t>& extent,
             const vk::Format& format,
             const vk::ImageTiling& tiling,
-            const vk::ImageUsageFlags& usage
+            const vk::ImageUsageFlags& usage,
+            const uint32_t mip_levels
         )
         {
             const vk::Extent3D extent_3d = vk::Extent3D{}
-                .setWidth(static_cast<uint32_t>(extent.width))
-                .setHeight(static_cast<uint32_t>(extent.height))
+                .setWidth(extent.width)
+                .setHeight(extent.height)
                 .setDepth(1);
 
             const vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo{}
                 .setImageType(vk::ImageType::e2D)
                 .setExtent(extent_3d)
-                .setMipLevels(1)
+                .setMipLevels(mip_levels)
                 .setArrayLayers(1)
                 .setFormat(format)
                 .setTiling(tiling)
@@ -63,8 +64,9 @@ namespace ge
     ImageData ImageData::create
     (
         const DeviceData& device_data,
-        const Extent<size_t>& extent,
+        const Extent<uint32_t>& extent,
         const vk::Format& format,
+        const uint32_t mip_levels,
         const vk::ImageTiling& tiling,
         const vk::ImageUsageFlags& usage,
         const vk::MemoryPropertyFlags& mem_properties,
@@ -79,7 +81,8 @@ namespace ge
             extent,
             format,
             tiling,
-            usage
+            usage,
+            mip_levels
         );
 
         const vk::MemoryRequirements mem_requirements = device.getImageMemoryRequirements(*image);
@@ -105,7 +108,7 @@ namespace ge
         }
         }
 
-        vk::UniqueImageView image_view = create_image_view(device, *image, format, aspect);
+        vk::UniqueImageView image_view = create_image_view(device, *image, format, mip_levels, aspect);
 
         return ImageData
         {
@@ -122,6 +125,7 @@ namespace ge
         const vk::Fence& fence,
         const vk::Image& image,
         const vk::Format& format,
+        const uint32_t mip_levels,
         const vk::ImageLayout& old_layout,
         const vk::ImageLayout& new_layout
     )
@@ -135,7 +139,7 @@ namespace ge
         vk::ImageSubresourceRange subresource_range = vk::ImageSubresourceRange{}
             .setAspectMask(vk::ImageAspectFlagBits::eColor)
             .setBaseMipLevel(0)
-            .setLevelCount(1)
+            .setLevelCount(mip_levels)
             .setBaseArrayLayer(0)
             .setLayerCount(1);
 
