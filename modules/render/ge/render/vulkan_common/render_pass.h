@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ge/render/antialiasing/antialiasing.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace ge
@@ -8,6 +10,7 @@ namespace ge
     (
         const vk::Device&,
         const vk::Format& present_format,
-        const vk::Format& depth_format
+        const vk::Format& depth_format,
+        const Antialiasing&
     );
 }

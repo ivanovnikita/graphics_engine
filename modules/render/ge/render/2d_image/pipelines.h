@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ge/common/logger.hpp"
+#include "ge/render/antialiasing/antialiasing.h"
 #include "ge/render/vulkan_common/device.h"
 
 #include <vulkan/vulkan.hpp>
@@ -15,6 +16,7 @@ namespace ge::image2d
         const vk::ShaderModule& fragment,
         const vk::Extent2D&,
         const vk::PipelineLayout&,
+        const Antialiasing&,
         const Logger&
     );
 }

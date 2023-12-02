@@ -16,7 +16,8 @@ namespace ge
             const vk::Format& format,
             const vk::ImageTiling& tiling,
             const vk::ImageUsageFlags& usage,
-            const uint32_t mip_levels
+            const uint32_t mip_levels,
+            const vk::SampleCountFlagBits& sample_count
         )
         {
             const vk::Extent3D extent_3d = vk::Extent3D{}
@@ -33,7 +34,7 @@ namespace ge
                 .setTiling(tiling)
                 .setInitialLayout(vk::ImageLayout::eUndefined)
                 .setUsage(usage)
-                .setSamples(vk::SampleCountFlagBits::e1)
+                .setSamples(sample_count)
                 .setSharingMode(vk::SharingMode::eExclusive);
 
             vk::Image image;
@@ -67,6 +68,7 @@ namespace ge
         const Extent<uint32_t>& extent,
         const vk::Format& format,
         const uint32_t mip_levels,
+        const vk::SampleCountFlagBits& sample_count,
         const vk::ImageTiling& tiling,
         const vk::ImageUsageFlags& usage,
         const vk::MemoryPropertyFlags& mem_properties,
@@ -82,7 +84,8 @@ namespace ge
             format,
             tiling,
             usage,
-            mip_levels
+            mip_levels,
+            sample_count
         );
 
         const vk::MemoryRequirements mem_requirements = device.getImageMemoryRequirements(*image);

@@ -1,5 +1,8 @@
 #include "pipeline.h"
 #include "create_pipeline.h"
+#include "antialiasing.h"
+
+#include "ge/common/overloaded.hpp"
 
 namespace ge
 {
@@ -37,11 +40,41 @@ namespace ge
                 .setPScissors(&scissor);
         }
 
-        vk::PipelineMultisampleStateCreateInfo get_multisample_create_info()
+        vk::PipelineMultisampleStateCreateInfo get_multisample_create_info
+        (
+            const Antialiasing& antialiasing
+        )
         {
-            return vk::PipelineMultisampleStateCreateInfo()
-                .setSampleShadingEnable(VK_FALSE)
-                .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+            return std::visit
+            (
+                overloaded
+                {
+                    [] (NoAntialiasing)
+                    {
+                        return vk::PipelineMultisampleStateCreateInfo()
+                            .setSampleShadingEnable(VK_FALSE)
+                            .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+                    },
+                    [] (const Msaa& msaa)
+                    {
+                        vk::PipelineMultisampleStateCreateInfo result = vk::PipelineMultisampleStateCreateInfo{}
+                            .setRasterizationSamples(sample_count(msaa));
+
+                        if (msaa.enable_sample_shading)
+                        {
+                            result.setSampleShadingEnable(VK_TRUE);
+                            result.setMinSampleShading(0.2f);
+                        }
+                        else
+                        {
+                            result.setSampleShadingEnable(VK_FALSE);
+                        }
+
+                        return result;
+                    }
+                }
+                , antialiasing
+            );
         }
 
         vk::PipelineColorBlendAttachmentState get_blend_attachment()
@@ -109,14 +142,15 @@ namespace ge
         const vk::RenderPass& render_pass,
         const vk::Extent2D& extent,
         const vk::PipelineLayout& pipeline_layout,
-        const bool depth_buffer_enabled
+        const bool depth_buffer_enabled,
+        const Antialiasing& antialiasing
     )
     {
         const vk::Viewport viewport = get_viewport(extent);
         const vk::Rect2D scissor = get_scissor(extent);
         const vk::PipelineViewportStateCreateInfo viewport_info = get_viewport_create_info(viewport, scissor);
 
-        const vk::PipelineMultisampleStateCreateInfo multisample_info = get_multisample_create_info();
+        const vk::PipelineMultisampleStateCreateInfo multisample_info = get_multisample_create_info(antialiasing);
 
         const vk::PipelineColorBlendAttachmentState blend_attachment = get_blend_attachment();
         const vk::PipelineColorBlendStateCreateInfo blend_state_info = get_blend_create_info(blend_attachment);

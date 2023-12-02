@@ -23,7 +23,8 @@ namespace ge::graph
                 DeviceFeatures::FillModeNonSolid,
                 DeviceFeatures::WideLines
             },
-            vk::Format::eB8G8R8A8Unorm
+            vk::Format::eB8G8R8A8Unorm,
+            NoAntialiasing{}
         }
         , camera_
         {
@@ -65,6 +66,7 @@ namespace ge::graph
                 *shaders_.fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
+                antialiasing_,
                 logger_
             )
         }
@@ -78,6 +80,7 @@ namespace ge::graph
                 *shaders_.fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
+                antialiasing_,
                 logger_
             )
         }
@@ -143,6 +146,7 @@ namespace ge::graph
             *shaders_.fragment,
             swapchain_data_.extent,
             *pipeline_layout_,
+            antialiasing_,
             logger_
         );
         vertices_pipeline_ = create_vertices_pipeline
@@ -153,6 +157,7 @@ namespace ge::graph
             *shaders_.fragment,
             swapchain_data_.extent,
             *pipeline_layout_,
+            antialiasing_,
             logger_
         );
     }

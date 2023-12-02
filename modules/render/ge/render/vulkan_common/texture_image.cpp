@@ -288,6 +288,7 @@ namespace ge
                 image_extent,
                 format,
                 mip_levels,
+                vk::SampleCountFlagBits::e1,
                 vk::ImageTiling::eOptimal,
                 usage,
                 vk::MemoryPropertyFlagBits::eDeviceLocal,

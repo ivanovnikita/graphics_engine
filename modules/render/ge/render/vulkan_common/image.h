@@ -13,6 +13,7 @@ namespace ge
             const Extent<uint32_t>&,
             const vk::Format&,
             const uint32_t mip_levels,
+            const vk::SampleCountFlagBits&,
             const vk::ImageTiling&,
             const vk::ImageUsageFlags&,
             const vk::MemoryPropertyFlags&,

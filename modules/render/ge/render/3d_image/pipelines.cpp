@@ -41,6 +41,7 @@ namespace ge::image3d
             const vk::RenderPass& render_pass,
             const vk::Extent2D& extent,
             const vk::PipelineLayout& pipeline_layout,
+            const Antialiasing& antialiasing,
             const Logger& logger
         )
         {
@@ -74,7 +75,8 @@ namespace ge::image3d
                 render_pass,
                 extent,
                 pipeline_layout,
-                depth_buffer_enabled
+                depth_buffer_enabled,
+                antialiasing
             );
         }
     }
@@ -87,6 +89,7 @@ namespace ge::image3d
         const vk::ShaderModule& fragment,
         const vk::Extent2D& extent,
         const vk::PipelineLayout& pipeline_layout,
+        const Antialiasing& antialiasing,
         const Logger& logger
     )
     {
@@ -115,6 +118,7 @@ namespace ge::image3d
             render_pass,
             extent,
             pipeline_layout,
+            antialiasing,
             logger
         );
     }

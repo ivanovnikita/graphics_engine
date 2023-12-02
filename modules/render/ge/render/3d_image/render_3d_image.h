@@ -19,7 +19,12 @@ namespace ge::image3d
     class Render3dImage final : public RenderBase, public virtual Render3dI
     {
     public:
-        explicit Render3dImage(const SurfaceParams&, const Logger&);
+        explicit Render3dImage
+        (
+            const SurfaceParams&,
+            Antialiasing,
+            const Logger&
+        );
         ~Render3dImage() override;
 
         const Camera3d& get_camera() const override;

@@ -13,6 +13,7 @@ namespace ge
         (
             const DeviceData&,
             const Extent<uint32_t>&,
+            vk::SampleCountFlagBits,
             const vk::CommandPool&,
             const vk::Fence&
         );

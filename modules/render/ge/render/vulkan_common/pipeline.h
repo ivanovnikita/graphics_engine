@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ge/render/antialiasing/antialiasing.h"
+
 #include <vulkan/vulkan.hpp>
 
 #include <span>
@@ -17,6 +19,7 @@ namespace ge
         const vk::RenderPass&,
         const vk::Extent2D&,
         const vk::PipelineLayout&,
-        const bool depth_buffer_enabled
+        const bool depth_buffer_enabled,
+        const Antialiasing&
     );
 }

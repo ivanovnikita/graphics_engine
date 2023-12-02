@@ -13,7 +13,12 @@
 
 namespace ge::image3d
 {
-    Render3dImage::Render3dImage(const SurfaceParams& surface_params, const Logger& logger)
+    Render3dImage::Render3dImage
+    (
+        const SurfaceParams& surface_params,
+        Antialiasing antialiasing,
+        const Logger& logger
+    )
         : RenderBase
         {
             surface_params,
@@ -24,7 +29,8 @@ namespace ge::image3d
                 DeviceFeatures::FillModeNonSolid,
                 DeviceFeatures::WideLines
             },
-            vk::Format::eB8G8R8A8Srgb
+            vk::Format::eB8G8R8A8Srgb,
+            std::move(antialiasing)
         }
         , camera_
         {
@@ -62,6 +68,7 @@ namespace ge::image3d
                 *shaders_.image_fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
+                antialiasing_,
                 logger_
             )
         }
@@ -138,6 +145,7 @@ namespace ge::image3d
             *shaders_.image_fragment,
             swapchain_data_.extent,
             *pipeline_layout_,
+            antialiasing_,
             logger_
         );
     }

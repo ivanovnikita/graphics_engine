@@ -13,6 +13,7 @@ namespace ge
         SamplerAnisotropy = 1,
         FillModeNonSolid = 1 << 1,
         WideLines = 1 << 2,
+        SampleShading = 1 << 3,
     };
 
     using DeviceFeaturesFlags = Flags<DeviceFeatures>;

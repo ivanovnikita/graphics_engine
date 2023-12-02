@@ -24,7 +24,8 @@ namespace ge::image2d
                 DeviceFeatures::FillModeNonSolid,
                 DeviceFeatures::WideLines
             },
-            vk::Format::eB8G8R8A8Srgb
+            vk::Format::eB8G8R8A8Srgb,
+            NoAntialiasing{}
         }
         , camera_
         {
@@ -61,6 +62,7 @@ namespace ge::image2d
                 *shaders_.image_fragment,
                 swapchain_data_.extent,
                 *pipeline_layout_,
+                antialiasing_,
                 logger_
             )
         }
@@ -130,6 +132,7 @@ namespace ge::image2d
             *shaders_.image_fragment,
             swapchain_data_.extent,
             *pipeline_layout_,
+            antialiasing_,
             logger_
         );
     }

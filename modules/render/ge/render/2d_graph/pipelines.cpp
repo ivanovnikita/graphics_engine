@@ -41,6 +41,7 @@ namespace ge::graph
             const vk::RenderPass& render_pass,
             const vk::Extent2D& extent,
             const vk::PipelineLayout& pipeline_layout,
+            const Antialiasing& antialiasing,
             const Logger& logger
         )
         {
@@ -74,7 +75,8 @@ namespace ge::graph
                 render_pass,
                 extent,
                 pipeline_layout,
-                depth_buffer_enabled
+                depth_buffer_enabled,
+                antialiasing
             );
         }
     }
@@ -87,6 +89,7 @@ namespace ge::graph
         const vk::ShaderModule& fragment,
         const vk::Extent2D& extent,
         const vk::PipelineLayout& pipeline_layout,
+        const Antialiasing& antialiasing,
         const Logger& logger
     )
     {
@@ -119,6 +122,7 @@ namespace ge::graph
             render_pass,
             extent,
             pipeline_layout,
+            antialiasing,
             logger
         );
     }
@@ -131,6 +135,7 @@ namespace ge::graph
         const vk::ShaderModule& fragment,
         const vk::Extent2D& extent,
         const vk::PipelineLayout& pipeline_layout,
+        const Antialiasing& antialiasing,
         const Logger& logger
     )
     {
@@ -160,6 +165,7 @@ namespace ge::graph
             render_pass,
             extent,
             pipeline_layout,
+            antialiasing,
             logger
         );
     }

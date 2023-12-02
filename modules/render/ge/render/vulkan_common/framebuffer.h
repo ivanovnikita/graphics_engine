@@ -16,6 +16,7 @@ namespace ge
         const vk::RenderPass&,
         const vk::ImageView& surface_image,
         const vk::ImageView& depth_buffer,
+        std::optional<vk::ImageView> msaa_buffer,
         const vk::Extent2D&
     );
 
@@ -24,6 +25,7 @@ namespace ge
         const vk::Device&,
         const vk::RenderPass&,
         const SwapchainData&,
-        const DepthBuffer&
+        const DepthBuffer&,
+        std::optional<vk::ImageView> msaa_buffer
     );
 }

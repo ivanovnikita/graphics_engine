@@ -9,6 +9,7 @@ namespace ge
         case DeviceFeatures::SamplerAnisotropy: return "SamplerAnisotropy";
         case DeviceFeatures::FillModeNonSolid: return "FillModeNonSolid";
         case DeviceFeatures::WideLines: return "WideLines";
+        case DeviceFeatures::SampleShading: return "SampleShading";
         }
 
         __builtin_unreachable();
@@ -31,6 +32,11 @@ namespace ge
         if (flags.test(DeviceFeatures::WideLines))
         {
             result.setWideLines(VK_TRUE);
+        }
+
+        if (flags.test(DeviceFeatures::SampleShading))
+        {
+            result.setSampleRateShading(VK_TRUE);
         }
 
         return result;

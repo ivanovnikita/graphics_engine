@@ -7,6 +7,9 @@
 #include "ge/render/vulkan_common/semaphore.h"
 #include "ge/render/vulkan_common/command_pool.h"
 #include "ge/render/vulkan_common/queue.h"
+#include "ge/render/vulkan_common/antialiasing.h"
+
+#include "ge/common/overloaded.hpp"
 
 namespace ge
 {
@@ -14,8 +17,9 @@ namespace ge
     (
         const SurfaceParams& surface_params,
         const Logger& logger,
-        DeviceFeaturesFlags device_feartures,
-        const vk::Format desired_surface_format
+        DeviceFeaturesFlags device_features,
+        const vk::Format desired_surface_format,
+        const Antialiasing& antialiasing
     )
         : logger_{logger}
         , instance_data_
@@ -52,12 +56,35 @@ namespace ge
                 {
                     DeviceExtension::VkKhrSwapchain
                 },
-                std::move(device_feartures),
+                [&device_features, &antialiasing]
+                {
+                    return std::visit
+                    (
+                        overloaded
+                        {
+                            [&device_features] (NoAntialiasing)
+                            {
+                                return device_features;
+                            },
+                            [&device_features] (const Msaa& msaa)
+                            {
+                                if (msaa.enable_sample_shading)
+                                {
+                                    device_features.set(DeviceFeatures::SampleShading);
+                                }
+
+                                return device_features;
+                            }
+                        },
+                        antialiasing
+                    );
+                } (),
                 instance_data_,
                 *surface_data_.surface,
                 logger_
             )
         }
+        , antialiasing_{choose_max(device_data_.physical_device_data, antialiasing, logger_)}
         , image_available_semaphore_{create_semaphore(*device_data_.logical_device)}
         , render_finished_semaphore_{create_semaphore(*device_data_.logical_device)}
         , render_finished_fence_{create_fence(*device_data_.logical_device)}
@@ -71,8 +98,19 @@ namespace ge
             (
                 device_data_,
                 Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+                sample_count(antialiasing_),
                 *command_pool_,
                 *transfer_finished_fence_
+            )
+        }
+        , msaa_data_
+        {
+            try_create_msaa_data
+            (
+                antialiasing_,
+                device_data_,
+                Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+                swapchain_data_.format
             )
         }
         , render_pass_
@@ -81,7 +119,8 @@ namespace ge
             (
                 *device_data_.logical_device,
                 swapchain_data_.format,
-                depth_buffer_.format
+                depth_buffer_.format,
+                antialiasing_
             )
         }
         , framebuffers_
@@ -91,7 +130,10 @@ namespace ge
                 *device_data_.logical_device,
                 *render_pass_,
                 swapchain_data_,
-                depth_buffer_
+                depth_buffer_,
+                msaa_data_.has_value()
+                    ? std::optional{*msaa_data_->image_view}
+                    : std::nullopt
             )
         }
     {
@@ -119,19 +161,32 @@ namespace ge
             .setHeight(new_surface_extent.height);
 
         swapchain_data_ = SwapchainData::create_default(device_data_, surface_data_, desired_surface_format_);
+
         depth_buffer_ = DepthBuffer::create
         (
             device_data_,
             Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+            sample_count(antialiasing_),
             *command_pool_,
             *transfer_finished_fence_
         );
+        msaa_data_ = try_create_msaa_data
+        (
+            antialiasing_,
+            device_data_,
+            Extent<uint32_t>{.width = swapchain_data_.extent.width, .height = swapchain_data_.extent.height},
+            swapchain_data_.format
+        );
+
         framebuffers_ = create_framebuffers
         (
             *device_data_.logical_device,
             *render_pass_,
             swapchain_data_,
-            depth_buffer_
+            depth_buffer_,
+            msaa_data_.has_value()
+                ? std::optional{*msaa_data_->image_view}
+                : std::nullopt
         );
 
         create_pipelines();

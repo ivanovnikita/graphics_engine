@@ -7,6 +7,7 @@ namespace ge
     (
         const DeviceData& device_data,
         const Extent<uint32_t>& extent,
+        const vk::SampleCountFlagBits sample_count,
         const vk::CommandPool& command_pool,
         const vk::Fence& fence
     )
@@ -19,6 +20,7 @@ namespace ge
             extent,
             format,
             mip_levels,
+            sample_count,
             vk::ImageTiling::eOptimal,
             vk::ImageUsageFlagBits::eDepthStencilAttachment,
             vk::MemoryPropertyFlagBits::eDeviceLocal,

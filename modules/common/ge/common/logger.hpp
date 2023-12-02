@@ -8,7 +8,8 @@ namespace ge
     {
         Error = 0,
         ErrorDetails = 1,
-        SystemInfo = 2
+        Warning = 2,
+        SystemInfo = 3
     };
 
     class Logger

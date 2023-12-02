@@ -61,6 +61,7 @@ int main(int /*argc*/, char* /*argv*/[])
             {
                 LogType::Error,
                 LogType::ErrorDetails,
+                LogType::Warning,
 //                LogType::SystemInfo
             }
         };
@@ -86,6 +87,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 , .height = height
                 , .background_color = background_color
             },
+            Msaa{.samples = MsaaSamples::x8, .enable_sample_shading = false},
             logger
         );
 

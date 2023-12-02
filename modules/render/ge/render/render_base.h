@@ -2,6 +2,7 @@
 
 #include "ge/render/render_i.h"
 
+#include "ge/render/antialiasing/antialiasing.h"
 #include "ge/render/vulkan_common/instance.h"
 #include "ge/render/vulkan_common/surface.h"
 #include "ge/render/vulkan_common/device.h"
@@ -22,7 +23,8 @@ namespace ge
             const SurfaceParams&,
             const Logger&,
             DeviceFeaturesFlags,
-            vk::Format desired_surface_format
+            vk::Format desired_surface_format,
+            const Antialiasing&
         );
         ~RenderBase() override;
 
@@ -40,6 +42,8 @@ namespace ge
         SurfaceData surface_data_;
         DeviceData device_data_;
 
+        Antialiasing antialiasing_;
+
         vk::UniqueSemaphore image_available_semaphore_;
         vk::UniqueSemaphore render_finished_semaphore_;
         vk::UniqueFence render_finished_fence_;
@@ -50,6 +54,7 @@ namespace ge
         vk::Format desired_surface_format_;
         SwapchainData swapchain_data_;
         DepthBuffer depth_buffer_;
+        std::optional<ImageData> msaa_data_;
         vk::UniqueRenderPass render_pass_;
 
         std::vector<vk::UniqueFramebuffer> framebuffers_;
