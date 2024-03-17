@@ -37,12 +37,12 @@ namespace ge
     class Render2dI : public virtual DrawableI, public WithCamera2dI
     {
     public:
-        virtual ~Render2dI();
+        virtual ~Render2dI() override;
     };
 
     class Render3dI : public virtual DrawableI, public WithCamera3dI
     {
     public:
-        virtual ~Render3dI();
+        virtual ~Render3dI() override;
     };
 }

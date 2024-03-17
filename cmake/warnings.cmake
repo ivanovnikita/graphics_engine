@@ -57,6 +57,9 @@ function(get_warnings result)
             -Wno-gnu-zero-variadic-macro-arguments
             -Wno-global-constructors
             -Wno-weak-vtables
+
+            # for TINYOBJLOADER_IMPLEMENTATION
+            -Wno-unused-macros
         )
 
     endif()

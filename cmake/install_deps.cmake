@@ -1,5 +1,5 @@
 if (${GE_USE_LIBC++})
-    set(settings_stdlib "-s:a=compiler.libcxx=libc++")
+    set(settings_stdlib "-s:h=compiler.libcxx=libc++")
 endif()
 
 if (${GE_ENABLE_LTO})
