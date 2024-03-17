@@ -27,13 +27,14 @@ set(generated_vulkan_sources
     "${generated_sources_dir}/invoke_for_downcasted.h"
 )
 set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
+list (GET VulkanHeaders_INCLUDE_DIRS 0 vulkan_headers_include_dir)
 add_custom_command(
     OUTPUT
         ${generated_vulkan_sources}
     COMMAND
         "${refl_generator_script}"
             -i
-                "${CONAN_RES_DIRS_VULKAN-HEADERS}/vulkan/registry/vk.xml"
+                "${vulkan_headers_include_dir}/vk.xml"
             -o
                 "${generated_sources_dir}"
     DEPENDS
@@ -42,7 +43,7 @@ add_custom_command(
 
 sources_in_dir_recurse(ge/render render_sources)
 if (${GE_ENABLE_DEBUG_LAYERS})
-    set(VK_LAYER_PATH "${CONAN_VULKAN-VALIDATIONLAYERS_ROOT}/res/vulkan/explicit_layer.d")
+    set(VK_LAYER_PATH "${vulkan-validationlayers_INCLUDE_DIR}/../res/vulkan/explicit_layer.d")
     set(template "ge/render/vk_layer_path.h.in")
     set(generated "${generated_sources_dir}/vk_layer_path.h")
     configure_file(${template} ${generated})
@@ -67,17 +68,15 @@ target_link_libraries(render
         GE::geometry
         GE::io
         GE::window
-        CONAN_PKG::glm
-        CONAN_PKG::vulkan-headers
+        glm::glm
+        vulkan-headers::vulkan-headers
     PRIVATE
-        CONAN_PKG::vulkan-loader
+        Vulkan::Vulkan
         Threads::Threads
         ${std_libs}
         dl
 )
 target_include_directories(render
-    SYSTEM PRIVATE
-        $<BUILD_INTERFACE:${CONAN_INCLUDE_DIRS_SHADERC}>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_shaders>
@@ -99,7 +98,7 @@ if (${GE_BUILD_TESTS})
     sources_in_dir_recurse(tests tests_sources)
     add_executable(tests_render ${tests_sources})
     target_link_libraries(tests_render
-        CONAN_PKG::gtest
+        gtest::gtest
         GE::render
         ${std_libs}
     )
@@ -116,9 +115,10 @@ install(
         GraphicsEngine
     DESTINATION lib
 )
+list (GET Vulkan_INCLUDE_DIRS 0 vulkan_include_dir)
 install(
     DIRECTORY
-        ${CONAN_LIB_DIRS_VULKAN-LOADER}/
+        "vulkan_include_dir/../lib/"
     DESTINATION
         bin
     FILES_MATCHING
@@ -127,7 +127,7 @@ install(
 if (${GE_ENABLE_DEBUG_LAYERS})
     install(
         FILES
-            "${CONAN_LIB_DIRS_VULKAN-VALIDATIONLAYERS}/libVkLayer_khronos_validation.so"
+            "${vulkan-validationlayers_INCLUDE_DIR}/../lib/libVkLayer_khronos_validation.so"
         DESTINATION
             bin
     )

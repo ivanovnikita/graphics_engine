@@ -11,7 +11,7 @@ target_include_directories(geometry
 )
 target_link_libraries(geometry
     PUBLIC
-        CONAN_PKG::glm
+        glm::glm
 )
 add_library(GE::geometry ALIAS geometry)
 define_source_group(geometry)
@@ -24,7 +24,7 @@ if (${GE_BUILD_TESTS})
     sources_in_dir_recurse(tests tests_sources)
     add_executable(tests_geometry ${tests_sources})
     target_link_libraries(tests_geometry
-        CONAN_PKG::gtest
+        gtest::gtest
         GE::geometry
         ${std_libs}
     )

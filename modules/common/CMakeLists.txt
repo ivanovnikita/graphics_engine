@@ -20,7 +20,7 @@ if (${GE_BUILD_TESTS})
     sources_in_dir_recurse(tests tests_sources)
     add_executable(tests_common ${tests_sources})
     target_link_libraries(tests_common
-        CONAN_PKG::gtest
+        gtest::gtest
         GE::common
         ${std_libs}
     )

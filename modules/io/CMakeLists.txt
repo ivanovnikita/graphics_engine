@@ -14,8 +14,8 @@ target_link_libraries(io
         GE::common
         GE::geometry
     PRIVATE
-        CONAN_PKG::stb
-        CONAN_PKG::tinyobjloader
+        stb::stb
+        tinyobjloader::tinyobjloader
 )
 
 add_library(GE::io ALIAS io)
@@ -29,7 +29,7 @@ if (${GE_BUILD_TESTS})
     sources_in_dir_recurse(tests tests_sources)
     add_executable(tests_io ${tests_sources})
     target_link_libraries(tests_io
-        CONAN_PKG::gtest
+        gtest::gtest
         GE::io
         ${std_libs}
     )

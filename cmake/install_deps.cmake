@@ -1,27 +1,38 @@
+if (${GE_USE_LIBC++})
+    set(settings_stdlib "-s:a=compiler.libcxx=libc++")
+endif()
+
 if (${GE_ENABLE_LTO})
-    list(APPEND conan_options enable_lto=True)
+    set(option_lto "-o:a=enable_lto=True;")
 endif()
 
 if (${GE_ENABLE_DEBUG_LAYERS})
-    list(APPEND conan_options enable_debug_layers=True)
+    set(option_debug_layers "-o:a=enable_debug_layers=True;")
 endif()
 
 if (${GE_BUILD_TESTS})
-    list(APPEND conan_options build_tests=True)
+    set(option_tests "-o:a=build_tests=True;")
 endif()
 
-if(NOT CONAN_EXPORTED)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/third_party/cmake-conan")
-    include(conan)
-    conan_cmake_autodetect(settings)
-    list(APPEND settings compiler.cppstd=20)
-    conan_cmake_install(
-        PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR}
-        BUILD missing
-        SETTINGS ${settings}
-        OPTIONS ${conan_options}
-    )
+set(CONAN_INSTALL_ARGS
+    "--build=missing;"
+    "${settings_stdlib}"
+    "${option_lto}"
+    "${option_debug_layers}"
+    "${option_tests}"
+    "-s:a=compiler.cppstd=20"
+)
+
+find_package(glm REQUIRED)
+find_package(VulkanHeaders REQUIRED)
+find_package(Vulkan REQUIRED)
+find_package(stb REQUIRED)
+find_package(tinyobjloader REQUIRED)
+
+if (${GE_ENABLE_DEBUG_LAYERS})
+    find_package(vulkan-validationlayers REQUIRED)
 endif()
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+if (${GE_BUILD_TESTS})
+    find_package(GTest REQUIRED)
+endif()

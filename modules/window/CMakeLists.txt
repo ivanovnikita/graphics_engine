@@ -17,8 +17,8 @@ set_target_properties(window PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_w
 target_link_libraries(window
     PRIVATE
         GE::common
-        CONAN_PKG::glm
-        CONAN_PKG::vulkan-loader
+        glm::glm
+        Vulkan::Vulkan
         ${window_libs}
 )
 target_include_directories(window

@@ -4,8 +4,8 @@ target_compile_options(ge_shader_compiler PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(ge_shader_compiler PROPERTIES ${GE_TARGET_PROPERTIES})
 target_link_libraries(ge_shader_compiler
     PRIVATE
-        CONAN_PKG::vulkan-headers
-        CONAN_PKG::shaderc
+        vulkan-headers::vulkan-headers
+        shaderc_shared # SPIRV-Tools # from system
         Threads::Threads
         ${std_libs}
 )

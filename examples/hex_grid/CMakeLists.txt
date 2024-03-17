@@ -6,7 +6,7 @@ target_link_libraries(example_hex_grid
     GE::window
     GE::render_loop
     GE::geometry
-    CONAN_PKG::vulkan-headers
+    vulkan-headers::vulkan-headers
     ${std_libs}
 )
 define_source_group(example_hex_grid)

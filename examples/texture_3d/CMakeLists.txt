@@ -5,7 +5,7 @@ target_link_libraries(example_texture_3d
     GE::render
     GE::window
     GE::render_loop
-    CONAN_PKG::vulkan-headers
+    vulkan-headers::vulkan-headers
     ${std_libs}
 )
 define_source_group(example_texture_3d)
