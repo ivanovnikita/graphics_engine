@@ -1,8 +1,39 @@
-#pragma once
-
-#include "reflection.hpp"
+module;
 
 #include <tuple>
+
+export module reflection;
+
+export import member;
+
+namespace ge
+{
+/* Members registration example:
+
+    constexpr auto register_members(const SomeType*) noexcept
+    {
+        return std::tuple
+        {
+            Member<&SomeType::member>{"member_name"},
+            Member<&SomeType::other_member>{"other_member_name"}
+        };
+    }
+*/
+
+    export template <typename T>
+    concept RegisteredMembers = requires
+    {
+        register_members(static_cast<const std::remove_cvref_t<T>*>(nullptr));
+    };
+
+    export template <typename T>
+        requires RegisteredMembers<T>
+    constexpr auto get_members() noexcept;
+
+    export template <typename T, typename F>
+        requires RegisteredMembers<T>
+    constexpr void for_each_member(F&&);
+}
 
 namespace ge
 {

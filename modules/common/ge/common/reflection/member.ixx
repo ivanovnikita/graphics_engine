@@ -1,8 +1,26 @@
-#pragma once
+module;
 
-#include "member.hpp"
-
+#include <type_traits>
+#include <string_view>
 #include <utility>
+
+export module member;
+
+namespace ge
+{
+    export template <auto MemberPtr>
+        requires std::is_member_object_pointer_v<decltype(MemberPtr)>
+    struct Member final
+    {
+        template <typename U>
+        static constexpr decltype(auto) get(U&& obj);
+
+        template <typename C, typename V>
+        static constexpr void set(C& obj, V&& value);
+
+        std::string_view name;
+    };
+}
 
 namespace ge
 {

@@ -1,10 +1,11 @@
-#pragma once
+export module logger;
 
-#include "flags.hpp"
+import flags;
+import log;
 
 namespace ge
 {
-    enum class LogType
+    export enum class LogType
     {
         Error = 0,
         ErrorDetails = 1,
@@ -12,7 +13,7 @@ namespace ge
         SystemInfo = 3
     };
 
-    class Logger
+    export class Logger
     {
     public:
         explicit Logger(Flags<LogType> enabled_logs) noexcept;
@@ -28,4 +29,15 @@ namespace ge
     };
 }
 
-#include "logger_impl.hpp"
+namespace ge
+{
+    template <typename... Args>
+    void Logger::log(const LogType log_type, const Args&... args) const noexcept
+    {
+        if (enabled(log_type))
+        {
+            ::ge::log(LogDestination::StdOut, args...);
+            log_flush(LogDestination::StdOut);
+        }
+    }
+}

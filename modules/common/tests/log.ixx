@@ -1,5 +1,4 @@
-#include "ge/common/log.hpp"
-#include "ge/common/bits_range.hpp"
+module;
 
 #include <gtest/gtest.h>
 
@@ -9,6 +8,12 @@
 #include <span>
 
 #include <cmath>
+
+export module tests_log;
+
+import log;
+import bits_range;
+import reflection;
 
 namespace
 {

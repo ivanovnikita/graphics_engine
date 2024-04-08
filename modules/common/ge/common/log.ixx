@@ -1,11 +1,56 @@
-#pragma once
+module;
 
-#include "log.hpp"
-
+#include <string_view>
 #include <array>
 #include <charconv>
 
-#include <cassert>
+#include <cstdio>
+
+export module log;
+
+import reflection;
+
+namespace ge
+{
+    export enum class LogDestination
+    {
+        StdOut,
+        StdErr
+    };
+
+    template <typename T>
+    concept ConvertibleToStringView =
+        std::convertible_to<T, std::string_view> or
+        requires(T t)
+        {
+            { to_string_view(t) } -> std::same_as<std::string_view>;
+        };
+
+    template <typename T>
+    concept NonTrivialLoggable = requires(T t, LogDestination destination)
+    {
+        log_non_trivial(destination, t);
+    };
+
+    // TODO: log unions
+
+    template <typename T>
+    concept Loggable =
+        std::integral<T> or
+        std::floating_point<T> or
+        ConvertibleToStringView<T> or
+        NonTrivialLoggable<T> or
+        RegisteredMembers<T> or
+        std::ranges::range<T>;
+
+    export template <typename T>
+        requires (std::is_pointer_v<T> and not ConvertibleToStringView<T>)
+    void log_non_trivial(LogDestination, T) noexcept;
+
+    export void log(LogDestination, Loggable auto ...) noexcept;
+
+    export void log_flush(LogDestination) noexcept;
+}
 
 namespace ge
 {

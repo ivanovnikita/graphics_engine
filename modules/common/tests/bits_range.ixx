@@ -1,6 +1,10 @@
-#include "ge/common/bits_range.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests_bits_range;
+
+import bits_range;
 
 TEST(bits_range, deref)
 {

@@ -1,6 +1,11 @@
+module;
+
 #include <gtest/gtest.h>
 
-#include "ge/common/safe_cast.hpp"
+export module tests_safe_cast;
+
+import exception;
+import safe_cast;
 
 template<typename T, typename U>
 struct CastPair

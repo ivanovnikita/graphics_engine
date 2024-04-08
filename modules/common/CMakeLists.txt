@@ -1,24 +1,34 @@
-sources_in_dir_recurse(ge/common common_sources)
-add_library(common ${common_sources})
+interfaces_in_dir_recurse(ge/common common_interfaces)
+implementations_in_dir_recurse(ge/common common_implementations)
+headers_in_dir_recurse(ge/common common_headers)
+
+add_library(common)
+target_sources(common
+    PRIVATE
+        ${common_implementations}
+    PUBLIC
+        FILE_SET CXX_MODULES FILES
+            ${common_interfaces}
+        FILE_SET HEADERS FILES
+            ${common_headers}
+)
 target_compile_options(common PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(common PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_common)
-target_include_directories(common
-    PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
-)
 add_library(GE::common ALIAS common)
-define_source_group(common)
+source_group(common FILES ${common_interfaces} ${common_implementations} ${common_headers})
 
 if (${GE_BUILD_TESTS})
     enable_testing()
 
     include(GoogleTest)
 
-    sources_in_dir_recurse(tests tests_sources)
-    add_executable(tests_common ${tests_sources})
+    interfaces_in_dir_recurse(tests tests_interfaces)
+    add_executable(tests_common)
+    target_sources(tests_common
+        PRIVATE
+            FILE_SET CXX_MODULES FILES
+                ${tests_interfaces}
+    )
     target_link_libraries(tests_common
         gtest::gtest
         GE::common
@@ -26,7 +36,7 @@ if (${GE_BUILD_TESTS})
     )
     target_compile_options(tests_common PRIVATE ${GE_COMPILE_OPTIONS})
     set_target_properties(tests_common PROPERTIES ${GE_TARGET_PROPERTIES})
-    define_source_group(tests_common)
+    source_group(common FILES ${tests_interfaces})
     gtest_discover_tests(tests_common)
 endif()
 
@@ -36,4 +46,7 @@ install(
     EXPORT
         GraphicsEngine
     DESTINATION lib
+    FILE_SET HEADERS DESTINATION include
+    FILE_SET CXX_MODULES DESTINATION cxx_modules
+    CXX_MODULES_BMI DESTINATION cxx_modules/bmi
 )

@@ -1,13 +1,13 @@
-#pragma once
+export module overloaded;
 
 namespace ge
 {
-    template <typename... Ts>
+    export template <typename... Ts>
     struct overloaded final : Ts...
     {
         using Ts::operator()...;
     };
 
-    template <typename... Ts>
+    export template <typename... Ts>
     overloaded(Ts...) -> overloaded<Ts...>;
 }

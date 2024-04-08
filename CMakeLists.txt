@@ -4,6 +4,11 @@ set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES "third_party/cmake-conan/conan_provider.cma
 
 project(graphics_engine)
 
+# For modules
+# Turning off extensions avoids an issue with the clang 16 compiler
+# clang 17 and greater can avoid this setting
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 include(CMakeDependentOption)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -41,16 +46,16 @@ include(install_deps)
 find_package(Threads REQUIRED)
 
 add_subdirectory(modules/common)
-add_subdirectory(modules/geometry)
-add_subdirectory(modules/io)
-add_subdirectory(modules/window)
-add_subdirectory(modules/shader_compiler)
-add_subdirectory(modules/render)
-add_subdirectory(modules/render_loop)
+# add_subdirectory(modules/geometry)
+# add_subdirectory(modules/io)
+# add_subdirectory(modules/window)
+# add_subdirectory(modules/shader_compiler)
+# add_subdirectory(modules/render)
+# add_subdirectory(modules/render_loop)
 
-if (${GE_BUILD_EXAMPLES})
-    add_subdirectory(examples)
-endif()
+# if (${GE_BUILD_EXAMPLES})
+#     add_subdirectory(examples)
+# endif()
 
 install(
     EXPORT

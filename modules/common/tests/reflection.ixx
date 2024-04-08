@@ -1,8 +1,12 @@
-#include "ge/common/reflection/reflection.hpp"
+module;
 
 #include <gtest/gtest.h>
 
 #include <unordered_map>
+
+export module tests_reflection;
+
+import reflection;
 
 namespace
 {

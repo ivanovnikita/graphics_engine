@@ -1,9 +1,22 @@
-function(sources_in_dir_recurse directory result)
+function(sources_in_dir_recurse directory extension result)
     file(GLOB_RECURSE output
-        "${directory}/*.cpp"
-        "${directory}/*.h"
-        "${directory}/*.hpp"
+        "${directory}/*.${extension}"
     )
+    set(${result} ${output} PARENT_SCOPE)
+endfunction()
+
+function(interfaces_in_dir_recurse directory result)
+    sources_in_dir_recurse(${directory} "ixx" output)
+    set(${result} ${output} PARENT_SCOPE)
+endfunction()
+
+function(implementations_in_dir_recurse directory result)
+    sources_in_dir_recurse(${directory} "cxx" output)
+    set(${result} ${output} PARENT_SCOPE)
+endfunction()
+
+function(headers_in_dir_recurse directory result)
+    sources_in_dir_recurse(${directory} "h" output)
     set(${result} ${output} PARENT_SCOPE)
 endfunction()
 

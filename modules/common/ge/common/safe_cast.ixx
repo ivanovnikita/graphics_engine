@@ -1,9 +1,18 @@
-#pragma once
+module;
 
-#include "ge/common/safe_cast.hpp"
-#include "ge/common/exception.h"
+#include "ge/common/exception_macro.h"
 
 #include <limits>
+
+export module safe_cast;
+
+import exception;
+
+namespace ge
+{
+    export template<typename To, typename From>
+    constexpr To safe_cast(const From& from);
+}
 
 namespace ge
 {

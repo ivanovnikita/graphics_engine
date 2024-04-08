@@ -1,13 +1,68 @@
-#pragma once
-
-#include "bits_range.hpp"
+module;
 
 #include <ranges>
 
 #include <cassert>
+#include <cstdint>
+
+export module bits_range;
 
 namespace ge
 {
+    export template <typename T>
+    struct BitsIteratorSentinel final
+    {
+    };
+
+    export template <typename T>
+        requires std::integral<T>
+    class BitsIterator final
+    {
+    public:
+        using difference_type = int;
+        using value_type = T;
+
+        BitsIterator() noexcept;
+        explicit BitsIterator(const T&) noexcept;
+        explicit BitsIterator(const T&, uint8_t bit_number) noexcept;
+
+        T operator*() const noexcept;
+
+        BitsIterator& operator++() noexcept;
+        BitsIterator operator++(int) noexcept;
+
+        BitsIterator& operator--() noexcept;
+        BitsIterator operator--(int) noexcept;
+
+        bool operator==(const BitsIteratorSentinel<T>&) const noexcept;
+
+    private:
+        const T* value_;
+        uint8_t bit_number_;
+    };
+
+    export template<class T>
+    BitsIterator(const T&) -> BitsIterator<T>;
+
+    export template<class T>
+    BitsIterator(const T&, uint8_t) -> BitsIterator<T>;
+
+    export template <typename T>
+    bool operator!=(const BitsIterator<T>&, const BitsIteratorSentinel<T>&) noexcept;
+
+    export template <typename T>
+    auto to_bits_range(const T&) noexcept;
+
+    export template <typename E, typename T>
+        requires std::is_enum_v<E> and std::is_same_v<std::underlying_type_t<E>, T>
+    auto to_enum_bits_range(const T&) noexcept;
+}
+
+namespace ge
+{
+    static_assert(std::input_or_output_iterator<BitsIterator<int>>);
+    static_assert(std::sentinel_for<BitsIteratorSentinel<int>, BitsIterator<int>>);
+
     template <typename T>
         requires std::integral<T>
     BitsIterator<T>::BitsIterator() noexcept

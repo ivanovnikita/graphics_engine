@@ -1,4 +1,10 @@
-#include "log.hpp"
+module;
+
+#include <string_view>
+
+#include <cstdio>
+
+module log;
 
 namespace ge
 {
