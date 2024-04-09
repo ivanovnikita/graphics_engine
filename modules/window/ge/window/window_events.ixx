@@ -1,7 +1,4 @@
-#pragma once
-
-#include "surface_coords.h"
-#include "window_size.h"
+module;
 
 #include <chrono>
 #include <optional>
@@ -9,45 +6,50 @@
 
 #include <cstdint>
 
+export module window_events;
+
+export import surface_coords;
+export import window_size;
+
 namespace ge
 {
     // TODO: xcb_timestamp_t may not be steady, use another clock type
-    using EventTimestamp = std::chrono::steady_clock::time_point;
+    export using EventTimestamp = std::chrono::steady_clock::time_point;
 
-    struct WindowExposed final
+    export struct WindowExposed final
     {
     };
 
-    struct WindowEventClose final
+    export struct WindowEventClose final
     {
     };
 
-    struct WindowEventResize final
+    export struct WindowEventResize final
     {
         Size new_size;
     };
 
-    enum class MouseButton
+    export enum class MouseButton
     {
         LEFT = 1
         , RIGHT
         , MIDDLE
     };
 
-    enum class ScrollButton
+    export enum class ScrollButton
     {
         UP
         , DOWN
     };
 
-    enum class ButtonEvent
+    export enum class ButtonEvent
     {
         PRESS
         , RELEASE
     };
 
     // TODO: use some sort of bitset flags
-    struct ModifiersState final
+    export struct ModifiersState final
     {
         bool mouse_left = false;
         bool mouse_right = false;
@@ -66,7 +68,7 @@ namespace ge
         uint8_t count = 0;
     };
 
-    template <typename ButtonType, ButtonEvent>
+    export template <typename ButtonType, ButtonEvent>
     struct MouseButtonEvent final
     {
         ButtonType button;
@@ -75,7 +77,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct MouseButtonEvent<ScrollButton, button_event> final
     {
         ScrollButton direction;
@@ -84,24 +86,24 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    using MouseButtonPress = MouseButtonEvent<MouseButton, ButtonEvent::PRESS>;
-    using MouseButtonRelease = MouseButtonEvent<MouseButton, ButtonEvent::RELEASE>;
-    using WheelEvent = MouseButtonEvent<ScrollButton, ButtonEvent::PRESS>;
+    export using MouseButtonPress = MouseButtonEvent<MouseButton, ButtonEvent::PRESS>;
+    export using MouseButtonRelease = MouseButtonEvent<MouseButton, ButtonEvent::RELEASE>;
+    export using WheelEvent = MouseButtonEvent<ScrollButton, ButtonEvent::PRESS>;
 
-    struct MouseMoveEvent final
+    export struct MouseMoveEvent final
     {
         SurfaceCoords pos;
         ModifiersState modifiers;
         EventTimestamp timestamp;
     };
 
-    enum class CrossEvent
+    export enum class CrossEvent
     {
         ENTER
         , LEAVE
     };
 
-    template <CrossEvent>
+    export template <CrossEvent>
     struct MouseCrossWindowBorderEvent final
     {
         SurfaceCoords pos;
@@ -109,10 +111,10 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    using MouseEnterWindow = MouseCrossWindowBorderEvent<CrossEvent::ENTER>;
-    using MouseLeaveWindow = MouseCrossWindowBorderEvent<CrossEvent::LEAVE>;
+    export using MouseEnterWindow = MouseCrossWindowBorderEvent<CrossEvent::ENTER>;
+    export using MouseLeaveWindow = MouseCrossWindowBorderEvent<CrossEvent::LEAVE>;
 
-    enum class KeyType
+    export enum class KeyType
     {
         Service,
         Latin,
@@ -121,7 +123,7 @@ namespace ge
         Unknown
     };
 
-    enum class ServiceKey
+    export enum class ServiceKey
     {
         // TODO: interpret as ascii?
         Enter,
@@ -189,7 +191,7 @@ namespace ge
         HyperR
     };
 
-    enum class KeypadServiceKey
+    export enum class KeypadServiceKey
     {
         Space,
         Tab,
@@ -212,7 +214,7 @@ namespace ge
         Decimal
     };
 
-    enum class KeypadLatinKey
+    export enum class KeypadLatinKey
     {
         Equal,
         Multiply,
@@ -233,10 +235,10 @@ namespace ge
         KP_9
     };
 
-    template <KeyType, ButtonEvent>
+    export template <KeyType, ButtonEvent>
     struct KeyEvent;
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Service, button_event> final
     {
         ServiceKey key;
@@ -244,7 +246,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Latin, button_event> final
     {
         char key;
@@ -252,7 +254,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct KeyEvent<KeyType::KeypadService, button_event> final
     {
         KeypadServiceKey key;
@@ -260,7 +262,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct KeyEvent<KeyType::KeypadLatin, button_event> final
     {
         char symbol;
@@ -269,7 +271,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    template <ButtonEvent button_event>
+    export template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Unknown, button_event> final
     {
         uint32_t key;
@@ -277,18 +279,18 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    using ServiceKeyPress = KeyEvent<KeyType::Service, ButtonEvent::PRESS>;
-    using ServiceKeyRelease = KeyEvent<KeyType::Service, ButtonEvent::RELEASE>;
-    using LatinKeyPress = KeyEvent<KeyType::Latin, ButtonEvent::PRESS>;
-    using LatinKeyRelease = KeyEvent<KeyType::Latin, ButtonEvent::RELEASE>;
-    using KeypadServiceKeyPress = KeyEvent<KeyType::KeypadService, ButtonEvent::PRESS>;
-    using KeypadServiceKeyRelease = KeyEvent<KeyType::KeypadService, ButtonEvent::RELEASE>;
-    using KeypadLatinKeyPress = KeyEvent<KeyType::KeypadLatin, ButtonEvent::PRESS>;
-    using KeypadLatinKeyRelease = KeyEvent<KeyType::KeypadLatin, ButtonEvent::RELEASE>;
-    using UnknownKeyPress = KeyEvent<KeyType::Unknown, ButtonEvent::PRESS>;
-    using UnknownKeyRelease = KeyEvent<KeyType::Unknown, ButtonEvent::RELEASE>;
+    export using ServiceKeyPress = KeyEvent<KeyType::Service, ButtonEvent::PRESS>;
+    export using ServiceKeyRelease = KeyEvent<KeyType::Service, ButtonEvent::RELEASE>;
+    export using LatinKeyPress = KeyEvent<KeyType::Latin, ButtonEvent::PRESS>;
+    export using LatinKeyRelease = KeyEvent<KeyType::Latin, ButtonEvent::RELEASE>;
+    export using KeypadServiceKeyPress = KeyEvent<KeyType::KeypadService, ButtonEvent::PRESS>;
+    export using KeypadServiceKeyRelease = KeyEvent<KeyType::KeypadService, ButtonEvent::RELEASE>;
+    export using KeypadLatinKeyPress = KeyEvent<KeyType::KeypadLatin, ButtonEvent::PRESS>;
+    export using KeypadLatinKeyRelease = KeyEvent<KeyType::KeypadLatin, ButtonEvent::RELEASE>;
+    export using UnknownKeyPress = KeyEvent<KeyType::Unknown, ButtonEvent::PRESS>;
+    export using UnknownKeyRelease = KeyEvent<KeyType::Unknown, ButtonEvent::RELEASE>;
 
-    using WindowEvent = std::variant
+    export using WindowEvent = std::variant
     <
         WindowExposed,
         WindowEventClose,

@@ -1,17 +1,29 @@
-#include "ge/window/linux/window_xcb.h"
-#include "ge/common/exception.h"
-#include "ge/common/overloaded.hpp"
+module;
+
+#include "ge/common/exception_macro.h"
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xinput.h>
 
+#include <xcb/xcb.h>
+
+#include <xcb/xcb_errors.h>
+#include <xcb/xcb_keysyms.h>
+
 #define XK_MISCELLANY
 #define XK_LATIN1
 #include <X11/keysymdef.h>
 
-#include <iostream>
-#include <sstream>
+#include <optional>
+#include <string_view>
+
+#include <cassert>
+
+module window_xcb;
+
+import exception;
+import overloaded;
 
 namespace ge
 {

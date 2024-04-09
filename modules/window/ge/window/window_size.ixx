@@ -1,26 +1,28 @@
-#pragma once
+module;
 
 #include <variant>
 #include <optional>
 
 #include <cstdint>
 
+export module window_size;
+
 namespace ge
 {
-    struct Size final
+    export struct Size final
     {
         uint16_t width;
         uint16_t height;
     };
 
-    using StaticSize = Size;
+    export using StaticSize = Size;
 
-    struct DynamicSize final
+    export struct DynamicSize final
     {
         Size default_size;
         std::optional<Size> min_size;
         std::optional<Size> max_size;
     };
 
-    using WindowSize = std::variant<StaticSize, DynamicSize>;
+    export using WindowSize = std::variant<StaticSize, DynamicSize>;
 }

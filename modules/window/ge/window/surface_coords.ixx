@@ -1,10 +1,12 @@
-#pragma once
+module;
 
 #include <glm/glm.hpp>
 
+export module surface_coords;
+
 namespace ge
 {
-    struct SurfaceCoords final
+    export struct SurfaceCoords final
     {
         glm::vec2 coords;
     };

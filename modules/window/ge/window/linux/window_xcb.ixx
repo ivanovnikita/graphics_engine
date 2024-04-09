@@ -1,20 +1,22 @@
-#pragma once
-
-#include "ge/common/logger.hpp"
-#include "ge/window/window_i.h"
+module;
 
 #include <xcb/xcb.h>
 
 #include <xcb/xcb_errors.h>
 #include <xcb/xcb_keysyms.h>
 
-#include <vulkan/vulkan.hpp>
-
 #include <memory>
+#include <vector>
+
+export module window_xcb;
+
+export import window_size;
+export import logger;
+export import window_i;
 
 namespace ge
 {
-    class WindowXCB final : public WindowI
+    export class WindowXCB final : public WindowI
     {
     public:
         WindowXCB

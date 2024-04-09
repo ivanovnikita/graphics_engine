@@ -1,14 +1,16 @@
-#pragma once
-
-#include "ge/window/window_events.h"
-#include "ge/window/window_size.h"
+module;
 
 #include <vector>
 #include <string_view>
 
+export module window_i;
+
+export import window_events;
+export import window_size;
+
 namespace ge
 {
-    class WindowI
+    export class WindowI
     {
     public:
         virtual ~WindowI();

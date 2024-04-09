@@ -1,4 +1,4 @@
-#include "ge/window/window_i.h"
+module window_i;
 
 namespace ge
 {
