@@ -15,6 +15,8 @@ import log;
 import bits_range;
 import reflection;
 
+module : private;
+
 namespace
 {
     template <typename T>

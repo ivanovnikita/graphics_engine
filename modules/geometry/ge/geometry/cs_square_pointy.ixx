@@ -1,8 +1,45 @@
-#pragma once
+module;
 
-#include "cs_square_pointy.hpp"
-#include "point_localization.hpp"
-#include "sign.hpp"
+#include <cmath>
+
+export module cs_square_pointy;
+
+export import coord_helpers;
+import point;
+import sign;
+import point_localization;
+
+namespace ge
+{
+    export struct SquareCoordAxialPointy final
+    {
+        int x;
+        int y;
+    };
+
+    export template <typename T>
+    class CsSquarePointy final
+    {
+    public:
+        explicit CsSquarePointy
+        (
+            T width,
+            T height,
+            T y_tilt
+        ) noexcept;
+
+        SquareCoordAxialPointy to_axial(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const SquareCoordAxialPointy&) const noexcept; // square center
+
+    private:
+        T width_;
+        T height_;
+        T y_tilt_;
+    };
+
+    export template <typename T>
+    CsSquarePointy(T, T, T) -> CsSquarePointy<T>;
+}
 
 namespace ge
 {

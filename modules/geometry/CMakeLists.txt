@@ -1,28 +1,35 @@
-sources_in_dir_recurse(ge/geometry geometry_sources)
-add_library(geometry ${geometry_sources})
+interfaces_in_dir_recurse(ge/geometry interfaces)
+implementations_in_dir_recurse(ge/geometry implementations)
+
+add_library(geometry)
+target_sources(geometry
+    PRIVATE
+        ${implementations}
+    PUBLIC
+        FILE_SET CXX_MODULES FILES
+            ${interfaces}
+)
 target_compile_options(geometry PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(geometry PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_geometry)
-target_include_directories(geometry
-    PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
-)
 target_link_libraries(geometry
     PUBLIC
         glm::glm
 )
 add_library(GE::geometry ALIAS geometry)
-define_source_group(geometry)
+source_group(common FILES ${interfaces} ${implementations})
 
 if (${GE_BUILD_TESTS})
     enable_testing()
 
     include(GoogleTest)
 
-    sources_in_dir_recurse(tests tests_sources)
-    add_executable(tests_geometry ${tests_sources})
+    interfaces_in_dir_recurse(tests tests_interfaces)
+    add_executable(tests_geometry)
+    target_sources(tests_geometry
+        PRIVATE
+            FILE_SET CXX_MODULES FILES
+                ${tests_interfaces}
+    )
     target_link_libraries(tests_geometry
         gtest::gtest
         GE::geometry
@@ -30,7 +37,7 @@ if (${GE_BUILD_TESTS})
     )
     target_compile_options(tests_geometry PRIVATE ${GE_COMPILE_OPTIONS})
     set_target_properties(tests_geometry PROPERTIES ${GE_TARGET_PROPERTIES})
-    define_source_group(tests_geometry)
+    source_group(common FILES ${tests_interfaces})
     gtest_discover_tests(tests_geometry)
 endif()
 
@@ -40,4 +47,6 @@ install(
     EXPORT
         GraphicsEngine
     DESTINATION lib
+    FILE_SET CXX_MODULES DESTINATION cxx_modules
+    CXX_MODULES_BMI DESTINATION cxx_modules/bmi
 )

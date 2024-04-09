@@ -1,6 +1,25 @@
-#pragma once
+module;
 
-#include "coord_helpers.hpp"
+#include <iostream>
+
+export module coord_helpers;
+
+import geometry.concepts;
+
+namespace ge
+{
+    export template <typename T>
+        requires Coord2dLike<T>
+    bool operator==(const T&, const T&) noexcept;
+
+    export template <typename T>
+        requires Coord2dLike<T>
+    bool operator!=(const T&, const T&) noexcept;
+
+    export template <typename T>
+        requires Coord2dLike<T>
+    std::ostream& operator<<(std::ostream&, const T&);
+}
 
 namespace ge
 {
@@ -26,3 +45,4 @@ namespace ge
         return out;
     }
 }
+

@@ -1,6 +1,13 @@
-#include "ge/geometry/cs_square_flat.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.cs_square_flat;
+
+import point;
+import cs_square_flat;
+
+module : private;
 
 TEST(cs_square_right_flat, draw_space_to_axial)
 {

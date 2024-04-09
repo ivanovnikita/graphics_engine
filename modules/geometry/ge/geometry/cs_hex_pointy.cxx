@@ -1,4 +1,4 @@
-#include "cs_hex_pointy.hpp"
+module cs_hex_pointy;
 
 namespace ge
 {

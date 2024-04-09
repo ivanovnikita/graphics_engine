@@ -1,8 +1,36 @@
-#pragma once
-
-#include "point.hpp"
+module;
 
 #include <cmath>
+
+export module point;
+
+namespace ge
+{
+    export template <typename T>
+    struct Point2d final
+    {
+        T x;
+        T y;
+    };
+
+    export using Point2dF = Point2d<float>;
+    export using Point2dD = Point2d<double>;
+
+    export template <typename T>
+    bool operator==(const Point2d<T>&, const Point2d<T>&) noexcept;
+
+    export template <typename T>
+    bool operator!=(const Point2d<T>&, const Point2d<T>&) noexcept;
+
+    export template <typename T>
+    Point2d<T> operator+(const Point2d<T>&, const Point2d<T>&) noexcept;
+
+    export template <typename T>
+    Point2d<T> operator-(const Point2d<T>&, const Point2d<T>&) noexcept;
+
+    export template <typename T>
+    T cross(const Point2d<T>&, const Point2d<T>&) noexcept;
+}
 
 namespace ge
 {

@@ -1,4 +1,4 @@
-#include "cs_hex_flat.hpp"
+module cs_hex_flat;
 
 namespace ge
 {

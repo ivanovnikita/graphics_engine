@@ -7,6 +7,8 @@ export module tests_safe_cast;
 import exception;
 import safe_cast;
 
+module : private;
+
 template<typename T, typename U>
 struct CastPair
 {

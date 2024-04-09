@@ -1,12 +1,90 @@
-#pragma once
-
-#include "cs_hex_pointy.hpp"
-#include "hex_coord_cube_fractional.hpp"
-#include "point_localization.hpp"
-#include "sign.hpp"
+module;
 
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
+
+export module cs_hex_pointy;
+
+export import coord_helpers;
+import point;
+import line_ref;
+import sign;
+import point_localization;
+import hex_coord_cube_fractional;
+
+namespace ge
+{
+    // doubled width coords: https://www.redblobgames.com/grids/hexagons/#coordinates-doubled
+    export struct HexCoordDoubledWidth final
+    {
+        int x;
+        int y;
+    };
+
+    // offset odd-r coords in horizontal layout: https://www.redblobgames.com/grids/hexagons/#coordinates-offset
+    export struct HexCoordOffsetPointy final
+    {
+        int x;
+        int y;
+    };
+
+    export struct HexCoordAxialPointy final
+    {
+        int x;
+        int y;
+
+        int z() const noexcept;
+    };
+
+    export HexCoordOffsetPointy to_hex_offset_pointy(const HexCoordDoubledWidth&) noexcept;
+    export HexCoordOffsetPointy to_hex_offset_pointy(const HexCoordAxialPointy&) noexcept;
+
+    export HexCoordDoubledWidth to_hex_doubled_width(const HexCoordOffsetPointy&) noexcept;
+    export HexCoordDoubledWidth to_hex_doubled_width(const HexCoordAxialPointy&) noexcept;
+
+    export HexCoordAxialPointy to_hex_axial_pointy(const HexCoordDoubledWidth&) noexcept;
+    export HexCoordAxialPointy to_hex_axial_pointy(const HexCoordOffsetPointy&) noexcept;
+
+    // Opposite sides of hex are parallel and symmetric
+    // Origin of draw space CS is in the center of hex (0; 0)
+    export template <typename T>
+    class CsHexPointy final
+    {
+    public:
+        // y_0 < y_1 < y_2 < y_3
+        explicit CsHexPointy
+        (
+            T width,
+            T height,
+            T y_1,
+            T y_2
+        ) noexcept;
+
+        HexCoordDoubledWidth to_hex_doubled_width(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordDoubledWidth&) const noexcept;
+
+        HexCoordAxialPointy to_hex_axial_pointy(const Point2d<T>&) const noexcept;
+        Point2d<T> to_draw_space(const HexCoordAxialPointy&) const noexcept;
+
+    private:
+        T width_;
+        T height_;
+        T y_1_;
+        T y_2_;
+
+        T height_cycle_;
+        T height_half_;
+
+        T width_half_;
+
+        T last_y_;
+        T pre_last_y_;
+    };
+
+    export template <typename T>
+    CsHexPointy(T, T, T, T) -> CsHexPointy<T>;
+}
 
 namespace ge
 {

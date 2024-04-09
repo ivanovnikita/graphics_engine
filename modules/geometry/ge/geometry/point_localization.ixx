@@ -1,6 +1,23 @@
-#pragma once
+export module point_localization;
 
-#include "point_localization.hpp"
+import point;
+import line_ref;
+
+namespace ge
+{
+    export enum class LineSide
+    {
+        Left,
+        Right,
+        Collinear
+    };
+
+    export template <typename T>
+    LineSide line_side(const LineCRef2d<T>&, const Point2d<T>&);
+
+    export template <typename T>
+    bool is_left_side(const LineCRef2d<T>&, const Point2d<T>&);
+}
 
 namespace ge
 {

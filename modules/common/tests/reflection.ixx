@@ -8,6 +8,8 @@ export module tests_reflection;
 
 import reflection;
 
+module : private;
+
 namespace
 {
     struct Foo final

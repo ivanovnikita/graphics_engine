@@ -1,10 +1,12 @@
-#pragma once
+module;
 
 #include <glm/glm.hpp>
 
+export module world_2d_coords;
+
 namespace ge
 {
-    struct TextureCoords final
+    export struct World2dCoords final
     {
         glm::vec2 coords;
     };

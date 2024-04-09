@@ -1,6 +1,13 @@
-#include "ge/geometry/point_localization.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.point_localization;
+
+import point;
+import point_localization;
+
+module : private;
 
 TEST(point_localization, left)
 {

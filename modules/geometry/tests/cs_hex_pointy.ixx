@@ -1,6 +1,13 @@
-#include "ge/geometry/cs_hex_pointy.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.cs_hex_pointy;
+
+import point;
+import cs_hex_pointy;
+
+module : private;
 
 TEST(cs_hex_pointy, draw_space_to_hex_doubled_width)
 {

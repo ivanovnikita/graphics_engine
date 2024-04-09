@@ -1,8 +1,8 @@
-#pragma once
+export module geometry.concepts;
 
 namespace ge
 {
-    template <typename T>
+    export template <typename T>
     concept Coord2dLike = requires
     (T c)
     {

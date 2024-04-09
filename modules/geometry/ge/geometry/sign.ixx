@@ -1,8 +1,8 @@
-#pragma once
+export module sign;
 
 namespace ge
 {
-    template <typename T>
+    export template <typename T>
     int sign(T val) noexcept
     {
         return (T(0) < val) - (val < T(0));

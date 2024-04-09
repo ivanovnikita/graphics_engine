@@ -1,6 +1,13 @@
-#include "ge/geometry/cs_hex_flat.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.cs_hex_flat;
+
+import point;
+import cs_hex_flat;
+
+module : private;
 
 TEST(cs_hex_flat, draw_space_to_hex_doubled_height)
 {

@@ -1,21 +1,21 @@
-interfaces_in_dir_recurse(ge/common common_interfaces)
-implementations_in_dir_recurse(ge/common common_implementations)
-headers_in_dir_recurse(ge/common common_headers)
+interfaces_in_dir_recurse(ge/common interfaces)
+implementations_in_dir_recurse(ge/common implementations)
+headers_in_dir_recurse(ge/common headers)
 
 add_library(common)
 target_sources(common
     PRIVATE
-        ${common_implementations}
+        ${implementations}
     PUBLIC
         FILE_SET CXX_MODULES FILES
-            ${common_interfaces}
+            ${interfaces}
         FILE_SET HEADERS FILES
-            ${common_headers}
+            ${headers}
 )
 target_compile_options(common PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(common PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_common)
 add_library(GE::common ALIAS common)
-source_group(common FILES ${common_interfaces} ${common_implementations} ${common_headers})
+source_group(common FILES ${interfaces} ${implementations} ${headers})
 
 if (${GE_BUILD_TESTS})
     enable_testing()

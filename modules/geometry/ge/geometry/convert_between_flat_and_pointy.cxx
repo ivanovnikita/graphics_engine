@@ -1,4 +1,4 @@
-#include "convert_between_flat_and_pointy.h"
+module convert_between_flat_and_pointy;
 
 namespace ge
 {

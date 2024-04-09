@@ -1,8 +1,22 @@
-#pragma once
-
-#include "hex_coord_cube_fractional.hpp"
+module;
 
 #include <cmath>
+
+export module hex_coord_cube_fractional;
+
+namespace ge
+{
+    export template <typename T>
+    struct HexCoordCubeFractional final
+    {
+        T x;
+        T y;
+        T z;
+    };
+
+    export template <typename R, typename T>
+    R hex_round(const HexCoordCubeFractional<T>&) noexcept;
+}
 
 namespace ge
 {

@@ -1,6 +1,14 @@
-#include "ge/geometry/hex_coord_rotate.hpp"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.hex_coord_rotate;
+
+import cs_hex_flat;
+import cs_hex_pointy;
+import hex_coord_rotate;
+
+module : private;
 
 // TODO: use typed tests
 
