@@ -1,12 +1,19 @@
-#include "read_image.h"
-#include "ge/common/exception.h"
-#include "ge/common/safe_cast.hpp"
+module;
+
+#include "ge/common/exception_macro.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #define STBI_ONLY_BMP
 #include <stb_image.h>
+
+#include <string>
+
+module read_image;
+
+import safe_cast;
+import exception;
 
 namespace ge
 {

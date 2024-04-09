@@ -1,7 +1,13 @@
-#include "ge/io/read_model.h"
-#include "ge/common/exception.h"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.read_model;
+
+import read_model;
+import exception;
+
+module : private;
 
 TEST(read_model, success)
 {

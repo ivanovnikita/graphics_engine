@@ -1,14 +1,16 @@
-#pragma once
-
-#include "vertex.h"
-#include "triangle_indexed.h"
+module;
 
 #include <span>
 #include <vector>
 
+export module model;
+
+export import vertex;
+export import triangle_indexed;
+
 namespace ge
 {
-    class Model final
+    export class Model final
     {
     public:
         explicit Model

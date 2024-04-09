@@ -1,10 +1,14 @@
-#include "read_model.h"
+module;
 
-#include "ge/common/exception.h"
-#include "ge/common/safe_cast.hpp"
+#include "ge/common/exception_macro.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+
+module read_model;
+
+import safe_cast;
+import exception;
 
 namespace ge
 {

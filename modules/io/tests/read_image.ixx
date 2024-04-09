@@ -1,7 +1,13 @@
-#include "ge/io/read_image.h"
-#include "ge/common/exception.h"
+module;
 
 #include <gtest/gtest.h>
+
+export module tests.read_image;
+
+import read_image;
+import exception;
+
+module : private;
 
 TEST(read_image, success)
 {

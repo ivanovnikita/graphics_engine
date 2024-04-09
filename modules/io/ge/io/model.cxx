@@ -1,4 +1,9 @@
-#include "model.h"
+module;
+
+#include <vector>
+#include <span>
+
+module model;
 
 namespace ge
 {

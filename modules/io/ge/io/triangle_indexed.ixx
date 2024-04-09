@@ -1,12 +1,14 @@
-#pragma once
+module;
 
 #include <array>
 
 #include <cstddef>
 
+export module triangle_indexed;
+
 namespace ge
 {
-    struct TriangleIndexed final
+    export struct TriangleIndexed final
     {
         std::array<size_t, 3> inds;
     };

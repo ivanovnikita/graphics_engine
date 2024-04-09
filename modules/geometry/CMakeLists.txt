@@ -37,7 +37,7 @@ if (${GE_BUILD_TESTS})
     )
     target_compile_options(tests_geometry PRIVATE ${GE_COMPILE_OPTIONS})
     set_target_properties(tests_geometry PROPERTIES ${GE_TARGET_PROPERTIES})
-    source_group(common FILES ${tests_interfaces})
+    source_group(tests_geometry FILES ${tests_interfaces})
     gtest_discover_tests(tests_geometry)
 endif()
 

@@ -12,6 +12,13 @@ target_sources(common
         FILE_SET HEADERS FILES
             ${headers}
 )
+target_include_directories(common
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+)
 target_compile_options(common PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(common PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_common)
 add_library(GE::common ALIAS common)
@@ -36,7 +43,7 @@ if (${GE_BUILD_TESTS})
     )
     target_compile_options(tests_common PRIVATE ${GE_COMPILE_OPTIONS})
     set_target_properties(tests_common PROPERTIES ${GE_TARGET_PROPERTIES})
-    source_group(common FILES ${tests_interfaces})
+    source_group(tests_common FILES ${tests_interfaces})
     gtest_discover_tests(tests_common)
 endif()
 

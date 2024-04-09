@@ -1,13 +1,13 @@
-#pragma once
+module;
 
 #include <vector>
 #include <span>
 
-#include <cstdint>
+export module image;
 
 namespace ge
 {
-    class Image final
+    export class Image final
     {
     public:
         explicit Image

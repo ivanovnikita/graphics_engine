@@ -1,8 +1,16 @@
-#include "image.h"
-#include "ge/common/exception.h"
+module;
+
+#include "ge/common/exception_macro.h"
+
+#include <span>
 
 #include <cassert>
+#include <cstddef>
 #include <cstring>
+
+module image;
+
+import exception;
 
 namespace ge
 {
