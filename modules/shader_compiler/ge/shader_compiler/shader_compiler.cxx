@@ -1,4 +1,4 @@
-#include "shader_compiler.h"
+module;
 
 #include <vulkan/vulkan.hpp>
 
@@ -8,6 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
+
+module shader_compiler;
 
 namespace ge
 {
@@ -103,8 +106,8 @@ namespace ge
             , const std::string_view target_filename
         )
         {
-            std::ostringstream header;
-            std::ostringstream source;
+            std::ostringstream interface;
+            std::ostringstream implementation;
 
             {
                 std::ostringstream common;
@@ -112,20 +115,26 @@ namespace ge
                     "namespace " << target_namespace << "\n"
                     "{\n";
 
-                header
-                    << "#pragma once\n\n"
+                interface
+                    << "module;\n\n"
                        "#include <span>\n\n"
                        "#include <cstdint>\n\n"
+                    <<
+                       "export module " << target_filename << ";\n\n"
+                    <<
                        "namespace vk\n"
                        "{\n"
-                       "    enum class ShaderStageFlagBits : uint32_t;\n"
+                       "    export enum class ShaderStageFlagBits : uint32_t;\n"
                        "}\n\n"
                     << common.str();
-                source
-                    << R"(#include ")" << target_filename << R"(.h")"
-                    << "\n\n"
+                implementation
+                    <<
+                       "module;\n\n"
                        "#include <vulkan/vulkan.hpp>\n\n"
                        "#include <array>\n\n"
+                       "#include <span>\n\n"
+                       "#include <cstdint>\n\n"
+                    << "module " << target_filename << ";\n\n"
                     << common.str();
             }
 
@@ -139,7 +148,7 @@ namespace ge
             };
 
             {
-                header << "    enum class ShaderName\n"
+                interface << "    export enum class ShaderName\n"
                           "    {\n";
 
                 std::string comma{""};
@@ -152,17 +161,17 @@ namespace ge
                             continue;
                         }
 
-                        header << "        " << comma << create_shader_name(shader_name, shader_kind) << "\n";
+                        interface << "        " << comma << create_shader_name(shader_name, shader_kind) << "\n";
 
                         comma = ", ";
                     }
                 }
 
-                header
+                interface
                     << "    };\n\n"
-                    << "    std::span<const uint32_t> get_shader(ShaderName);\n"
-                    << "    vk::ShaderStageFlagBits get_shader_kind(ShaderName);\n";
-                header << "}\n";
+                    << "    export std::span<const uint32_t> get_shader(ShaderName);\n"
+                    << "    export vk::ShaderStageFlagBits get_shader_kind(ShaderName);\n";
+                interface << "}\n";
             }
 
             for (const auto& [shader_name, shaders] : compiled_shaders)
@@ -177,24 +186,24 @@ namespace ge
                     const auto start = std::chrono::high_resolution_clock::now();
 
 
-                    source <<
+                    implementation <<
                         "    static constexpr std::array<uint32_t, "
                         << shader.size()
                         << "> "
                         << create_shader_name(shader_name, shader_kind)
                         << "\n" << "    {\n";
 
-                    source << "        " << shader.front();
+                    implementation << "        " << shader.front();
                     for (size_t i = 1; i < shader.size(); ++i)
                     {
-                        source << ", " << shader[i] << "";
+                        interface << ", " << shader[i] << "";
 
                         if (i % 10 == 0)
                         {
-                            source << "\n      ";
+                            interface << "\n      ";
                         }
                     }
-                    source << "\n    };\n\n";
+                    implementation << "\n    };\n\n";
 
                     const auto stop = std::chrono::high_resolution_clock::now();
 
@@ -208,10 +217,10 @@ namespace ge
             }
 
             {
-                source << "    std::span<const uint32_t> get_shader(const ShaderName shader_name)\n"
+                implementation << "    std::span<const uint32_t> get_shader(const ShaderName shader_name)\n"
                           "    {\n";
 
-                source << "        switch(shader_name)\n"
+                implementation << "        switch(shader_name)\n"
                           "        {\n";
 
                 for (const auto& [shader_name, shaders] : compiled_shaders)
@@ -224,7 +233,7 @@ namespace ge
                         }
 
                         const std::string name = create_shader_name(shader_name, shader_kind);
-                        source
+                        implementation
                             << "        case ShaderName::"
                             << name
                             << ": return "
@@ -233,18 +242,18 @@ namespace ge
                     }
                 }
 
-                source
+                implementation
                     << "        }\n"
                        "        __builtin_unreachable();\n";
 
-                source << "    }\n\n";
+                implementation << "    }\n\n";
             }
 
             {
-                source << "    vk::ShaderStageFlagBits get_shader_kind(const ShaderName shader_name)\n"
+                implementation << "    vk::ShaderStageFlagBits get_shader_kind(const ShaderName shader_name)\n"
                           "    {\n";
 
-                source << "        switch(shader_name)\n"
+                implementation << "        switch(shader_name)\n"
                           "        {\n";
 
                 for (const auto& [shader_name, shaders] : compiled_shaders)
@@ -257,7 +266,7 @@ namespace ge
                         }
 
                         const std::string name = create_shader_name(shader_name, shader_kind);
-                        source
+                        implementation
                             << "        case ShaderName::"
                             << name
                             << ": return "
@@ -267,18 +276,18 @@ namespace ge
                     }
                 }
 
-                source
+                implementation
                     << "        }\n"
                        "        __builtin_unreachable();\n";
 
-                source << "    }\n\n";
+                implementation << "    }\n\n";
             }
 
-            source << "}\n";
+            implementation << "}\n";
 
             GeneratedCppSources result;
-            result.header = header.str();
-            result.source = source.str();
+            result.interface = interface.str();
+            result.implementation = implementation.str();
 
             return result;
         }
@@ -349,9 +358,9 @@ namespace ge
         {
             std::ofstream file;
             file.exceptions(std::ifstream::failbit);
-            file.open((target_dir / target_filename).string() + ".h", std::ios::out);
+            file.open((target_dir / target_filename).string() + ".ixx", std::ios::out);
 
-            file << sources.header;
+            file << sources.interface;
             file.flush();
 
             file.close();
@@ -359,51 +368,12 @@ namespace ge
         {
             std::ofstream file;
             file.exceptions(std::ifstream::failbit);
-            file.open((target_dir / target_filename).string() + ".cpp", std::ios::out);
+            file.open((target_dir / target_filename).string() + ".cxx", std::ios::out);
 
-            file << sources.source;
+            file << sources.implementation;
             file.flush();
 
             file.close();
         }
     }
-}
-
-int main(int argc, char** argv)
-{
-    using namespace ge;
-
-    try
-    {
-        if (argc < 5)
-        {
-            throw std::logic_error("Invalid input options");
-        }
-
-        const fs::path shaders_dir{argv[1]};
-        const std::string target_namespace{argv[2]};
-        const fs::path target_dir{argv[3]};
-        const std::string target_name{argv[4]};
-
-        const GeneratedCppSources generated = compile_shaders_into_cpp_sources
-        (
-            shaders_dir
-            , target_namespace
-            , target_name
-        );
-
-        if (not fs::exists(target_dir))
-        {
-            fs::create_directory(target_dir);
-        }
-
-        save_sources(generated, target_dir, target_name);
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Unexpected compilation error: " << e.what() << std::endl;
-        return 1;
-    }
-
-    return 0;
 }
