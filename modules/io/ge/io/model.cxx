@@ -3,7 +3,7 @@ module;
 #include <vector>
 #include <span>
 
-module model;
+module io.model;
 
 namespace ge
 {

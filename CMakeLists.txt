@@ -50,12 +50,12 @@ add_subdirectory(modules/geometry)
 add_subdirectory(modules/io)
 add_subdirectory(modules/window)
 add_subdirectory(modules/shader_compiler)
-# add_subdirectory(modules/render)
-# add_subdirectory(modules/render_loop)
+add_subdirectory(modules/render)
+add_subdirectory(modules/render_loop)
 
-# if (${GE_BUILD_EXAMPLES})
-#     add_subdirectory(examples)
-# endif()
+if (${GE_BUILD_EXAMPLES})
+    add_subdirectory(examples)
+endif()
 
 install(
     EXPORT

@@ -196,11 +196,11 @@ namespace ge
                     implementation << "        " << shader.front();
                     for (size_t i = 1; i < shader.size(); ++i)
                     {
-                        interface << ", " << shader[i] << "";
+                        implementation << ", " << shader[i] << "";
 
                         if (i % 10 == 0)
                         {
-                            interface << "\n      ";
+                            implementation << "\n      ";
                         }
                     }
                     implementation << "\n    };\n\n";

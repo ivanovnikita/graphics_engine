@@ -45,6 +45,9 @@ function(get_warnings result)
 
             -Wno-double-promotion
 
+            -Wno-switch-default
+            -Wno-missing-variable-declarations
+
             # for vulkan
             -Wno-switch-enum
             -Wno-covered-switch-default

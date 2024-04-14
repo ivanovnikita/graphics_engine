@@ -1,4 +1,4 @@
-export module vertex;
+export module io.vertex;
 
 export import world_3d_coords;
 export import texture_coords;

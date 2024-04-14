@@ -3,7 +3,7 @@ module;
 #include <vector>
 #include <span>
 
-export module image;
+export module io.image;
 
 namespace ge
 {

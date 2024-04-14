@@ -1,0 +1,10 @@
+module;
+
+#include <string_view>
+
+export module vk_layer_path;
+
+namespace ge
+{
+    export constexpr std::string_view VK_LAYER_PATH{"@VK_LAYER_PATH@"};
+}

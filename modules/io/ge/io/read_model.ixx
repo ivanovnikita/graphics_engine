@@ -2,9 +2,9 @@ module;
 
 #include <string>
 
-export module read_model;
+export module io.read_model;
 
-export import model;
+export import io.model;
 
 namespace ge
 {

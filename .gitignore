@@ -5,3 +5,4 @@
 .cmake
 examples/graph/data/*
 builded_package
+modules/render/generated/*

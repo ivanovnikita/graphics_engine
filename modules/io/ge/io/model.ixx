@@ -3,10 +3,10 @@ module;
 #include <span>
 #include <vector>
 
-export module model;
+export module io.model;
 
-export import vertex;
-export import triangle_indexed;
+export import io.vertex;
+export import io.triangle_indexed;
 
 namespace ge
 {

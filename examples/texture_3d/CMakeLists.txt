@@ -1,4 +1,10 @@
-add_executable(example_texture_3d main.cpp)
+set(implementations main.cxx)
+
+add_executable(example_texture_3d)
+target_sources(example_texture_3d
+    PRIVATE
+        ${implementations}
+)
 target_compile_options(example_texture_3d PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(example_texture_3d PROPERTIES ${GE_TARGET_PROPERTIES})
 target_link_libraries(example_texture_3d
@@ -8,5 +14,5 @@ target_link_libraries(example_texture_3d
     vulkan-headers::vulkan-headers
     ${std_libs}
 )
-define_source_group(example_texture_3d)
+source_group(example_texture_3d FILES ${implementations})
 install(TARGETS example_texture_3d DESTINATION examples/texture_3d)

@@ -2,9 +2,9 @@ module;
 
 #include <gtest/gtest.h>
 
-export module tests.read_model;
+export module tests.io.read_model;
 
-import read_model;
+import io.read_model;
 import exception;
 
 module : private;

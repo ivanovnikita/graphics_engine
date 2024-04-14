@@ -8,7 +8,7 @@ module;
 #include <cstddef>
 #include <cstring>
 
-module image;
+module io.image;
 
 import exception;
 

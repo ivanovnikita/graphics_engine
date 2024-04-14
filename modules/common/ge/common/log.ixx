@@ -18,7 +18,7 @@ namespace ge
         StdErr
     };
 
-    template <typename T>
+    export template <typename T>
     concept ConvertibleToStringView =
         std::convertible_to<T, std::string_view> or
         requires(T t)
@@ -26,7 +26,7 @@ namespace ge
             { to_string_view(t) } -> std::same_as<std::string_view>;
         };
 
-    template <typename T>
+    export template <typename T>
     concept NonTrivialLoggable = requires(T t, LogDestination destination)
     {
         log_non_trivial(destination, t);
@@ -34,7 +34,7 @@ namespace ge
 
     // TODO: log unions
 
-    template <typename T>
+    export template <typename T>
     concept Loggable =
         std::integral<T> or
         std::floating_point<T> or

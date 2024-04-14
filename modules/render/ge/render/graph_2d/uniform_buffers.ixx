@@ -1,0 +1,18 @@
+module;
+
+#include <vulkan/vulkan.hpp>
+
+#include <vector>
+
+export module graph_2d.uniform_buffers;
+
+export import vulkan_common.buffer;
+
+namespace ge::graph
+{
+    export std::vector<BufferData> create_uniform_buffers
+    (
+        const DeviceData&,
+        size_t count
+    );
+}

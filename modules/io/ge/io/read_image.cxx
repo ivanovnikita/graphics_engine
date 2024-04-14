@@ -10,7 +10,7 @@ module;
 
 #include <string>
 
-module read_image;
+module io.read_image;
 
 import safe_cast;
 import exception;

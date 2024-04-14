@@ -2,9 +2,9 @@ module;
 
 #include <gtest/gtest.h>
 
-export module tests.read_image;
+export module tests.io.read_image;
 
-import read_image;
+import io.read_image;
 import exception;
 
 module : private;

@@ -2,9 +2,9 @@ module;
 
 #include <string>
 
-export module read_image;
+export module io.read_image;
 
-export import image;
+export import io.image;
 
 namespace ge
 {

@@ -615,7 +615,7 @@ def generate_reflection_structs(structs):
         if struct.protect:
             result += f'#ifdef {struct.protect}\n\n'
 
-        result += f'    constexpr auto register_members(const {struct.get_cpp_name()}*) noexcept\n'
+        result += f'    export constexpr auto register_members(const {struct.get_cpp_name()}*) noexcept\n'
         result += '    {\n'
         result += '        using namespace ge;\n'
         result += '        return std::tuple\n'
@@ -640,14 +640,16 @@ def generate_reflection_structs(structs):
     return result
 
 
-def generate_reflection(api):
+def generate_reflection(api, module_name):
     result = ''
 
-    result += '#pragma once\n\n'
-
-    result += '#include "ge/common/reflection/member.hpp"\n\n'
+    result += 'module;\n\n'
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += f'export module {module_name};\n\n'
+
+    result += 'export import member;\n\n'
 
     result += 'namespace vk\n'
     result += '{\n'    
@@ -660,14 +662,16 @@ def generate_reflection(api):
     return result
 
 
-def generate_enum_to_string_view_decl(enums):
+def generate_enum_to_string_view_decl(enums, module_name):
     result = ''
 
-    result += '#pragma once\n\n'
+    result += 'module;\n\n'
 
     result += '#include <string_view>\n\n'
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += f'export module {module_name};'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -679,7 +683,7 @@ def generate_enum_to_string_view_decl(enums):
         if enum.protect:
             result += f'#ifdef {enum.protect}\n\n'
 
-        result += f'    std::string_view to_string_view({enum.get_cpp_name()}) noexcept;\n'
+        result += f'    export std::string_view to_string_view({enum.get_cpp_name()}) noexcept;\n'
 
         if enum.protect:
             result += '#endif\n\n'
@@ -688,10 +692,16 @@ def generate_enum_to_string_view_decl(enums):
 
     return result
 
-def generate_enum_to_string_view_def(enums):
+def generate_enum_to_string_view_def(enums, module_name):
     result = ''
 
-    result += '#include "to_string_view_enum.h"\n\n'
+    result += 'module;\n\n'
+
+    result += '#include <string_view>\n\n'
+
+    result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += f'module {module_name};\n\n'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -744,12 +754,14 @@ def generate_enum_to_string_view_def(enums):
     return result
 
 
-def generate_fwds(api):
+def generate_fwds(api, module_name):
     result = ''
 
-    result += '#pragma once\n\n'
+    result += 'module;\n\n'
 
     result += '#include <cstdint>\n\n'
+
+    result += f'export module {module_name};'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -761,7 +773,7 @@ def generate_fwds(api):
         if struct.protect:
             result += f'#ifdef {struct.protect}\n\n'
 
-        result += f'    struct {struct.get_cpp_name()};\n'
+        result += f'    export struct {struct.get_cpp_name()};\n'
 
         if struct.protect:
             result += '#endif\n\n'
@@ -780,7 +792,7 @@ def generate_fwds(api):
                 bitwidth = 'uint64_t'
             underlying_type = f' : {bitwidth}'
 
-        result += f'    enum class {enum.get_cpp_name()}{underlying_type};\n'
+        result += f'    export enum class {enum.get_cpp_name()}{underlying_type};\n'
 
         if enum.protect:
             result += '#endif\n\n'
@@ -790,14 +802,16 @@ def generate_fwds(api):
     return result
 
 
-def generate_invoke_for_downcasted(api):
+def generate_invoke_for_downcasted(api, module_name):
     result = ''
 
-    result += '#pragma once\n\n'
+    result += 'module;\n\n'
 
     result += '#include <string_view>\n\n'
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
+
+    result += f'export module {module_name};'
 
     result += 'namespace ge\n'
     result += '{\n'
@@ -807,7 +821,7 @@ def generate_invoke_for_downcasted(api):
     for entry in enum_structure_type.entries:
         enum_structure_type_entries[entry.name] = entry
 
-    result += '    template <typename F>\n'
+    result += '    export template <typename F>\n'
     result += '    void invoke_for_downcasted(const vk::BaseInStructure& in, F&& func)\n'
     result += '    {\n'
     result += '        const VkStructureType c_type = static_cast<VkStructureType>(in.sType);\n'
@@ -886,20 +900,20 @@ def generate_code(input_xml_file_path, output_dir):
     api = collect_api(root)
     #print_api(api)
 
-    refl = generate_reflection(api)
-    write_file(refl, output_dir, "vulkan_refl.hpp")
+    refl = generate_reflection(api, 'vulkan_refl')
+    write_file(refl, output_dir, 'vulkan_refl.ixx')
 
-    str_view_decl = generate_enum_to_string_view_decl(api.enums)
-    write_file(str_view_decl, output_dir, "to_string_view_enum.h")
+    str_view_decl = generate_enum_to_string_view_decl(api.enums, 'to_string_view_enum')
+    write_file(str_view_decl, output_dir, 'to_string_view_enum.ixx')
 
-    str_view_def = generate_enum_to_string_view_def(api.enums)
-    write_file(str_view_def, output_dir, "to_string_view_enum.cpp")
+    str_view_def = generate_enum_to_string_view_def(api.enums, 'to_string_view_enum')
+    write_file(str_view_def, output_dir, 'to_string_view_enum.cxx')
 
-    fwds = generate_fwds(api)
-    write_file(fwds, output_dir, "vulkan_fwds.h")
+    fwds = generate_fwds(api, 'vulkan_fwd')
+    write_file(fwds, output_dir, 'vulkan_fwds.ixx')
 
-    downcasted = generate_invoke_for_downcasted(api)
-    write_file(downcasted, output_dir, "invoke_for_downcasted.h")
+    downcasted = generate_invoke_for_downcasted(api, 'invoke_for_downcasted')
+    write_file(downcasted, output_dir, 'invoke_for_downcasted.ixx')
 
 
 if __name__ == '__main__':

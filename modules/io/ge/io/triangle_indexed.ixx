@@ -4,7 +4,7 @@ module;
 
 #include <cstddef>
 
-export module triangle_indexed;
+export module io.triangle_indexed;
 
 namespace ge
 {

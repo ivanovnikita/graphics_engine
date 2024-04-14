@@ -5,7 +5,7 @@ module;
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-module read_model;
+module io.read_model;
 
 import safe_cast;
 import exception;
