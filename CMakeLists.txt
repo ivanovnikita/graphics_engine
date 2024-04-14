@@ -8,7 +8,7 @@ include(CMakeDependentOption)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(default_debug_layers OFF)
-    set(default_lto ON)
+    set(default_lto OFF)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(default_debug_layers ON)
     set(default_lto OFF)
