@@ -24,12 +24,14 @@ add_custom_command(
 set(generated_sources_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
 set(generated_vulkan_interfaces
     "${generated_sources_dir}/to_string_view_enum.ixx"
-    "${generated_sources_dir}/vulkan_fwds.ixx"
     "${generated_sources_dir}/vulkan_refl.ixx"
     "${generated_sources_dir}/invoke_for_downcasted.ixx"
 )
 set(generated_vulkan_implementations
     "${generated_sources_dir}/to_string_view_enum.cxx"
+)
+set(generated_vulkan_headers
+    "${generated_sources_dir}/vulkan_fwds.h"
 )
 set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
 list (GET VulkanHeaders_INCLUDE_DIRS 0 vulkan_headers_include_dir)
@@ -37,6 +39,7 @@ add_custom_command(
     OUTPUT
         ${generated_vulkan_interfaces}
         ${generated_vulkan_implementations}
+        ${generated_vulkan_headers}
     COMMAND
         "${refl_generator_script}"
             -i
@@ -74,6 +77,7 @@ target_sources(render
             ${generated_vulkan_interfaces}
         FILE_SET HEADERS FILES
             ${headers}
+            ${generated_vulkan_headers}
 )
 target_compile_options(render PRIVATE ${GE_COMPILE_OPTIONS})
 set_target_properties(render PROPERTIES ${GE_TARGET_PROPERTIES} OUTPUT_NAME ge_render)
@@ -109,6 +113,7 @@ source_group(render
         ${generated_shaders_implementations}
         ${generated_vulkan_interfaces}
         ${generated_vulkan_implementations}
+        ${generated_vulkan_headers}
         ${shaders_sources}
         ${headers}
         ${legacy_sources}

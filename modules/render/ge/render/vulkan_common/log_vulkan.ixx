@@ -48,4 +48,3 @@ namespace ge
         log(destination, "<handle>");
     }
 }
-

@@ -1,6 +1,6 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan_fwds.h"
 
 #include <string_view>
 
@@ -23,5 +23,4 @@ namespace ge
     export std::string_view to_string_view(DeviceFeatures);
 
     export vk::PhysicalDeviceFeatures to_vk_physical_device_features(const DeviceFeaturesFlags&);
-
 }

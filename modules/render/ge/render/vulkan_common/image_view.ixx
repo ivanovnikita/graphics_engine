@@ -1,8 +1,9 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan_fwds.h"
 
 #include <span>
+#include <vector>
 
 export module vulkan_common.image_view;
 

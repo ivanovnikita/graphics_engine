@@ -1,6 +1,6 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "ge/render/vulkan_common/vulkan_fwds.h"
 
 export module image_2d.pipelines;
 

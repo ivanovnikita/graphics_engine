@@ -1,6 +1,8 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan_fwds.h"
+
+#include <optional>
 
 export module vulkan_common.create_antialiasing;
 

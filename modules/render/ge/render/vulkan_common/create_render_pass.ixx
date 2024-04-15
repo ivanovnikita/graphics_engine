@@ -1,6 +1,6 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan_fwds.h"
 
 export module vulkan_common.create_render_pass;
 

@@ -1,7 +1,5 @@
 module;
 
-#include <glm/glm.hpp>
-
 #include <functional>
 #include <optional>
 

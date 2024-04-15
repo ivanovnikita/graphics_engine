@@ -1,6 +1,8 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan_fwds.h"
+
+#include <vulkan/vulkan.h>
 
 export module vulkan_common.debug_callback;
 

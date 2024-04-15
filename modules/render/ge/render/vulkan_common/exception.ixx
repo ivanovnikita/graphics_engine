@@ -1,7 +1,5 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <stdexcept>
 #include <string_view>
 

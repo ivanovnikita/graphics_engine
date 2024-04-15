@@ -754,14 +754,12 @@ def generate_enum_to_string_view_def(enums, module_name):
     return result
 
 
-def generate_fwds(api, module_name):
+def generate_fwds(api):
     result = ''
 
-    result += 'module;\n\n'
+    result += '#pragma once\n\n'
 
     result += '#include <cstdint>\n\n'
-
-    result += f'export module {module_name};'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -773,7 +771,7 @@ def generate_fwds(api, module_name):
         if struct.protect:
             result += f'#ifdef {struct.protect}\n\n'
 
-        result += f'    export struct {struct.get_cpp_name()};\n'
+        result += f'    struct {struct.get_cpp_name()};\n'
 
         if struct.protect:
             result += '#endif\n\n'
@@ -792,7 +790,7 @@ def generate_fwds(api, module_name):
                 bitwidth = 'uint64_t'
             underlying_type = f' : {bitwidth}'
 
-        result += f'    export enum class {enum.get_cpp_name()}{underlying_type};\n'
+        result += f'    enum class {enum.get_cpp_name()}{underlying_type};\n'
 
         if enum.protect:
             result += '#endif\n\n'
@@ -909,8 +907,8 @@ def generate_code(input_xml_file_path, output_dir):
     str_view_def = generate_enum_to_string_view_def(api.enums, 'to_string_view_enum')
     write_file(str_view_def, output_dir, 'to_string_view_enum.cxx')
 
-    fwds = generate_fwds(api, 'vulkan_fwd')
-    write_file(fwds, output_dir, 'vulkan_fwds.ixx')
+    fwds = generate_fwds(api)
+    write_file(fwds, output_dir, 'vulkan_fwds.h')
 
     downcasted = generate_invoke_for_downcasted(api, 'invoke_for_downcasted')
     write_file(downcasted, output_dir, 'invoke_for_downcasted.ixx')

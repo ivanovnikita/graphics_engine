@@ -1,7 +1,5 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <vector>
 
 export module vulkan_common.uniform_buffers;

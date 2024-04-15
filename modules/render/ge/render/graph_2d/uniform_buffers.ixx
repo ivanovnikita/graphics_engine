@@ -1,7 +1,5 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <vector>
 
 export module graph_2d.uniform_buffers;

@@ -1,6 +1,8 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "ge/render/vulkan_common/vulkan_fwds.h"
+
+#include <array>
 
 export module image_2d.vertex_description;
 

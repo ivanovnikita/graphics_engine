@@ -1,6 +1,8 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include "ge/render/vulkan_common/vulkan_fwds.h"
+
+#include <cstddef>
 
 export module image_3d.descriptor_pool;
 
