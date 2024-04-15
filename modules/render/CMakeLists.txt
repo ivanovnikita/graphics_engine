@@ -87,6 +87,10 @@ target_include_directories(render
         $<BUILD_INTERFACE:${generated_sources_dir}>
         $<INSTALL_INTERFACE:include>
 )
+target_precompile_headers(render
+    PUBLIC
+        <vulkan/vulkan.hpp>
+)
 add_library(GE::render ALIAS render)
 define_source_group(render)
 
