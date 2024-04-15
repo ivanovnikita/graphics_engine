@@ -6,7 +6,9 @@ module;
 
 module vulkan_common.image;
 
+import extent;
 import vulkan_common.exception;
+import vulkan_common.device;
 import vulkan_common.buffer;
 import vulkan_common.command_buffer;
 import vulkan_common.image_view;

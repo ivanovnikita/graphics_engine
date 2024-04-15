@@ -6,7 +6,7 @@ module;
 
 export module vulkan_common.device_extensions;
 
-export import flags;
+import flags;
 
 namespace ge
 {

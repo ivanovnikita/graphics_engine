@@ -7,6 +7,8 @@ export module vulkan_common.texture_image;
 export import vulkan_common.image;
 export import io.image;
 
+import vulkan_common.device_fwd;
+
 namespace ge
 {
     export struct TextureImageData final

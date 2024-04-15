@@ -11,6 +11,7 @@ module;
 
 module vulkan_common.device;
 
+import vulkan_common.instance;
 import vulkan_common.log_vulkan;
 import vulkan_common.exception;
 //import invoke_for_downcasted;

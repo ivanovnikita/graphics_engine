@@ -1,12 +1,11 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <vector>
 
 export module image_3d.uniform_buffers;
 
-export import vulkan_common.buffer;
+import vulkan_common.buffer_fwd;
+import vulkan_common.device_fwd;
 
 namespace ge::image3d
 {

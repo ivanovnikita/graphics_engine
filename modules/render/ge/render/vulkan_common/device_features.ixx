@@ -1,12 +1,11 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <string_view>
 
 export module vulkan_common.device_features;
 
-export import flags;
+import flags;
+import vulkan_common.vulkan_fwds;
 
 namespace ge
 {
@@ -23,5 +22,4 @@ namespace ge
     export std::string_view to_string_view(DeviceFeatures);
 
     export vk::PhysicalDeviceFeatures to_vk_physical_device_features(const DeviceFeaturesFlags&);
-
 }

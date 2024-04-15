@@ -1,12 +1,15 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include <optional>
 
 export module vulkan_common.create_antialiasing;
 
-export import vulkan_common.device;
 export import vulkan_common.image;
 export import antialiasing;
+
+import extent;
+import vulkan_common.vulkan_fwds;
+import vulkan_common.device_fwd;
 
 namespace ge
 {
@@ -25,6 +28,6 @@ namespace ge
         const Antialiasing&,
         const DeviceData&,
         const Extent<uint32_t>&,
-        vk::Format
+        const vk::Format&
     );
 }

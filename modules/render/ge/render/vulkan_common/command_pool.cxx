@@ -7,6 +7,7 @@ module;
 module vulkan_common.command_pool;
 
 import vulkan_common.exception;
+import vulkan_common.device;
 
 namespace ge
 {

@@ -7,6 +7,7 @@ module;
 module vulkan_common.command_buffer;
 
 import vulkan_common.exception;
+import vulkan_common.device;
 import vulkan_common.fence;
 import vulkan_common.queue;
 import safe_cast;

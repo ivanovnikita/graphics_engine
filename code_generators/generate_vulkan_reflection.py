@@ -761,7 +761,7 @@ def generate_fwds(api, module_name):
 
     result += '#include <cstdint>\n\n'
 
-    result += f'export module {module_name};'
+    result += f'export module {module_name};\n\n'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -909,7 +909,7 @@ def generate_code(input_xml_file_path, output_dir):
     str_view_def = generate_enum_to_string_view_def(api.enums, 'to_string_view_enum')
     write_file(str_view_def, output_dir, 'to_string_view_enum.cxx')
 
-    fwds = generate_fwds(api, 'vulkan_fwd')
+    fwds = generate_fwds(api, 'vulkan_fwds')
     write_file(fwds, output_dir, 'vulkan_fwds.ixx')
 
     downcasted = generate_invoke_for_downcasted(api, 'invoke_for_downcasted')

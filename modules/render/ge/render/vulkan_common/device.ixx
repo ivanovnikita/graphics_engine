@@ -4,10 +4,12 @@ module;
 
 export module vulkan_common.device;
 
-export import vulkan_common.instance;
 export import vulkan_common.device_layers;
 export import vulkan_common.device_extensions;
 export import vulkan_common.device_features;
+
+import logger;
+import vulkan_common.instance_fwd;
 
 namespace ge
 {

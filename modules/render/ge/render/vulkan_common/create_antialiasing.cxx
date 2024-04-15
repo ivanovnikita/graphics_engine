@@ -4,6 +4,7 @@ module;
 
 module vulkan_common.create_antialiasing;
 
+import vulkan_common.device;
 import vulkan_common.sample_counts;
 import overloaded;
 
@@ -69,7 +70,7 @@ namespace ge
         const Antialiasing& antialiasing,
         const DeviceData& device_data,
         const Extent<uint32_t>& extent,
-        const vk::Format format
+        const vk::Format& format
     )
     {
         return std::visit

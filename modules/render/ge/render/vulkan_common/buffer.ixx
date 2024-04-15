@@ -4,7 +4,7 @@ module;
 
 export module vulkan_common.buffer;
 
-export import vulkan_common.device;
+import vulkan_common.device_fwd;
 
 namespace ge
 {

@@ -1,12 +1,11 @@
 module;
 
-#include <vulkan/vulkan.hpp>
-
 #include <vector>
 
 export module vulkan_common.command_buffer;
 
-export import vulkan_common.device;
+import vulkan_common.vulkan_fwds;
+import vulkan_common.device_fwd;
 
 namespace ge
 {

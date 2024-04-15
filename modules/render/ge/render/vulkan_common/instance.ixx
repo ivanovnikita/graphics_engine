@@ -7,7 +7,7 @@ export module vulkan_common.instance;
 export import vulkan_common.version;
 export import vulkan_common.instance_layers;
 export import vulkan_common.instance_extensions;
-export import logger;
+import logger;
 
 namespace ge
 {

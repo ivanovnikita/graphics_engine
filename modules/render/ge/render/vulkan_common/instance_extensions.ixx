@@ -6,7 +6,7 @@ module;
 
 export module vulkan_common.instance_extensions;
 
-export import flags;
+import flags;
 
 namespace ge
 {

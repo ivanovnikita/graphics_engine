@@ -4,8 +4,9 @@ module;
 
 export module vulkan_common.depth_buffer;
 
-export import vulkan_common.device;
-export import vulkan_common.image;
+import extent;
+import vulkan_common.device_fwd;
+import vulkan_common.image;
 
 namespace ge
 {

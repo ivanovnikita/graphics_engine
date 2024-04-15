@@ -1,11 +1,13 @@
 module;
 
-#include <vulkan/vulkan.hpp>
+#include <vector>
 
 module tiles_2d.uniform_buffers;
 
 import view_proj_2d;
+import vulkan_common.buffer;
 import vulkan_common.uniform_buffers;
+import vulkan_common.device;
 
 namespace ge::tiles
 {

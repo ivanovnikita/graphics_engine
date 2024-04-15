@@ -7,6 +7,8 @@ module;
 module vulkan_common.uniform_buffers;
 
 import exception;
+import vulkan_common.buffer;
+import vulkan_common.device;
 
 namespace ge
 {

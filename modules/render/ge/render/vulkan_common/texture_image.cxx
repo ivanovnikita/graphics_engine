@@ -8,11 +8,13 @@ module;
 
 module vulkan_common.texture_image;
 
+import vulkan_common.device;
 import vulkan_common.buffer;
 import vulkan_common.command_buffer;
 import vulkan_common.sampler;
 import safe_cast;
 import exception;
+import extent;
 
 namespace ge
 {

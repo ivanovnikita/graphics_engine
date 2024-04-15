@@ -4,7 +4,9 @@ module;
 
 module vulkan_common.depth_buffer;
 
+import extent;
 import vulkan_common.format;
+import vulkan_common.device;
 
 namespace ge
 {
