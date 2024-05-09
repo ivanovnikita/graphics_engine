@@ -31,6 +31,7 @@ namespace ge
         virtual ~WithCamera3dI();
 
         virtual const Camera3d& get_camera() const = 0;
+        virtual Camera3d& get_camera() = 0;
         virtual void set_camera(Camera3d) = 0;
     };
 
@@ -44,5 +45,11 @@ namespace ge
     {
     public:
         virtual ~Render3dI() override;
+    };
+
+    enum class NeedRedraw : uint8_t
+    {
+        No = 0,
+        Yes = 1
     };
 }

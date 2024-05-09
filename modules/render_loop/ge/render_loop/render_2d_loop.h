@@ -38,12 +38,6 @@ namespace ge
     class Render2dLoop final
     {
     public:
-        enum class NeedRedraw : uint8_t
-        {
-            No = 0,
-            Yes = 1
-        };
-
         using MouseButtonPressCallback = std::function<NeedRedraw(const world2d::MouseButtonPress&)>;
         using MouseButtonReleaseCallback = std::function<NeedRedraw(const world2d::MouseButtonRelease&)>;
         using MouseMoveCallback = std::function<NeedRedraw(const world2d::MouseMoveEvent&)>;

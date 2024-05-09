@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ge/render/camera/camera_3d_mover_i.h"
 #include "ge/render/render_i.h"
 #include "ge/window/window_i.h"
 
@@ -11,16 +12,11 @@ namespace ge
     class Render3dLoop final
     {
     public:
-        enum class NeedRedraw : uint8_t
-        {
-            No = 0,
-            Yes = 1
-        };
-
         explicit Render3dLoop
         (
             WindowI&,
-            Render3dI&
+            Render3dI&,
+            Camera3dMoverI&
         );
 
         bool stopped() const;
@@ -35,6 +31,8 @@ namespace ge
         WindowI& window_;
         Render3dI& render_;
         bool stopped_;
+
+        Camera3dMoverI& camera_mover_;
 
         NeedRedraw need_redraw_;
     };

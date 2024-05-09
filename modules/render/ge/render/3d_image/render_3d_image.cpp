@@ -83,6 +83,11 @@ namespace ge::image3d
         return camera_;
     }
 
+    Camera3d& Render3dImage::get_camera()
+    {
+        return camera_;
+    }
+
     void Render3dImage::set_camera(Camera3d camera)
     {
         camera_ = std::move(camera);
@@ -96,12 +101,12 @@ namespace ge::image3d
 
     void Render3dImage::set_object_to_draw
     (
-        const World3dCoords object_pos,
+        ObjectTransform object_transform,
         const std::span<const Polygons>& polygons,
         const Image& image
     )
     {
-        object_pos_ = object_pos;
+        object_transform_ = object_transform;
 
         polygons_in_device_memory_ = load_polygons_to_device
         (
@@ -180,7 +185,7 @@ namespace ge::image3d
     void Render3dImage::update_uniform_buffer(const size_t current_image)
     {
         assert(current_image < swapchain_data_.images.size());
-        assert(object_pos_.has_value());
+        assert(object_transform_.has_value());
 
         constexpr uint32_t offset = 0;
         void* const data = map_memory
@@ -191,7 +196,7 @@ namespace ge::image3d
             sizeof(Mvp3d),
             vk::MemoryMapFlags{}
         );
-        const Mvp3d mvp = camera_.get_mvp(*object_pos_);
+        const Mvp3d mvp = camera_.get_mvp(*object_transform_);
         std::memcpy(data, &mvp, sizeof(Mvp3d));
         device_data_.logical_device->unmapMemory(*uniform_buffers_[current_image].device_memory);
     }

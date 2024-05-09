@@ -219,7 +219,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (selected_hex_pos == prev_selected_square_pointy)
             {
-                return Render2dLoop::NeedRedraw::No;
+                return NeedRedraw::No;
             }
 
             prev_selected_square_pointy = selected_hex_pos;
@@ -229,7 +229,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             render.set_object_to_draw(fixed_grid_pointy);
 
-            return Render2dLoop::NeedRedraw::Yes;
+            return NeedRedraw::Yes;
         };
 
         Camera2d camera = render.get_camera();

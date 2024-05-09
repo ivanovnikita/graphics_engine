@@ -1,7 +1,10 @@
 #include "render_3d_loop.h"
 
+#include <iostream>
+
 namespace ge
 {
+
     template <typename T>
     void Render3dLoop::handle_window_event(const T&)
     {
@@ -26,14 +29,56 @@ namespace ge
         need_redraw_= NeedRedraw::Yes;
     }
 
+    template <>
+    void Render3dLoop::handle_window_event(const ServiceKeyPress& e)
+    {
+        need_redraw_ = camera_mover_.handle_window_event(e);
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const ServiceKeyRelease&)
+    {
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const LatinKeyPress& e)
+    {
+        need_redraw_ = camera_mover_.handle_window_event(e);
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const LatinKeyRelease&)
+    {
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const MouseMoveEvent& e)
+    {
+        need_redraw_ = camera_mover_.handle_window_event(e);
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const MouseButtonPress& e)
+    {
+        need_redraw_ = camera_mover_.handle_window_event(e);
+    }
+
+    template <>
+    void Render3dLoop::handle_window_event(const MouseButtonRelease& e)
+    {
+        need_redraw_ = camera_mover_.handle_window_event(e);
+    }
+
     Render3dLoop::Render3dLoop
     (
         WindowI& window,
-        Render3dI& render
+        Render3dI& render,
+        Camera3dMoverI& camera_mover
     )
         : window_{window}
         , render_{render}
         , stopped_{false}
+        , camera_mover_{camera_mover}
         , need_redraw_{NeedRedraw::No}
     {
     }

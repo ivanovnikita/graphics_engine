@@ -2,6 +2,7 @@
 #include "ge/io/read_image.h"
 #include "ge/io/read_model.h"
 #include "ge/common/exception.h"
+#include "ge/render/camera/camera_3d_mover_fps.h"
 #include "ge/window/linux/window_xcb.h"
 #include "ge/render_loop/render_3d_loop.h"
 
@@ -22,24 +23,16 @@ namespace square
 {
     [[ maybe_unused ]] constexpr std::array vertices
     {
-        V{C{{-0.5f, -0.5f, 0.f}}, {{0.f, 1.f}}},
-        V{C{{0.5f, -0.5f, 0.f}}, {{1.f, 1.f}}},
-        V{C{{0.5f, 0.5f, 0.f}}, {{1.f, 0.f}}},
-        V{C{{-0.5f, 0.5f, 0.f}}, {{0.f, 0.f}}},
-
-        V{C{{-0.5f, -0.5f, -0.5f}}, {{0.f, 1.f}}},
-        V{C{{0.5f, -0.5f, -0.5f}}, {{1.f, 1.f}}},
-        V{C{{0.5f, 0.5f, -0.5f}}, {{1.f, 0.f}}},
-        V{C{{-0.5f, 0.5f, -0.5f}}, {{0.f, 0.f}}},
+        V{C{{0.f, 0.f, 0.f}}, {{0.f, 1.f}}},
+        V{C{{1.f, 0.f, 0.f}}, {{1.f, 1.f}}},
+        V{C{{1.f, 1.f, 0.f}}, {{1.f, 0.f}}},
+        V{C{{0.f, 1.f, 0.f}}, {{0.f, 0.f}}},
     };
 
     [[ maybe_unused ]] constexpr std::array triangles
     {
         T{{0, 1, 2}},
         T{{2, 3, 0}},
-
-        T{{4, 5, 6}},
-        T{{6, 7, 4}},
     };
 }
 
@@ -90,13 +83,14 @@ int main(int /*argc*/, char* /*argv*/[])
             Msaa{.samples = MsaaSamples::x8, .enable_sample_shading = false},
             logger
         );
+        Camera3dMoverFps camera_mover{render};
 
         window.start_display();
 
         std::array<Polygons, 1> models;
         std::optional<Image> texture;
 
-        const bool draw_square = false;
+        const bool draw_square = true;
         const bool draw_model = true;
 
         if (draw_square)
@@ -108,31 +102,51 @@ int main(int /*argc*/, char* /*argv*/[])
             };
             texture.emplace(read_image("../res/dwarf_king.jpg"));
 
-            Camera3d camera = render.get_camera();
-            camera.set_pos(World3dCoords{{-2.f, -2.f, 2.f}});
-            render.set_camera(std::move(camera));
+            World3dCoords obj_pos{{-1.f, -1.f, -1.f}};
+            render.set_object_to_draw
+            (
+                ObjectTransform
+                {
+                    .pos = obj_pos,
+                    .rotate = glm::vec3{0.f},
+                    .scale = glm::vec3{1.f}
+                },
+                models,
+                *texture
+            );
+            render.get_camera().set_pos(World3dCoords{{0.f, 0.f, 0.f}});
+            camera_mover.look_at(obj_pos);
         }
         else if (draw_model)
         {
             models[0] = from_model(read_model_obj("../res/viking_room.obj"));
             texture.emplace(read_image("../res/viking_room.png"));
+            World3dCoords obj_pos{{-1.f, -1.f, -1.f}};
+            render.set_object_to_draw
+            (
+                ObjectTransform
+                {
+                    .pos = obj_pos,
+                    .rotate = glm::vec3{-90.f, -90.f, 0.f},
+                    .scale = glm::vec3{1.f}
+                },
+                models,
+                *texture
+            );
 
-            Camera3d camera = render.get_camera();
-            camera.set_pos(World3dCoords{{2.f, 2.f, 2.f}});
-            render.set_camera(std::move(camera));
+            render.get_camera().set_pos(World3dCoords{{0.f, 0.f, 0.f}});
+            camera_mover.look_at(obj_pos);
         }
 
         assert(texture.has_value());
 
-        render.set_object_to_draw(World3dCoords{{0.f, 0.f, 0.f}}, models, *texture);
-
         render.draw_frame();
 
-        Render3dLoop render_loop{window, render};
+        Render3dLoop render_loop{window, render, camera_mover};
         while (not render_loop.stopped())
         {
             render_loop.handle_window_events();
-//            render.draw_frame();
+            render.draw_frame();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }

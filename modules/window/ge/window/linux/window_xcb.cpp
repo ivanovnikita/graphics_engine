@@ -1082,7 +1082,7 @@ namespace ge
             {
                 assert(key_syms_ != nullptr);
                 auto key_release_event = reinterpret_cast<xcb_key_release_event_t*>(event.get());
-                events.emplace_back(handle_key_event<ButtonEvent::PRESS>(*key_syms_, *key_release_event));
+                events.emplace_back(handle_key_event<ButtonEvent::RELEASE>(*key_syms_, *key_release_event));
                 break;
             }
             }
