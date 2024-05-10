@@ -52,4 +52,6 @@ namespace ge
         No = 0,
         Yes = 1
     };
+
+    NeedRedraw combine_need_redraw(const NeedRedraw old_value, const NeedRedraw new_value);
 }

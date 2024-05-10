@@ -198,7 +198,7 @@ namespace ge
     
     void Render2dLoop::combine_need_redraw(NeedRedraw v)
     {
-        need_redraw_ = static_cast<NeedRedraw>(static_cast<uint8_t>(need_redraw_) | static_cast<uint8_t>(v));
+        need_redraw_ = ::ge::combine_need_redraw(need_redraw_, v);
     }
     
     void Render2dLoop::deactivate_state(const InputState state)

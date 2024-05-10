@@ -32,41 +32,43 @@ namespace ge
     template <>
     void Render3dLoop::handle_window_event(const ServiceKeyPress& e)
     {
-        need_redraw_ = camera_mover_.handle_window_event(e);
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
-    void Render3dLoop::handle_window_event(const ServiceKeyRelease&)
+    void Render3dLoop::handle_window_event(const ServiceKeyRelease& e)
     {
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
     void Render3dLoop::handle_window_event(const LatinKeyPress& e)
     {
-        need_redraw_ = camera_mover_.handle_window_event(e);
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
-    void Render3dLoop::handle_window_event(const LatinKeyRelease&)
+    void Render3dLoop::handle_window_event(const LatinKeyRelease& e)
     {
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
     void Render3dLoop::handle_window_event(const MouseMoveEvent& e)
     {
-        need_redraw_ = camera_mover_.handle_window_event(e);
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
     void Render3dLoop::handle_window_event(const MouseButtonPress& e)
     {
-        need_redraw_ = camera_mover_.handle_window_event(e);
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     template <>
     void Render3dLoop::handle_window_event(const MouseButtonRelease& e)
     {
-        need_redraw_ = camera_mover_.handle_window_event(e);
+        combine_need_redraw(camera_mover_.handle_window_event(e));
     }
 
     Render3dLoop::Render3dLoop
@@ -103,6 +105,17 @@ namespace ge
             );
         }
 
+        const std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+
+        if (prev_timestamp_.has_value())
+        {
+            // TODO: а что если прошло слишком много времени?
+            const auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - *prev_timestamp_);
+            combine_need_redraw(camera_mover_.move_camera(delta));
+        }
+
+        prev_timestamp_ = now;
+
         switch (need_redraw_)
         {
         case NeedRedraw::Yes:
@@ -120,6 +133,6 @@ namespace ge
     
     void Render3dLoop::combine_need_redraw(NeedRedraw v)
     {
-        need_redraw_ = static_cast<NeedRedraw>(static_cast<uint8_t>(need_redraw_) | static_cast<uint8_t>(v));
+        need_redraw_ = ::ge::combine_need_redraw(need_redraw_, v);
     }
 }

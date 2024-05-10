@@ -1,12 +1,13 @@
 #pragma once
 
+#include "ge/common/flags.hpp"
 #include "ge/window/window_events.h"
 
 namespace ge
 {
     enum class KeyboardKey
     {
-        Enter,
+        Enter = 1,
         Tab,
 
         BackSpace,
@@ -78,4 +79,6 @@ namespace ge
 
     std::optional<KeyboardKey> map(ServiceKey);
     std::optional<KeyboardKey> map(char);
+
+    using Keyboard = Flags<KeyboardKey>;
 }

@@ -4,6 +4,7 @@
 #include "ge/render/render_i.h"
 #include "ge/window/window_i.h"
 
+#include <chrono>
 #include <optional>
 #include <functional>
 
@@ -35,5 +36,7 @@ namespace ge
         Camera3dMoverI& camera_mover_;
 
         NeedRedraw need_redraw_;
+
+        std::optional<std::chrono::high_resolution_clock::time_point> prev_timestamp_;
     };
 }

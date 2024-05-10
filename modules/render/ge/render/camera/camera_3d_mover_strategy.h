@@ -11,9 +11,13 @@ namespace ge
         ~Camera3dMoverStrategy() override;
 
         NeedRedraw handle_window_event(const ServiceKeyPress&) override;
+        NeedRedraw handle_window_event(const ServiceKeyRelease&) override;
         NeedRedraw handle_window_event(const LatinKeyPress&) override;
+        NeedRedraw handle_window_event(const LatinKeyRelease&) override;
         NeedRedraw handle_window_event(const MouseButtonPress&) override;
         NeedRedraw handle_window_event(const MouseButtonRelease&) override;
         NeedRedraw handle_window_event(const MouseMoveEvent&) override;
+
+        NeedRedraw move_camera(const std::chrono::milliseconds& delta_time) override;
     };
 }
