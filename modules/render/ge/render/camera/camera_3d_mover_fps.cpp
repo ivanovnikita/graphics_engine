@@ -1,5 +1,6 @@
 #include "camera_3d_mover_fps.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext/quaternion_float.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/gtc/quaternion.hpp>

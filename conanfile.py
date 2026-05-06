@@ -61,4 +61,4 @@ class GraphicsEngineConan(ConanFile):
             self.requires("spirv-headers/1.3.236.0", override=True)
 
         if self.options.build_tests or self.options.build_graphics_tests:
-            self.requires("gtest/1.10.0")
+            self.requires("gtest/1.17.0")
