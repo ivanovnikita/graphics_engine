@@ -3,6 +3,8 @@ module;
 #include <optional>
 #include <functional>
 
+#include <cstdint>
+
 export module render_3d_loop;
 
 export import render_i;

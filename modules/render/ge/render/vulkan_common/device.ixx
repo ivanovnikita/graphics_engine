@@ -9,7 +9,7 @@ export import vulkan_common.device_extensions;
 export import vulkan_common.device_features;
 
 import logger;
-import vulkan_common.instance_fwd;
+import vulkan_common.instance;
 
 namespace ge
 {
@@ -42,6 +42,8 @@ namespace ge
             const vk::SurfaceKHR&,
             const Logger&
         );
+
+        ~DeviceData() = default;
 
         PhysicalDeviceData physical_device_data;
         vk::UniqueDevice logical_device;

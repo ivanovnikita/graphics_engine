@@ -4,6 +4,8 @@ module;
 #include <variant>
 #include <vector>
 
+#include <cstdint>
+
 module render_2d_loop;
 
 namespace ge

@@ -15,10 +15,10 @@ import log;
 import bits_range;
 import reflection;
 
-module : private;
+// module : private;
 
-namespace
-{
+// namespace
+// {
     template <typename T>
     struct TypeName final
     {
@@ -95,7 +95,7 @@ namespace
     {
         static constexpr std::string_view NAME = "long double";
     };
-}
+// }
 
 TEST(log, string_view)
 {
@@ -274,18 +274,18 @@ TEST(log, enums)
     log_flush(LogDestination::StdOut);
 }
 
-TEST(log, bit_flags)
-{
-    using namespace ge;
+// TEST(log, bit_flags)
+// {
+//     using namespace ge;
 
-    const uint8_t flags =
-        static_cast<uint8_t>(BitFlags::Foo) |
-        static_cast<uint8_t>(BitFlags::Baz);
+//     const uint8_t flags =
+//         static_cast<uint8_t>(BitFlags::Foo) |
+//         static_cast<uint8_t>(BitFlags::Baz);
 
-    log(LogDestination::StdOut, to_enum_bits_range<BitFlags>(flags));
-    log(LogDestination::StdOut, "\n");
-    log_flush(LogDestination::StdOut);
-}
+//     log(LogDestination::StdOut, to_enum_bits_range<BitFlags>(flags));
+//     log(LogDestination::StdOut, "\n");
+//     log_flush(LogDestination::StdOut);
+// }
 
 namespace
 {

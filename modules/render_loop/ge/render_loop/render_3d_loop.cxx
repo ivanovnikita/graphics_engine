@@ -3,6 +3,8 @@ module;
 #include <variant>
 #include <vector>
 
+#include <cstdint>
+
 module render_3d_loop;
 
 namespace ge

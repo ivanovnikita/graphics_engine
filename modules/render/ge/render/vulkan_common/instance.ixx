@@ -20,6 +20,8 @@ namespace ge
             const Logger&
         );
 
+        ~InstanceData() = default;
+
         vk::UniqueInstance instance;
         Version api_version;
         InstanceLayerFlags enabled_layers;

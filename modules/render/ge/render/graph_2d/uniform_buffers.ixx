@@ -4,8 +4,8 @@ module;
 
 export module graph_2d.uniform_buffers;
 
-import vulkan_common.buffer_fwd;
-import vulkan_common.device_fwd;
+import vulkan_common.buffer;
+import vulkan_common.device;
 
 namespace ge::graph
 {

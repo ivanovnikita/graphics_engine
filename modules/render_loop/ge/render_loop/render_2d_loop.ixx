@@ -3,6 +3,8 @@ module;
 #include <optional>
 #include <functional>
 
+#include <cstdint>
+
 export module render_2d_loop;
 
 export import flags;

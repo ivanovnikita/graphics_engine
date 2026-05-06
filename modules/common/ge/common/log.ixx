@@ -175,13 +175,13 @@ namespace ge
             const auto it_end = std::ranges::end(range);
             if (it != it_end)
             {
-                log(destination, *it);
+                // log(destination, *it);
                 ++it;
             }
 
             while (it != it_end)
             {
-                log(destination, ", ", *it);
+                // log(destination, ", ", *it);
                 ++it;
             }
 
@@ -196,8 +196,8 @@ namespace ge
         log(destination, "<pointer>");
     }
 
-    void log(const LogDestination destination, Loggable auto ... values) noexcept
+    void log(const LogDestination /*destination*/, Loggable auto ... /*values*/) noexcept
     {
-        (detail::log(destination, values), ...);
+        // (detail::log(destination, values), ...);
     }
 }

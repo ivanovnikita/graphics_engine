@@ -3,6 +3,7 @@ module;
 #include <vulkan/vulkan.h>
 
 #include <span>
+#include <string_view>
 
 #include <cassert>
 

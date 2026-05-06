@@ -4,7 +4,7 @@ module;
 
 export module vulkan_common.image;
 
-import vulkan_common.device_fwd;
+import vulkan_common.device;
 import extent;
 
 namespace ge

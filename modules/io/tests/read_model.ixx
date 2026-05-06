@@ -7,7 +7,7 @@ export module tests.io.read_model;
 import io.read_model;
 import exception;
 
-module : private;
+// module : private;
 
 TEST(read_model, success)
 {

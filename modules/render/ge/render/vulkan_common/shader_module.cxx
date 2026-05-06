@@ -48,7 +48,7 @@ namespace ge
         return vk::UniqueShaderModule
         {
             std::move(shader_module),
-            vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+            vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
         };
     }
 }

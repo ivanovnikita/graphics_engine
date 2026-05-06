@@ -618,6 +618,7 @@ def generate_reflection_structs(structs):
         result += f'    export constexpr auto register_members(const {struct.get_cpp_name()}*) noexcept\n'
         result += '    {\n'
         result += '        using namespace ge;\n'
+        result += '        using namespace vk;\n'
         result += '        return std::tuple\n'
         result += '        {\n'
         
@@ -671,7 +672,7 @@ def generate_enum_to_string_view_decl(enums, module_name):
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
 
-    result += f'export module {module_name};'
+    result += f'export module {module_name};\n\n'
 
     result += 'namespace vk\n'
     result += '{\n'
@@ -811,7 +812,7 @@ def generate_invoke_for_downcasted(api, module_name):
 
     result += '#include <vulkan/vulkan.hpp>\n\n'
 
-    result += f'export module {module_name};'
+    result += f'export module {module_name};\n\n'
 
     result += 'namespace ge\n'
     result += '{\n'

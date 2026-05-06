@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <vector>
+#include <optional>
 
 import graph_2d.render_graph_2d;
 import exception;

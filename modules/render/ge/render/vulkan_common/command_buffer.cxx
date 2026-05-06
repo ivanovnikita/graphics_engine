@@ -4,6 +4,8 @@ module;
 
 #include <vulkan/vulkan.hpp>
 
+#include <chrono>
+
 module vulkan_common.command_buffer;
 
 import vulkan_common.exception;
@@ -46,7 +48,7 @@ namespace ge
         }
         }
 
-        vk::PoolFree
+        vk::detail::PoolFree
         <
             vk::Device,
             vk::CommandPool,
@@ -102,7 +104,7 @@ namespace ge
         }
         }
 
-        vk::PoolFree
+        vk::detail::PoolFree
         <
             vk::Device,
             vk::CommandPool,

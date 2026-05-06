@@ -21,31 +21,31 @@ add_custom_command(
         ${shaders_sources}
 )
 
-set(generated_sources_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-set(generated_vulkan_interfaces
-    "${generated_sources_dir}/to_string_view_enum.ixx"
-    "${generated_sources_dir}/vulkan_fwds.ixx"
-    "${generated_sources_dir}/vulkan_refl.ixx"
-    "${generated_sources_dir}/invoke_for_downcasted.ixx"
-)
-set(generated_vulkan_implementations
-    "${generated_sources_dir}/to_string_view_enum.cxx"
-)
-set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
-list (GET VulkanHeaders_INCLUDE_DIRS 0 vulkan_headers_include_dir)
-add_custom_command(
-    OUTPUT
-        ${generated_vulkan_interfaces}
-        ${generated_vulkan_implementations}
-    COMMAND
-        "${refl_generator_script}"
-            -i
-                "${vulkan_headers_include_dir}/vk.xml"
-            -o
-                "${generated_sources_dir}"
-    DEPENDS
-        ${refl_generator_script}
-)
+#set(generated_sources_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
+#set(generated_vulkan_interfaces
+#    "${generated_sources_dir}/to_string_view_enum.ixx"
+#    "${generated_sources_dir}/vulkan_fwds.ixx"
+#    "${generated_sources_dir}/vulkan_refl.ixx"
+#    "${generated_sources_dir}/invoke_for_downcasted.ixx"
+#)
+#set(generated_vulkan_implementations
+#    "${generated_sources_dir}/to_string_view_enum.cxx"
+#)
+#set(refl_generator_script "${CMAKE_SOURCE_DIR}/code_generators/generate_vulkan_reflection.py")
+# list (GET VulkanHeaders_INCLUDE_DIRS 0 vulkan_headers_include_dir)
+# add_custom_command(
+#     OUTPUT
+#         ${generated_vulkan_interfaces}
+#         ${generated_vulkan_implementations}
+#     COMMAND
+#         "${refl_generator_script}"
+#             -i
+#                 "${vulkan_headers_include_dir}/vk.xml"
+#             -o
+#                 "${generated_sources_dir}"
+#     DEPENDS
+#         ${refl_generator_script}
+# )
 
 interfaces_in_dir_recurse(ge/render interfaces)
 implementations_in_dir_recurse(ge/render implementations)

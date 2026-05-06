@@ -7,7 +7,7 @@ export module tests.cs_hex_pointy;
 import point;
 import cs_hex_pointy;
 
-module : private;
+// module : private;
 
 TEST(cs_hex_pointy, draw_space_to_hex_doubled_width)
 {

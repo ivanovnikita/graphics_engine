@@ -4,6 +4,8 @@ module;
 
 #include <vulkan/vulkan.hpp>
 
+#include <variant>
+
 module vulkan_common.surface;
 
 import vulkan_common.exception;

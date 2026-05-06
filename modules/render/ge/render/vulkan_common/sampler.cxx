@@ -56,7 +56,7 @@ namespace ge
         return vk::UniqueSampler
         {
             std::move(sampler),
-            vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{*device_data.logical_device}
+            vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{*device_data.logical_device}
         };
     }
 }

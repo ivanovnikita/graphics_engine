@@ -7,7 +7,7 @@ export module tests.io.read_image;
 import io.read_image;
 import exception;
 
-module : private;
+// module : private;
 
 TEST(read_image, success)
 {

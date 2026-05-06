@@ -8,7 +8,7 @@ export module tests_reflection;
 
 import reflection;
 
-module : private;
+// module : private;
 
 namespace
 {

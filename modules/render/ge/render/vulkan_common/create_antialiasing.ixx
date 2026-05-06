@@ -1,6 +1,10 @@
 module;
 
+#include <vulkan/vulkan.hpp>
+
 #include <optional>
+
+#include <cstdint>
 
 export module vulkan_common.create_antialiasing;
 
@@ -9,7 +13,7 @@ export import antialiasing;
 
 import extent;
 import vulkan_common.vulkan_fwds;
-import vulkan_common.device_fwd;
+import vulkan_common.device;
 
 namespace ge
 {

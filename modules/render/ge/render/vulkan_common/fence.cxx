@@ -4,6 +4,8 @@ module;
 
 #include <vulkan/vulkan.hpp>
 
+#include <chrono>
+
 module vulkan_common.fence;
 
 import vulkan_common.exception;
@@ -38,7 +40,7 @@ namespace ge
         return vk::UniqueFence
         {
             std::move(fence),
-            vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+            vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
         };
     }
 

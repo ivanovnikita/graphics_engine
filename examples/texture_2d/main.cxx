@@ -2,6 +2,7 @@
 #include <fstream>
 #include <span>
 #include <thread>
+#include <optional>
 
 import image_2d.render_image_2d;
 import io.read_image;

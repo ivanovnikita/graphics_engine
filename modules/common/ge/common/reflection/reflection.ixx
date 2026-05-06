@@ -2,6 +2,8 @@ module;
 
 #include <tuple>
 
+#include <cstddef>
+
 export module reflection;
 
 export import member;

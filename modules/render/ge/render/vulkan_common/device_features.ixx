@@ -1,5 +1,7 @@
 module;
 
+#include <vulkan/vulkan.hpp>
+
 #include <string_view>
 
 export module vulkan_common.device_features;

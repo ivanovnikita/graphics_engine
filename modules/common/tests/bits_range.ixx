@@ -6,7 +6,7 @@ export module tests_bits_range;
 
 import bits_range;
 
-module : private;
+// module : private;
 
 TEST(bits_range, deref)
 {

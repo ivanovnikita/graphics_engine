@@ -7,7 +7,7 @@ export module tests.cs_square_flat;
 import point;
 import cs_square_flat;
 
-module : private;
+// module : private;
 
 TEST(cs_square_right_flat, draw_space_to_axial)
 {

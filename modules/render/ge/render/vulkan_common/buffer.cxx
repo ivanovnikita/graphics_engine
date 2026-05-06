@@ -54,7 +54,7 @@ namespace ge
             return vk::UniqueBuffer
             {
                 std::move(buffer),
-                vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+                vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
             };
         }
 
@@ -176,7 +176,7 @@ namespace ge
         return vk::UniqueDeviceMemory
         {
             std::move(memory),
-            vk::ObjectFree<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+            vk::detail::ObjectFree<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
         };
     }
 

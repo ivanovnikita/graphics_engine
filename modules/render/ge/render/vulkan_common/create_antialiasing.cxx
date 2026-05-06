@@ -2,6 +2,8 @@ module;
 
 #include <vulkan/vulkan.hpp>
 
+#include <variant>
+
 module vulkan_common.create_antialiasing;
 
 import vulkan_common.device;

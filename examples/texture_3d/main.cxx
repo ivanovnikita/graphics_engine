@@ -2,6 +2,7 @@
 #include <fstream>
 #include <span>
 #include <thread>
+#include <optional>
 
 #include <cassert>
 

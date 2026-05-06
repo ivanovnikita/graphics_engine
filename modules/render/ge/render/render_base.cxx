@@ -4,6 +4,9 @@ module;
 
 #include <vulkan/vulkan.hpp>
 
+#include <chrono>
+#include <variant>
+
 module render_base;
 
 import vulkan_common.exception;

@@ -8,7 +8,7 @@ export module tests.log_vulkan;
 
 import vulkan_common.log_vulkan;
 
-module : private;
+// module : private;
 
 TEST(log_vulkan, flags)
 {

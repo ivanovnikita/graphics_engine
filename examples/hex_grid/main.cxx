@@ -4,6 +4,8 @@
 #include <fstream>
 #include <span>
 #include <thread>
+#include <vector>
+#include <optional>
 
 import tiles_2d.render_tiles_2d;
 import exception;

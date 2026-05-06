@@ -77,7 +77,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct MouseButtonEvent<ScrollButton, button_event> final
     {
         ScrollButton direction;
@@ -238,7 +238,7 @@ namespace ge
     export template <KeyType, ButtonEvent>
     struct KeyEvent;
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Service, button_event> final
     {
         ServiceKey key;
@@ -246,7 +246,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Latin, button_event> final
     {
         char key;
@@ -254,7 +254,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct KeyEvent<KeyType::KeypadService, button_event> final
     {
         KeypadServiceKey key;
@@ -262,7 +262,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct KeyEvent<KeyType::KeypadLatin, button_event> final
     {
         char symbol;
@@ -271,7 +271,7 @@ namespace ge
         EventTimestamp timestamp;
     };
 
-    export template <ButtonEvent button_event>
+    template <ButtonEvent button_event>
     struct KeyEvent<KeyType::Unknown, button_event> final
     {
         uint32_t key;

@@ -7,7 +7,7 @@ export module tests.point_localization;
 import point;
 import point_localization;
 
-module : private;
+// module : private;
 
 TEST(point_localization, left)
 {

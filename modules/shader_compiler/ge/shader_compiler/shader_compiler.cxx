@@ -53,6 +53,7 @@ namespace ge
             case vk::ShaderStageFlagBits::eTaskNV:
             case vk::ShaderStageFlagBits::eMeshNV:
             case vk::ShaderStageFlagBits::eSubpassShadingHUAWEI:
+            case vk::ShaderStageFlagBits::eClusterCullingHUAWEI:
             {
                 throw std::logic_error("Unknown shader type");
             }
@@ -117,15 +118,16 @@ namespace ge
 
                 interface
                     << "module;\n\n"
+                       "#include <vulkan/vulkan.hpp>\n\n"
                        "#include <span>\n\n"
                        "#include <cstdint>\n\n"
                     <<
                        "export module " << target_filename << ";\n\n"
-                    <<
-                       "namespace vk\n"
-                       "{\n"
-                       "    export enum class ShaderStageFlagBits : uint32_t;\n"
-                       "}\n\n"
+                    // <<
+                    //    "namespace vk\n"
+                    //    "{\n"
+                    //    "    export enum class ShaderStageFlagBits : uint32_t;\n"
+                    //    "}\n\n"
                     << common.str();
                 implementation
                     <<

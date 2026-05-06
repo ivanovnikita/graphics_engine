@@ -68,7 +68,7 @@ namespace ge
         return vk::UniqueFramebuffer
         {
             std::move(framebuffer),
-            vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+            vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
         };
     }
 

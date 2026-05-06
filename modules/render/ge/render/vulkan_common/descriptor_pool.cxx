@@ -42,7 +42,7 @@ namespace ge
         return vk::UniqueDescriptorPool
         {
             std::move(pool),
-            vk::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
+            vk::detail::ObjectDestroy<vk::Device, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE>{device}
         };
     }
 }

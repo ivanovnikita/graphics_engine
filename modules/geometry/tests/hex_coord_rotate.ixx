@@ -8,7 +8,7 @@ import cs_hex_flat;
 import cs_hex_pointy;
 import hex_coord_rotate;
 
-module : private;
+// module : private;
 
 // TODO: use typed tests
 

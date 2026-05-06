@@ -15,10 +15,14 @@ module;
 #define XK_LATIN1
 #include <X11/keysymdef.h>
 
+#include <chrono>
+#include <memory>
 #include <optional>
 #include <string_view>
+#include <variant>
 
 #include <cassert>
+#include <cstring>
 
 module window_xcb;
 
@@ -162,7 +166,7 @@ namespace ge
             return result;
         }
 
-        std::string error_event_to_string
+        [[ maybe_unused ]] std::string error_event_to_string
         (
             xcb_errors_context_t& errors_ctx,
             const xcb_generic_error_t& e

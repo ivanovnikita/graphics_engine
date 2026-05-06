@@ -71,7 +71,7 @@ namespace ge
             GE_THROW_EXPECTED_ERROR("Allocation for unique descriptor sets failed");
         }
 
-        vk::PoolFree
+        vk::detail::PoolFree
         <
             vk::Device,
             vk::DescriptorPool,

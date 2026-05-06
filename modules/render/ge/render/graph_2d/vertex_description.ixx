@@ -3,6 +3,7 @@ module;
 #include <vulkan/vulkan.hpp>
 
 #include <array>
+#include <cstddef>
 
 export module graph_2d.vertex_description;
 
@@ -10,7 +11,7 @@ export import logger;
 
 namespace ge::graph
 {
-    static constexpr size_t VERTEX_DESCRIPTION_COUNT = 2;
+    export constexpr size_t VERTEX_DESCRIPTION_COUNT = 2;
 
     // Vertex + Color
     export std::array

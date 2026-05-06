@@ -3,6 +3,7 @@ module;
 #include "ge/common/exception_macro.h"
 
 #include <limits>
+#include <type_traits>
 
 export module safe_cast;
 

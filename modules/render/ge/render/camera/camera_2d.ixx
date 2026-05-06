@@ -2,6 +2,8 @@ module;
 
 #include <span>
 
+#include <cstdint>
+
 export module camera_2d;
 
 export import extent;
